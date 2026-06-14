@@ -1013,6 +1013,7 @@ select option{background:#FFF;color:var(--t1)}
       <div class="user-info" style="color:var(--gold);font-size:13px;font-weight:700" id="sbUser"></div>
       <div style="color:var(--t3);font-size:11px;margin-top:2px" id="sbRole"></div>
       <button class="sb-btn sb-btn-ghost" style="margin-top:8px" onclick="doLogout()">🚪 退出登录</button>
+      <button id="auditLogBtn" class="sb-btn sb-btn-ghost" style="margin-top:6px;display:none" onclick="openAuditModal()">🔍 审计日志</button>
     </div>
   </div>
 
@@ -1686,6 +1687,23 @@ select option{background:#FFF;color:var(--t1)}
 <!-- ═══ Toast Area ═══ -->
 <div class="toast-area" id="toastArea"></div>
 
+<!-- ═══ 审计日志 Modal ═══ -->
+<div class="modal-mask" id="auditModal">
+  <div class="modal" style="width:820px;max-width:95vw;max-height:88vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:17px">🔍 审计日志</h3>
+      <button onclick="closeAuditModal()" style="background:transparent;border:none;font-size:22px;color:var(--t3);cursor:pointer;line-height:1">×</button>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg);border-radius:8px;padding:3px;border:1px solid var(--border)">
+      <button id="auditTabLogin" onclick="switchAuditTab('login')" style="flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;background:var(--gold);color:#fff;transition:all .2s">🔐 登录历史</button>
+      <button id="auditTabOp" onclick="switchAuditTab('op')" style="flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--t3);transition:all .2s">⚙️ 操作历史</button>
+    </div>
+    <div id="auditContent" style="max-height:500px;overflow-y:auto;border-radius:10px;border:1px solid var(--border)">
+      <div style="text-align:center;padding:40px;color:var(--t3)">加载中...</div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════
    Constants
@@ -1708,6 +1726,29 @@ const USERS = {
   guimei01:{name:"桂妹",role:"编辑者",pw:"202606",perm:"upload"},
   yujie02:{name:"玉洁",role:"编辑者",pw:"202512",perm:"upload"}
 };
+/* ══════════════════════════════════════
+   Supabase 审计日志
+   ══════════════════════════════════════ */
+const SUPA_URL = 'https://nbfiltgqklzdfaibyeka.supabase.co';
+const SUPA_KEY = 'sb_publishable_JUAxogJ3PvkcaoTwvXksbw_Arme6Vx2';
+let _userIP = '获取中';
+fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{_userIP=d.ip}).catch(()=>{_userIP='未知'});
+
+function _supaInsert(table, data){
+  return fetch(`${SUPA_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+    body:JSON.stringify(data)
+  }).catch(e=>console.warn('审计日志写入失败:',e));
+}
+function logLogin(username, status){
+  _supaInsert('login_history',{username, ip_address:_userIP, user_agent:navigator.userAgent.substring(0,200), status:status||'success'});
+}
+function logOp(action, detail){
+  if(!currentUser) return;
+  _supaInsert('operation_history',{username:currentUser.name||currentUser.username, action, detail:String(detail||'').substring(0,400), ip_address:_userIP});
+}
+
 function canDo(action){
   if(!currentUser)return false;
   const p=currentUser.perm||'view';
@@ -1716,8 +1757,67 @@ function canDo(action){
   if(p==='view'&&action==='view')return true;
   return false;
 }
+/* ══════ 审计日志弹窗 ══════ */
+function openAuditModal(){
+  document.getElementById('auditModal').classList.add('show');
+  switchAuditTab('login');
+}
+function closeAuditModal(){
+  document.getElementById('auditModal').classList.remove('show');
+}
+async function switchAuditTab(type){
+  const isLogin = type==='login';
+  const t1=document.getElementById('auditTabLogin'), t2=document.getElementById('auditTabOp');
+  t1.style.background = isLogin?'var(--gold)':'transparent';
+  t1.style.color = isLogin?'#fff':'var(--t3)';
+  t2.style.background = !isLogin?'var(--gold)':'transparent';
+  t2.style.color = !isLogin?'#fff':'var(--t3)';
+  const box = document.getElementById('auditContent');
+  box.innerHTML = '<div style="text-align:center;padding:40px;color:var(--t3)">加载中...</div>';
+  const table = isLogin?'login_history':'operation_history';
+  const order = isLogin?'login_time':'created_at';
+  try{
+    const resp = await fetch(`${SUPA_URL}/rest/v1/${table}?select=*&order=${order}.desc&limit=200`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    const rows = await resp.json();
+    if(!rows.length){box.innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">暂无记录</div>';return;}
+    const th = s=>`<th style="padding:9px 12px;text-align:left;color:var(--t3);font-size:11px;font-weight:700;background:var(--bg);position:sticky;top:0;white-space:nowrap">${s}</th>`;
+    const td = (s,mono)=>`<td style="padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--t2);white-space:nowrap${mono?';font-family:monospace':''}">${s||'-'}</td>`;
+    const fmtTime = s=>s?new Date(s).toLocaleString('zh-CN',{hour12:false}).replace(/\//g,'-'):'-';
+    if(isLogin){
+      box.innerHTML=`<table style="width:100%;border-collapse:collapse">
+        <thead><tr>${th('登录时间')+th('账号')+th('IP 地址')+th('状态')+th('设备')}</tr></thead>
+        <tbody>${rows.map(r=>`<tr>
+          ${td(fmtTime(r.login_time))}
+          ${td('<b>'+r.username+'</b>')}
+          ${td(r.ip_address,true)}
+          <td style="padding:8px 12px;border-bottom:1px solid var(--border)"><span style="padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:rgba(48,209,88,.1);color:#30D158">${r.status}</span></td>
+          ${td((r.user_agent||'').substring(0,40)+'...')}
+        </tr>`).join('')}</tbody>
+      </table>`;
+    } else {
+      box.innerHTML=`<table style="width:100%;border-collapse:collapse">
+        <thead><tr>${th('时间')+th('账号')+th('操作')+th('详情')+th('IP')}</tr></thead>
+        <tbody>${rows.map(r=>`<tr>
+          ${td(fmtTime(r.created_at))}
+          ${td('<b>'+r.username+'</b>')}
+          <td style="padding:8px 12px;border-bottom:1px solid var(--border)"><span style="padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:rgba(0,114,255,.08);color:var(--gold)">${r.action}</span></td>
+          ${td(r.detail)}
+          ${td(r.ip_address,true)}
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+  }catch(e){
+    box.innerHTML='<div style="text-align:center;padding:40px;color:var(--err)">加载失败：'+e.message+'</div>';
+  }
+}
+
 function applyPermissions(){
   if(!currentUser)return;
+  // 审计日志按钮仅管理员可见
+  const ab=document.getElementById('auditLogBtn');
+  if(ab) ab.style.display=currentUser.perm==='all'?'':'none';
   // 角色标签颜色
   const rb=document.getElementById('sbRole');
   if(currentUser.perm==='all'){rb.style.color='var(--gold)';rb.style.fontWeight='700'}
@@ -1854,6 +1954,7 @@ function doLogin(){
       document.getElementById('sbRole').textContent='@'+u+' · '+user.role;
       document.getElementById('heroBadge').innerHTML='👤 '+user.name;
       applyPermissions();
+      logLogin(u, 'success');
       initApp();
       initMetricsPanel();
       _loginSetLoading(false);
@@ -2245,7 +2346,7 @@ function deleteOne(id){
   if(currentUser&&currentUser.perm!=='all'){toast('⚠️ 仅管理员可删除');return}
   DATA.contents=DATA.contents.filter(c=>c.id!==id);
   DATA.metrics=DATA.metrics.filter(m=>m.content_id!==id);
-  saveData();render();toast('已删除 ID='+id,'info');
+  saveData();render();toast('已删除 ID='+id,'info');logOp('删除内容','ID='+id);
 }
 function deleteSelected(){
   if(currentUser&&currentUser.perm!=='all'){toast('⚠️ 仅管理员可删除');return}
@@ -2253,7 +2354,7 @@ function deleteSelected(){
   if(!confirm('确认删除 '+selectedRows.size+' 条记录？'))return;
   DATA.contents=DATA.contents.filter(c=>!selectedRows.has(c.id));
   DATA.metrics=DATA.metrics.filter(m=>!selectedRows.has(m.content_id));
-  saveData();selectedRows.clear();render();toast('已批量删除','info');
+  saveData();selectedRows.clear();render();toast('已批量删除','info');logOp('批量删除内容', selectedRows.size+'条');
 }
 
 /* ── Detail Panel ── */
@@ -2508,6 +2609,7 @@ function downloadTemplate(){
    Export
    ══════════════════════════════════════ */
 function exportCSV(){
+  logOp('导出CSV','内容管理数据');
   const items=getFiltered();
   const rows=items.map(c=>{
     const p=getPlatform(c.platform_id);
@@ -3184,6 +3286,7 @@ function saveBiliToStorage(){
 function clearBiliData(){
   if(currentUser&&currentUser.perm!=='all'){toast('⚠️ 仅管理员可清空数据');return}
   if(!confirm('确定清空所有B站投放数据？此操作不可恢复。'))return;
+  logOp('清空B站数据','操作不可恢复');
   BILIBILI_RAW=[];
   localStorage.removeItem('bili_data');
   localStorage.removeItem('bili_raw_link');
@@ -6063,6 +6166,7 @@ function copyReportText(){
 }
 
 function exportBiliCSV(){
+  logOp('导出B站CSV', getBiliFiltered().length+'条数据');
   const items=getBiliFiltered();
   const headers=['日期','月份','UP主','BV号','总花费','现金花费','展示量','点击量','点击率','千次展示价格','单次点击价格','播放量','播放成本','评论点击数','评论点击成本','总成交订单','总成交金额','ROI','京东引流','京东订单','京东GMV','天猫引流','天猫订单','天猫GMV','京东外溢引流','京东外溢订单','京东外溢金额','天猫外溢引流','天猫外溢订单','天猫外溢金额','主推型号','上线日期','广告位置','内容类型','转化目标','账号类型'];
   let csv=headers.join(',')+'\n';
