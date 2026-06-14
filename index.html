@@ -399,6 +399,83 @@ select option{background:#FFF;color:var(--t1)}
 .report-copy-btn.copied{background:#22C55E;border-color:#22C55E;color:#FFF}
 @media(max-width:900px){.report-grid{grid-template-columns:1fr}}
 
+/* ── Mobile Responsive (≤768px) ── */
+@media(max-width:768px){
+  /* Sidebar: slide-in overlay */
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;z-index:500;
+    transform:translateX(-100%);transition:transform .3s ease;
+    width:var(--sidebar-w)!important;min-width:var(--sidebar-w)!important;
+  }
+  .app.mobile-sb-open .sidebar{
+    transform:translateX(0);
+    box-shadow:4px 0 24px rgba(0,0,0,.18);
+  }
+  /* Backdrop when sidebar open */
+  .mobile-sb-backdrop{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:499;
+  }
+  .app.mobile-sb-open .mobile-sb-backdrop{display:block}
+  /* Restore sidebar content even if collapse class is applied */
+  .app.sidebar-collapsed .sidebar{padding:0 !important}
+  .app.sidebar-collapsed .sidebar>*:not(.sb-collapse-toggle){display:flex!important}
+  .sb-collapse-toggle{display:none!important}
+
+  /* Main: full width, tighter padding */
+  .main{padding:12px 12px 72px;width:100%}
+
+  /* Hero: stack vertically */
+  .hero{flex-direction:column;align-items:flex-start;gap:10px;padding:14px 16px}
+  .hero h1{font-size:18px}
+  .hero .hero-sub{font-size:12px}
+
+  /* KPI cards: 2 columns */
+  .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px;padding:4px 0 8px}
+  .kpi-card{padding:12px 14px}
+  .kpi-value{font-size:20px}
+
+  /* Breakeven KPIs: 2 columns */
+  .breakeven-kpi-row{grid-template-columns:repeat(2,1fr);gap:8px}
+
+  /* Tab bar: horizontal scroll */
+  .tab-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;gap:2px}
+  .tab-btn{flex:none;padding:8px 12px;font-size:12px;white-space:nowrap}
+
+  /* Modals: full width */
+  .modal{width:95vw!important;max-width:95vw!important;padding:18px 14px!important;border-radius:12px}
+
+  /* Linklib overlay */
+  .linklib-header{padding:12px 14px}
+  .linklib-body{padding:12px 14px}
+  .linklib-form{flex-direction:column;gap:8px}
+
+  /* Action bar */
+  .action-bar{gap:6px}
+  .action-bar .act-btn{padding:7px 10px;font-size:11px}
+
+  /* Section headers */
+  .sec-header{margin:14px 0 8px}
+
+  /* Toast: bottom */
+  .toast-area{top:auto;bottom:72px;right:10px;left:10px}
+  .toast{font-size:12px;padding:10px 12px}
+
+  /* Floating hamburger button */
+  .mobile-menu-btn{
+    display:flex;position:fixed;bottom:18px;left:14px;z-index:600;
+    width:46px;height:46px;border-radius:50%;
+    background:var(--gold);color:#FFF;border:none;
+    align-items:center;justify-content:center;font-size:22px;
+    box-shadow:0 4px 16px rgba(212,175,55,.45);cursor:pointer;
+    transition:transform .15s,background .2s;
+  }
+  .mobile-menu-btn:active{transform:scale(.9)}
+}
+@media(min-width:769px){
+  .mobile-menu-btn{display:none!important}
+  .mobile-sb-backdrop{display:none!important}
+}
+
 /* ── Break-Even / Investor View ── */
 .breakeven-section{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
 .breakeven-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
@@ -869,6 +946,10 @@ select option{background:#FFF;color:var(--t1)}
 
 <!-- ═══ App Shell ═══ -->
 <div class="app" id="appShell" style="display:none">
+
+  <!-- Mobile backdrop & hamburger -->
+  <div class="mobile-sb-backdrop" onclick="closeMobileSidebar()"></div>
+  <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
 
   <!-- ── Sidebar ── -->
   <div class="sidebar">
@@ -2024,6 +2105,19 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ── Sidebar 折叠 ── */
+function toggleMobileSidebar(){
+  var app = document.querySelector('.app');
+  var open = app.classList.toggle('mobile-sb-open');
+  var btn = document.querySelector('.mobile-menu-btn');
+  if(btn) btn.textContent = open ? '✕' : '☰';
+}
+function closeMobileSidebar(){
+  var app = document.querySelector('.app');
+  app.classList.remove('mobile-sb-open');
+  var btn = document.querySelector('.mobile-menu-btn');
+  if(btn) btn.textContent = '☰';
+}
+
 function toggleSidebar(){
   var app = document.querySelector('.app');
   app.classList.toggle('sidebar-collapsed');
