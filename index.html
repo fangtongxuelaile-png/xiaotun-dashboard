@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>小豚当家内容投放数据中台 V3.12.2</title>
+<title>小豚当家内容投放数据中台 V3.12.3</title>
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -13,7 +13,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#E5E5EA;--bg-card:#FFFFFF;--bg-elev:#FFFFFF;
-  --gold:#0072FF;--gold-a:.08;--blue:#3478F6;--blue-a:.08;
+  --gold:#D4AF37;--gold-rgb:212,175,55;--gold-a:.08;--blue:#3478F6;--blue-a:.08;
   --t1:#1D1D1F;--t2:#6E6E73;--t3:#86868B;
   --ok:#30D158;--warn:#FF9F0A;--err:#FF453A;
   --sidebar-w:280px;--radius:12px;
@@ -27,7 +27,7 @@ html,body{height:100%;font-family:-apple-system,'PingFang SC','SF Pro Text','Hel
 input,select,textarea,button{font-family:inherit;font-size:13px;color:var(--t1)}
 button{cursor:pointer;border:none;outline:none}
 input,select,textarea{background:#FFF;border:1px solid var(--border-strong);border-radius:8px;padding:8px 12px;color:var(--t1);width:100%;transition:border .2s}
-input:focus,select:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px rgba(0,114,255,.1)}
+input:focus,select:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px rgba(212,175,55,.1)}
 select option{background:#FFF;color:var(--t1)}
 
 /* ── Layout ── */
@@ -39,6 +39,13 @@ select option{background:#FFF;color:var(--t1)}
 }
 .main{flex:1;overflow-y:auto;padding:24px 32px 48px}
 
+/* ── Sidebar Collapse Toggle ── */
+.sb-collapse-toggle{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--t3);font-size:14px;cursor:pointer;transition:all .2s;flex-shrink:0;margin:4px 4px 0 auto}
+.sb-collapse-toggle:hover{background:var(--bg);color:var(--t1);border-color:var(--gold)}
+.app.sidebar-collapsed .sidebar{width:48px;min-width:48px;padding:0}
+.app.sidebar-collapsed .sidebar>*:not(.sb-collapse-toggle){display:none}
+.app.sidebar-collapsed .sidebar .sb-collapse-toggle{margin:12px auto 0}
+
 /* ── Sidebar internal ── */
 .sb-section{padding:14px 18px}
 .sb-divider{height:1px;background:var(--border);margin:4px 18px}
@@ -48,12 +55,12 @@ select option{background:#FFF;color:var(--t1)}
   text-align:center;transition:all .2s;margin-bottom:8px;
 }
 .sb-btn-primary{background:var(--gold);border:1px solid var(--gold);color:#FFF}
-.sb-btn-primary:hover{background:#005FE6;transform:translateY(-1px);box-shadow:var(--shadow-hover)}
+.sb-btn-primary:hover{background:#B8960F;transform:translateY(-1px);box-shadow:var(--shadow-hover)}
 
 /* ── Data Snapshot History ── */
 .uh-tag-bili{background:rgba(251,114,153,.12);color:#FB7299}
 .uh-tag-ad{background:rgba(0,0,0,.06);color:var(--t1)}
-.uh-tag-content{background:rgba(0,114,255,.08);color:var(--gold)}
+.uh-tag-content{background:rgba(212,175,55,.08);color:var(--gold)}
 .uh-tag-feishu{background:rgba(52,199,89,.1);color:#34C759}
 .dsh-item{padding:8px 10px;background:#FFF;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:11px;transition:all .2s}
 .dsh-item:hover{border-color:var(--gold)}
@@ -62,7 +69,7 @@ select option{background:#FFF;color:var(--t1)}
 .dsh-item .dsh-actions{display:flex;gap:6px}
 .dsh-btn{padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border-strong);background:#FFF;color:var(--t2);transition:all .2s}
 .dsh-btn-call{background:var(--gold);color:#FFF;border-color:var(--gold)}
-.dsh-btn-call:hover{background:#005FE6;border-color:#005FE6;box-shadow:0 2px 8px rgba(0,114,255,.2)}
+.dsh-btn-call:hover{background:#B8960F;border-color:#B8960F;box-shadow:0 2px 8px rgba(212,175,55,.2)}
 .dsh-btn-del{color:var(--t3)}
 .dsh-btn-del:hover{background:#FEE2E2;color:#EF4444;border-color:#FECACA}
 .dsh-empty{color:var(--t3);font-size:11px;text-align:center;padding:8px 0}
@@ -71,7 +78,7 @@ select option{background:#FFF;color:var(--t1)}
 
 /* 语义层指标管理 */
 .metric-item{padding:5px 6px;margin-bottom:3px;background:rgba(0,0,0,.02);border-radius:5px;border-left:2px solid var(--gold);transition:all .2s}
-.metric-item:hover{background:rgba(0,114,255,.04)}
+.metric-item:hover{background:rgba(212,175,55,.04)}
 .metric-item b{font-size:10px}
 .metric-detail{margin-top:3px;font-size:9px;color:var(--t3);line-height:1.5;padding:3px 6px;background:rgba(0,0,0,.01);border-radius:4px}
 
@@ -121,7 +128,7 @@ select option{background:#FFF;color:var(--t1)}
   box-shadow: 0 0 4px #22C55E;
 }
 .sb-logo .logo-text{text-align:left}
-.sb-logo .title{font-size:14px;font-weight:800;color:#C9A84C;letter-spacing:.1em;line-height:1.3}
+.sb-logo .title{font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.1em;line-height:1.3}
 .sb-logo .sub{font-size:10px;color:var(--t3);margin-top:1px;letter-spacing:.02em}
 
 /* Import panel inside sidebar */
@@ -129,12 +136,12 @@ select option{background:#FFF;color:var(--t1)}
   background:var(--bg);border:1px solid var(--border-strong);
   border-radius:10px;padding:12px;margin-bottom:8px;
 }
-.import-box .hint{color:var(--t3);font-size:11px;line-height:1.5;margin-bottom:8px;padding:6px 8px;background:rgba(0,114,255,.04);border-radius:6px;border:1px solid rgba(0,114,255,.08)}
+.import-box .hint{color:var(--t3);font-size:11px;line-height:1.5;margin-bottom:8px;padding:6px 8px;background:rgba(212,175,55,.04);border-radius:6px;border:1px solid rgba(212,175,55,.08)}
 .drop-zone{
   border:2px dashed var(--border-strong);border-radius:8px;background:#FFF;
   padding:14px 8px;text-align:center;margin-bottom:8px;cursor:pointer;transition:all .2s;
 }
-.drop-zone:hover,.drop-zone.drag-over{border-color:var(--gold);background:rgba(0,114,255,.02)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--gold);background:rgba(212,175,55,.02)}
 .drop-zone .dz-icon{font-size:20px;opacity:.6;margin-bottom:2px}
 .drop-zone .dz-text{color:var(--gold);font-size:12px;font-weight:600}
 .drop-zone .dz-sub{color:var(--t3);font-size:10px;margin-top:2px}
@@ -153,7 +160,7 @@ select option{background:#FFF;color:var(--t1)}
 .hero .hero-sub{color:var(--t2);font-size:13px;margin-top:4px}
 .hero .user-badge{
   display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;
-  background:rgba(0,114,255,.06);border:1px solid rgba(0,114,255,.12);
+  background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.12);
   font-size:13px;font-weight:600;color:var(--gold);
 }
 
@@ -162,7 +169,7 @@ select option{background:#FFF;color:var(--t1)}
 .collapsible-header{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .2s}
 .collapsible-header:hover{background:var(--bg)}
 .collapsible-header h3{font-size:14px;font-weight:700;color:var(--t1);margin:0;flex:1}
-.collapsible-header .badge-sm{font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(0,114,255,.08);color:var(--gold);font-weight:600}
+.collapsible-header .badge-sm{font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(212,175,55,.08);color:var(--gold);font-weight:600}
 .collapsible-header .toggle-arrow{font-size:12px;color:var(--t3);transition:transform .3s}
 .collapsible-header .toggle-arrow.open{transform:rotate(180deg)}
 .collapsible-body{transition:max-height .4s ease,opacity .3s ease;overflow:hidden}
@@ -179,7 +186,7 @@ select option{background:#FFF;color:var(--t1)}
 .month-btn.gold{border-color:var(--gold);background:linear-gradient(135deg,rgba(212,175,55,.08),rgba(212,175,55,.02))}
 
 /* ── KPI Cards ── */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;position:sticky;top:0;z-index:10;background:var(--bg);padding:8px 0 12px}
 .kpi-card{
   background:#FFF;border:1px solid var(--border);
   border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;
@@ -200,7 +207,7 @@ select option{background:#FFF;color:var(--t1)}
 /* ── Section Header ── */
 .sec-header{display:flex;align-items:center;gap:10px;margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .sec-header h3{font-size:16px;font-weight:800}
-.sec-header .badge{font-size:11px;padding:2px 10px;border-radius:999px;background:rgba(0,114,255,.08);color:var(--gold);font-weight:600}
+.sec-header .badge{font-size:11px;padding:2px 10px;border-radius:999px;background:rgba(212,175,55,.08);color:var(--gold);font-weight:600}
 .gold-hr{height:1px;background:var(--border);margin:20px 0;border:none}
 
 /* ── Chart ── */
@@ -208,6 +215,9 @@ select option{background:#FFF;color:var(--t1)}
   background:#FFF;border:1px solid var(--border);border-radius:14px;
   padding:16px;box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;
 }
+/* ── Chart Skeleton ── */
+.chart-skeleton{height:340px;background:linear-gradient(90deg,var(--bg) 25%,var(--bg-card) 50%,var(--bg) 75%);background-size:200% 100%;animation:skeletonShimmer 1.5s infinite;border-radius:8px}
+@keyframes skeletonShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* ── Table ── */
 .tbl-wrap{
@@ -224,7 +234,7 @@ select option{background:#FFF;color:var(--t1)}
 .tbl-scroll{max-height:420px;overflow-y:auto}
 .status-tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
 .status-待排期{background:rgba(142,142,147,.12);color:#6E6E73}
-.status-素材制作中{background:rgba(0,114,255,.08);color:#0072FF}
+.status-素材制作中{background:rgba(212,175,55,.08);color:#0072FF}
 .status-待审核{background:rgba(255,159,10,.1);color:#FF9F0A}
 .status-已发布{background:rgba(48,209,88,.1);color:#30D158}
 .status-异常{background:rgba(255,69,58,.1);color:#FF453A}
@@ -238,7 +248,7 @@ select option{background:#FFF;color:var(--t1)}
   transition:all .2s;
 }
 .act-save{background:var(--gold);border:1px solid var(--gold);color:#FFF}
-.act-save:hover{background:#005FE6}
+.act-save:hover{background:#B8960F}
 .act-sec{background:#FFF;border:1px solid var(--border-strong);color:var(--t2)}
 .act-sec:hover{background:var(--bg)}
 .act-del{background:rgba(255,69,58,.06);border:1px solid rgba(255,69,58,.15);color:#FF453A}
@@ -274,14 +284,14 @@ select option{background:#FFF;color:var(--t1)}
 .linklib-form .field input{width:100%}
 .linklib-btn{ padding:8px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;white-space:nowrap;transition:all .2s}
 .linklib-btn-add{background:var(--gold);color:#FFF}
-.linklib-btn-add:hover{background:#005FE6;box-shadow:0 4px 12px rgba(0,114,255,.25)}
+.linklib-btn-add:hover{background:#B8960F;box-shadow:0 4px 12px rgba(212,175,55,.25)}
 .linklib-list{display:flex;flex-direction:column;gap:8px}
 .linklib-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#FFF;border-radius:10px;border:1px solid var(--border);transition:all .2s}
 .linklib-item:hover{border-color:var(--gold);box-shadow:var(--shadow)}
 .linklib-item .tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;flex-shrink:0}
 .linklib-item .tag-bili{background:rgba(251,114,153,.12);color:#FB7299}
 .linklib-item .tag-ad{background:rgba(0,0,0,.06);color:var(--t1)}
-.linklib-item .tag-content{background:rgba(0,114,255,.08);color:var(--gold)}
+.linklib-item .tag-content{background:rgba(212,175,55,.08);color:var(--gold)}
 .linklib-item .item-month{font-size:12px;color:var(--t3);flex-shrink:0;font-weight:600}
 .linklib-item .item-title{flex:1;font-size:13px;font-weight:600;color:var(--t1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .linklib-item .item-url{font-size:11.5px;color:var(--t2);word-break:break-all;flex:1;min-width:0;line-height:1.5}
@@ -310,14 +320,14 @@ select option{background:#FFF;color:var(--t1)}
 }
 .toast-ok{background:rgba(48,209,88,.1);border:1px solid rgba(48,209,88,.2);color:#30D158}
 .toast-err{background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.2);color:#FF453A}
-.toast-info{background:rgba(0,114,255,.08);border:1px solid rgba(0,114,255,.15);color:#0072FF}
+.toast-info{background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.15);color:#B8960F}
 @keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
 
 /* ── Misc ── */
 .empty-state{text-align:center;padding:48px 20px;color:var(--t3)}
 .empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.5}
 .empty-state p{font-size:14px}
-.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(0,114,255,.06);color:var(--gold);margin-right:4px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(212,175,55,.06);color:var(--gold);margin-right:4px}
 .inline-edit{background:#FFF;border:1px solid var(--border-strong);border-radius:6px;padding:4px 8px;color:var(--t1);font-size:12px;width:60px}
 
 /* ── Tab Bar ── */
@@ -333,8 +343,8 @@ select option{background:#FFF;color:var(--t1)}
 /* ── Ad KPI variants ── */
 .kpi-card.roi-card::after{background:linear-gradient(90deg,var(--ok),var(--gold))}
 .kpi-card.cost-card::after{background:linear-gradient(90deg,var(--blue),var(--gold))}
-.data-source-link{font-size:11px;color:var(--t3);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(0,114,255,.05);border:1px solid rgba(0,114,255,.1);transition:.2s}
-.data-source-link:hover{color:var(--gold);background:rgba(0,114,255,.1);border-color:rgba(0,114,255,.2)}
+.data-source-link{font-size:11px;color:var(--t3);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.1);transition:.2s}
+.data-source-link:hover{color:var(--gold);background:rgba(212,175,55,.1);border-color:rgba(212,175,55,.2)}
 .ad-filter-row{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
 .ad-filter-row label{font-size:11px;color:var(--t3);font-weight:600}
 .ad-filter-row select{width:auto;min-width:120px}
@@ -346,7 +356,7 @@ select option{background:#FFF;color:var(--t1)}
 .ad-tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
 .ad-tag-京东{background:rgba(255,59,48,.08);color:#FF3B30}
 .ad-tag-天猫{background:rgba(255,149,0,.08);color:#FF9500}
-.ad-tag-抖店{background:rgba(0,114,255,.08);color:#0072FF}
+.ad-tag-抖店{background:rgba(212,175,55,.08);color:#0072FF}
 .ad-tag-千川{background:rgba(52,120,246,.08);color:#3478F6}
 .ad-tag-鲸瞳京东{background:rgba(48,209,88,.08);color:#30D158}
 .ad-tag-鲸瞳4G京东{background:rgba(175,82,222,.08);color:#AF52DE}
@@ -360,7 +370,7 @@ select option{background:#FFF;color:var(--t1)}
 .channel-card .kpi-card .kpi-value{font-size:18px;margin:0}
 
 /* ═══ Report Section ═══ */
-.report-section{background:var(--bg-card);border:1px solid rgba(0,114,255,.08);border-radius:14px;padding:20px 20px 16px;margin-bottom:16px}
+.report-section{background:var(--bg-card);border:1px solid rgba(212,175,55,.08);border-radius:14px;padding:20px 20px 16px;margin-bottom:16px}
 .report-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
 .report-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;min-height:120px}
 .report-card-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:6px}
@@ -375,11 +385,11 @@ select option{background:#FFF;color:var(--t1)}
 .report-alert.danger{background:rgba(239,68,68,.06);color:#EF4444;border-left:2px solid #EF4444}
 .report-alert.warning{background:rgba(249,115,22,.06);color:#F97316;border-left:2px solid #F97316}
 .report-alert.ok{background:rgba(34,197,94,.06);color:#22C55E;border-left:2px solid #22C55E}
-.report-suggestions{background:linear-gradient(135deg,rgba(0,114,255,.03),rgba(52,120,246,.02));border:1px solid rgba(0,114,255,.1);border-radius:10px;padding:14px;margin-bottom:14px}
+.report-suggestions{background:linear-gradient(135deg,rgba(212,175,55,.03),rgba(52,120,246,.02));border:1px solid rgba(212,175,55,.1);border-radius:10px;padding:14px;margin-bottom:14px}
 .report-suggestions .sug-item{padding:8px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:12px;line-height:1.6}
 .report-suggestions .sug-item:last-child{border-bottom:none}
 .report-suggestions .sug-tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-right:6px}
-.report-suggestions .sug-tag.strategy{background:rgba(0,114,255,.1);color:#0072FF}
+.report-suggestions .sug-tag.strategy{background:rgba(212,175,55,.1);color:#0072FF}
 .report-suggestions .sug-tag.creator{background:rgba(175,82,222,.1);color:#AF52DE}
 .report-suggestions .sug-tag.content{background:rgba(34,197,94,.1);color:#22C55E}
 .report-full-text{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative}
@@ -418,7 +428,7 @@ select option{background:#FFF;color:var(--t1)}
 .be-table tr.row-loss td{background:rgba(239,68,68,.025)}
 .be-table tr.row-breakeven td{background:rgba(249,115,22,.025)}
 .be-table tr.row-profit td{background:rgba(34,197,94,.025)}
-.be-table tr:hover td{background:rgba(0,114,255,.04)}
+.be-table tr:hover td{background:rgba(212,175,55,.04)}
 .be-toggle-header:hover{border-color:rgba(212,175,55,.6)!important;box-shadow:0 0 12px rgba(212,175,55,.12)}
 
 /* ══════ 暗黑模式 ══════ */
@@ -562,7 +572,7 @@ select option{background:#FFF;color:var(--t1)}
 .fd-btn{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border-strong);background:#FFF;color:var(--t2);transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
 .fd-btn:hover{background:var(--gold);color:#FFF;border-color:var(--gold)}
 .fd-btn-view{background:var(--gold);color:#FFF;border-color:var(--gold)}
-.fd-btn-view:hover{background:#005FE6;border-color:#005FE6}
+.fd-btn-view:hover{background:#B8960F;border-color:#B8960F}
 /* Data preview panel */
 .fd-preview{background:#FFF;border:1px solid var(--border);border-radius:12px;margin-top:14px;overflow:hidden}
 .fd-preview-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border)}
@@ -571,7 +581,7 @@ select option{background:#FFF;color:var(--t1)}
 .fd-preview-body table{width:100%;border-collapse:collapse;font-size:11px}
 .fd-preview-body th{background:var(--bg);color:var(--t3);font-weight:700;padding:8px 10px;text-align:left;position:sticky;top:0;z-index:1;white-space:nowrap;font-size:10px}
 .fd-preview-body td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--t2);white-space:nowrap;max-width:300px;overflow:hidden;text-overflow:ellipsis}
-.fd-preview-body tr:hover td{background:rgba(0,114,255,.02)}
+.fd-preview-body tr:hover td{background:rgba(212,175,55,.02)}
 .fd-search-wrap{position:relative;max-width:400px}
 .fd-search-wrap input{padding-right:32px}
 .fd-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:transparent;color:var(--t3);cursor:pointer;font-size:14px}
@@ -763,7 +773,7 @@ select option{background:#FFF;color:var(--t1)}
 /* ── 城市标签 ── */
 .earth-city-label{
   position:absolute;color:rgba(255,255,255,.9);font-size:11px;font-weight:600;
-  text-shadow:0 0 8px rgba(0,0,0,.9),0 0 20px rgba(0,114,255,.5);
+  text-shadow:0 0 8px rgba(0,0,0,.9),0 0 20px rgba(212,175,55,.5);
   pointer-events:none;white-space:nowrap;
 }
 
@@ -867,10 +877,11 @@ select option{background:#FFF;color:var(--t1)}
         <div class="logo-icon">🐖</div>
         <div class="logo-text">
           <div class="title">小豚当家</div>
-          <div class="sub">内容投放数据中台 V3.12.2</div>
+          <div class="sub">内容投放数据中台 V3.12.3</div>
         </div>
       </div>
     </div>
+    <button class="sb-collapse-toggle" onclick="toggleSidebar()" title="折叠侧边栏">◀</button>
     <div class="sb-divider"></div>
 
     <!-- Filters (Content Tab) -->
@@ -898,7 +909,7 @@ select option{background:#FFF;color:var(--t1)}
     <div>
       <div class="sb-label">💰 抖音投放概览</div>
       <div style="color:var(--t2);font-size:12px;line-height:1.6;margin-top:6px">
-        <div style="padding:8px;background:rgba(0,114,255,.04);border-radius:8px;border:1px solid rgba(0,114,255,.08);margin-bottom:8px">
+        <div style="padding:8px;background:rgba(212,175,55,.04);border-radius:8px;border:1px solid rgba(212,175,55,.08);margin-bottom:8px">
           <b style="color:var(--gold)">数据范围</b><br>
           2025.10 → 2026.06<br>
           <span style="color:var(--t3);font-size:11px">共9个月 · 来源于CID投放明细</span>
@@ -1010,7 +1021,7 @@ select option{background:#FFF;color:var(--t1)}
     <!-- Hero -->
     <div class="hero">
       <div>
-        <h1>📊 小豚当家内容投放数据中台 V3.12.2</h1>
+        <h1>📊 小豚当家内容投放数据中台 V3.12.3</h1>
         <div class="hero-sub">统一管理投放内容 · 实时追踪效果数据</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -1462,7 +1473,7 @@ select option{background:#FFF;color:var(--t1)}
           <div class="chart-box"><div id="reportChart" style="height:320px"></div></div>
         </div>
         <div class="tbl-wrap" style="margin-bottom:16px"><div class="tbl-scroll" id="reportTableWrap" style="max-height:320px"></div></div>
-        <div style="background:var(--bg-card);border:1px solid rgba(0,114,255,.12);border-radius:10px;padding:16px">
+        <div style="background:var(--bg-card);border:1px solid rgba(212,175,55,.12);border-radius:10px;padding:16px">
           <div style="font-size:12px;font-weight:600;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:6px">
             📝 自动生成文案
             <button class="act-btn act-sec" style="padding:3px 10px;font-size:11px;margin-left:auto" onclick="copyReportText()">📋 复制</button>
@@ -1859,8 +1870,23 @@ function toggleDarkMode(){
   var isDark = html.getAttribute('data-theme') === 'dark';
   html.setAttribute('data-theme', isDark ? '' : 'dark');
   localStorage.setItem('theme', isDark ? 'light' : 'dark');
-  // 重绘 Plotly 图表
-  setTimeout(function(){ Plotly.Plots.resize(); }, 200);
+  // 更新 Plotly 图表样式
+  setTimeout(function(){
+    var isDark = html.getAttribute('data-theme') === 'dark';
+    var fontColor = isDark ? '#E5E5EA' : '#1D1D1F';
+    var gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+    var chartDivs = document.querySelectorAll('.js-plotly-plot');
+    for(var i=0;i<chartDivs.length;i++){
+      try{
+        Plotly.relayout(chartDivs[i], {
+          font: {color: fontColor},
+          'xaxis.gridcolor': gridColor,
+          'yaxis.gridcolor': gridColor
+        });
+      }catch(e){}
+    }
+    Plotly.Plots.resize();
+  }, 200);
 }
 // 初始化主题
 (function(){ var t = localStorage.getItem('theme'); if(t==='dark') document.documentElement.setAttribute('data-theme','dark'); })();
@@ -1885,6 +1911,36 @@ function toggleBigScreen(){
 }
 // ESC 退出大屏
 document.addEventListener('keydown', function(e){ if(e.key==='Escape'&&document.body.classList.contains('big-screen-mode')) toggleBigScreen(); });
+
+/* ── 键盘快捷键 ── */
+document.addEventListener('keydown', function(e){
+  var mod = e.metaKey || e.ctrlKey;
+  if(!mod || e.shiftKey || e.altKey || e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+  if(e.key==='1'){ e.preventDefault(); switchTab('bili'); }
+  else if(e.key==='2'){ e.preventDefault(); switchTab('ad'); }
+  else if(e.key==='3'){ e.preventDefault(); switchTab('content'); }
+  else if(e.key==='b'||e.key==='B'){ e.preventDefault(); toggleSidebar(); }
+});
+
+/* ── Sidebar 折叠 ── */
+function toggleSidebar(){
+  var app = document.querySelector('.app');
+  app.classList.toggle('sidebar-collapsed');
+  var btn = document.querySelector('.sb-collapse-toggle');
+  var collapsed = app.classList.contains('sidebar-collapsed');
+  btn.textContent = collapsed ? '▶' : '◀';
+  btn.title = collapsed ? '展开侧边栏' : '折叠侧边栏';
+  localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+  setTimeout(function(){ Plotly.Plots.resize(); }, 300);
+}
+// 初始化 sidebar 状态
+(function(){
+  if(localStorage.getItem('sidebarCollapsed')==='1'){
+    document.querySelector('.app').classList.add('sidebar-collapsed');
+    var b = document.querySelector('.sb-collapse-toggle');
+    if(b){ b.textContent = '▶'; b.title = '展开侧边栏'; }
+  }
+})();
 
 function doLogout(){
   sessionStorage.removeItem('xtb_user');currentUser=null;
@@ -1943,6 +1999,14 @@ function initApp(){
   document.getElementById('searchInput').addEventListener('input',render);
   renderMonthGrid('ad');
   renderMonthGrid('content');
+  
+  // 恢复上次会话的 Tab 和子 Tab 状态
+  var savedTab = localStorage.getItem('xtb_lastTab');
+  if(savedTab && savedTab !== 'bili') switchTab(savedTab);
+  var savedBiliSub = localStorage.getItem('xtb_biliSubTab');
+  if(savedBiliSub && savedBiliSub !== 'data') switchBiliSubTab(savedBiliSub);
+  var savedContentSub = localStorage.getItem('xtb_contentSubTab');
+  if(savedContentSub && savedContentSub !== 'manage') switchContentSubTab(savedContentSub);
 }
 
 function setDefaultDates(){
@@ -2201,7 +2265,7 @@ function showDetail(id){
   const panel=document.getElementById('detailPanel');
   panel.style.display='block';
   document.getElementById('detailContent').innerHTML=`
-    <div style="background:linear-gradient(145deg,#FFF,#F9FAFB);border:1px solid rgba(0,114,255,.1);border-radius:12px;padding:20px">
+    <div style="background:linear-gradient(145deg,#FFF,#F9FAFB);border:1px solid rgba(212,175,55,.1);border-radius:12px;padding:20px">
       <div style="color:var(--gold);font-size:16px;font-weight:700;margin-bottom:12px">${p.icon} ${esc(c.title)}</div>
       <table style="width:100%;font-size:13px;color:var(--t2);border-collapse:collapse">
         <tr><td style="padding:4px 0;color:var(--t3);width:80px">平台</td><td>${p.icon} ${p.name}</td></tr>
@@ -2213,7 +2277,7 @@ function showDetail(id){
         <tr><td style="padding:4px 0;color:var(--t3)">备注</td><td>${esc(c.note)||'-'}</td></tr>
       </table>
     </div>
-    <div style="background:var(--bg-card);border:1px solid rgba(0,114,255,.1);border-radius:12px;padding:20px">
+    <div style="background:var(--bg-card);border:1px solid rgba(212,175,55,.1);border-radius:12px;padding:20px">
       <div style="color:var(--gold);font-size:14px;font-weight:700;margin-bottom:8px">📊 效果数据（${ms.length} 条）</div>
       ${ms.length?`<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">
         <thead><tr style="color:var(--t3)">
@@ -2608,6 +2672,7 @@ function switchTab(tab){
     try{if(typeof plPause==='function')plPause();}catch(e){}
   }
     currentTab = tab;
+  localStorage.setItem('xtb_lastTab', tab);
   document.getElementById('tabContentPanel').classList.toggle('active', tab==='content');
   document.getElementById('tabAdPanel').classList.toggle('active', tab==='ad');
   document.getElementById('tabBiliPanel').classList.toggle('active', tab==='bili');
@@ -2639,6 +2704,7 @@ function switchTab(tab){
 /* ── Content sub-tab switching ── */
 var contentFeishuInited=false;
 function switchContentSubTab(sub){
+  localStorage.setItem('xtb_contentSubTab', sub);
   document.getElementById('subTabBtnManage').classList.toggle('active', sub==='manage');
   document.getElementById('subTabBtnFeishu').classList.toggle('active', sub==='feishu');
   document.getElementById('contentSubTabManage').classList.toggle('active', sub==='manage');
@@ -2761,7 +2827,7 @@ function renderFeishuSheets(){
       '<div class="fd-meta">'+
         '<span>'+s.rows.toLocaleString()+'行</span>'+
         '<span>'+s.cols+'列</span>'+
-        '<span style="background:rgba(0,114,255,.06);color:var(--gold)">'+s.cat+'</span>'+
+        '<span style="background:rgba(212,175,55,.06);color:var(--gold)">'+s.cat+'</span>'+
         badges.join('')+
       '</div>'+
       '<div style="font-size:10px;color:var(--t3);line-height:1.5">'+s.desc+'</div>'+
@@ -2966,7 +3032,7 @@ const METRICS = {
 const COLORS = {
   // 主色系
   primary:   '#0072FF',   // 主蓝
-  primaryA:  'rgba(0,114,255,.08)',
+  primaryA:  'rgba(212,175,55,.08)',
   gold:      '#D4AF37',   // 金色（真实金色）
   goldA:     'rgba(212,175,55,.08)',
   pink:      '#FB7299',   // B站粉
@@ -3468,7 +3534,7 @@ function renderBiliTop10(items){
     var fnY=function(v){return v>=10000?'¥'+(v/10000).toFixed(1)+'万':'¥'+Math.round(v)};
     traces=[
       {type:'bar',y:names,x:gmvVals,orientation:'h',name:'GMV',
-       marker:{color:'rgba(0,114,255,0.75)',cornerradius:4},
+       marker:{color:'rgba(212,175,55,0.75)',cornerradius:4},
        text:gmvVals.map(fnY),textposition:'inside',insidetextanchor:'start',
        hovertemplate:'%{y}<br>GMV: ¥%{x:,.0f}<extra></extra>'},
       {type:'bar',y:names,x:costVals,orientation:'h',name:'消耗',
@@ -3526,7 +3592,7 @@ function renderBiliCostRoi(items){
     if(mCost[m]||mRoiCount[m]){x.push(m);yCost.push(mCost[m]||0);yGmv.push(mGmv[m]||0);yRoi.push(mRoiCount[m]?+(mRoiSum[m]/mRoiCount[m]).toFixed(2):0)}
   });
   Plotly.newPlot('biliCostRoiChart',[
-    {type:'bar',x:x,y:yCost,name:'消耗(¥)',marker:{color:'rgba(0,114,255,0.55)',cornerradius:5},yaxis:'y'},
+    {type:'bar',x:x,y:yCost,name:'消耗(¥)',marker:{color:'rgba(212,175,55,0.55)',cornerradius:5},yaxis:'y'},
     {type:'bar',x:x,y:yGmv,name:'GMV(¥)',marker:{color:'rgba(48,209,88,0.45)',cornerradius:5},yaxis:'y'},
     {type:'scatter',mode:'lines+markers',x:x,y:yRoi,name:'ROI',line:{color:'#FF9F0A',width:2.5},marker:{size:8},yaxis:'y2'},
   ],{...baseLayout(),height:340,margin:{t:20,r:60,b:40,l:50},barmode:'group',xaxis:{...baseLayout().xaxis},yaxis:{...baseLayout().yaxis,title:'金额(¥)'},yaxis2:{overlaying:'y',side:'right',title:'ROI',gridcolor:'transparent',tickfont:{color:'#FF9F0A'}}},{responsive:true,displayModeBar:false});
@@ -3770,7 +3836,7 @@ function renderBiliMonthReport(month){
   setTimeout(function(){
     if(document.getElementById('mrBiliTrend')){
       Plotly.newPlot('mrBiliTrend',[
-        {type:'bar',x:days,y:dayCost,name:'消耗',marker:{color:'rgba(0,114,255,.45)',cornerradius:3}},
+        {type:'bar',x:days,y:dayCost,name:'消耗',marker:{color:'rgba(212,175,55,.45)',cornerradius:3}},
         {type:'bar',x:days,y:dayGmv,name:'GMV',marker:{color:'rgba(48,209,88,.45)',cornerradius:3}},
         {type:'scatter',mode:'lines+markers',x:days,y:dayRoi,name:'ROI',line:{color:'#FF9F0A',width:2},marker:{size:6},yaxis:'y2'}
       ],{height:260,margin:{t:20,r:60,b:40,l:50},barmode:'group',xaxis:{tickfont:{size:9}},yaxis:{title:'金额(¥)',tickfont:{size:10}},yaxis2:{overlaying:'y',side:'right',title:'ROI',gridcolor:'transparent',tickfont:{color:'#FF9F0A'}},paper_bgcolor:'transparent',plot_bgcolor:'transparent'},{responsive:true,displayModeBar:false});
@@ -3832,7 +3898,7 @@ function renderAdMonthReport(month){
   setTimeout(function(){
     if(document.getElementById('mrAdTrend')){
       Plotly.newPlot('mrAdTrend',[
-        {type:'bar',x:days,y:dayCost,name:'消耗',marker:{color:'rgba(0,114,255,.45)',cornerradius:3}},
+        {type:'bar',x:days,y:dayCost,name:'消耗',marker:{color:'rgba(212,175,55,.45)',cornerradius:3}},
         {type:'bar',x:days,y:dayGmv,name:'GMV',marker:{color:'rgba(48,209,88,.45)',cornerradius:3}},
         {type:'scatter',mode:'lines+markers',x:days,y:dayRoi,name:'ROI',line:{color:'#FF9F0A',width:2},marker:{size:6},yaxis:'y2'}
       ],{height:260,margin:{t:20,r:60,b:40,l:50},barmode:'group',xaxis:{tickfont:{size:9}},yaxis:{title:'金额(¥)',tickfont:{size:10}},yaxis2:{overlaying:'y',side:'right',title:'ROI',gridcolor:'transparent',tickfont:{color:'#FF9F0A'}},paper_bgcolor:'transparent',plot_bgcolor:'transparent'},{responsive:true,displayModeBar:false});
@@ -3909,7 +3975,7 @@ function renderBiliDailyOverview(items){
 
   Plotly.newPlot('biliDailyOverviewChart',[
     {type:'scatter',mode:'lines',x:x,y:costs,fill:'tozeroy',
-     name:'每日消耗(¥)',fillcolor:'rgba(0,114,255,0.12)',
+     name:'每日消耗(¥)',fillcolor:'rgba(212,175,55,0.12)',
      line:{color:'#0072FF',width:2,shape:'spline'},
      yaxis:'y'},
     {type:'scatter',mode:'lines+markers',x:x,y:rois,
@@ -3944,7 +4010,7 @@ function renderBiliUpRanking(items){
     .sort((a,b)=>b.gmv-a.gmv).slice(0,10);
   Plotly.newPlot('biliUpRanking',[
     {type:'bar',y:tops.map(t=>t.name).reverse(),x:tops.map(t=>t.gmv).reverse(),orientation:'h',
-     marker:{color:'rgba(0,114,255,0.75)',cornerradius:4},
+     marker:{color:'rgba(212,175,55,0.75)',cornerradius:4},
      text:tops.map(t=>'¥'+fmtN(Math.round(t.gmv))).reverse(),textposition:'inside',insidetextanchor:'start',
      hovertemplate:'%{y}<br>GMV: ¥%{x:,.0f}<extra></extra>'}
   ],{...baseLayout(),height:320,margin:{t:10,r:30,b:30,l:100},xaxis:{...baseLayout().xaxis,title:'GMV(¥)'},yaxis:{automargin:true}},{responsive:true,displayModeBar:false});
@@ -3962,7 +4028,7 @@ function renderBiliPlayClickTrend(items){
   const yPlays=dates.map(d=>dayMap[d].plays);
   const yClicks=dates.map(d=>dayMap[d].clicks);
   Plotly.newPlot('biliPlayClickChart',[
-    {type:'scatter',mode:'lines',x:x,y:yPlays,name:'播放量',fill:'tozeroy',fillcolor:'rgba(0,114,255,0.1)',line:{color:'#0072FF',width:2,shape:'spline'}},
+    {type:'scatter',mode:'lines',x:x,y:yPlays,name:'播放量',fill:'tozeroy',fillcolor:'rgba(212,175,55,0.1)',line:{color:'#0072FF',width:2,shape:'spline'}},
     {type:'scatter',mode:'lines',x:x,y:yClicks,name:'点击量',line:{color:'#FF2D55',width:2,shape:'spline'},yaxis:'y2'},
   ],{...baseLayout(),height:340,margin:{t:20,r:60,b:40,l:50},xaxis:{...baseLayout().xaxis,tickmode:'array',tickvals:x,ticktext:x,tickangle:-60,tickfont:{size:8},automargin:true},yaxis:{...baseLayout().yaxis,title:'播放量'},yaxis2:{overlaying:'y',side:'right',title:'点击量',gridcolor:'transparent',tickfont:{color:'#FF2D55'}}},{responsive:true,displayModeBar:false});
 }
@@ -4112,7 +4178,7 @@ function renderBiliQualityAssess(items){
 
   // Chart 1: CPM & CPC monthly trend
   Plotly.newPlot('biliQualityCpmCpc',[
-    {type:'bar',x:x,y:cpm,name:'CPM(¥)',marker:{color:'rgba(0,114,255,0.55)',cornerradius:4},hovertemplate:'CPM: ¥%{y:.2f}<extra></extra>'},
+    {type:'bar',x:x,y:cpm,name:'CPM(¥)',marker:{color:'rgba(212,175,55,0.55)',cornerradius:4},hovertemplate:'CPM: ¥%{y:.2f}<extra></extra>'},
     {type:'bar',x:x,y:cpc,name:'CPC(¥)',marker:{color:'rgba(255,159,10,0.6)',cornerradius:4},hovertemplate:'CPC: ¥%{y:.2f}<extra></extra>'}
   ],{...baseLayout(),height:340,margin:{t:30,r:30,b:40,l:50},
     title:{text:'千次展示价格 CPM vs 单次点击价格 CPC',font:{size:13,color:'#1D1D1F'}},
@@ -4578,7 +4644,7 @@ function renderBili5AFunnel(items){
     if(hoverSmooth[i]>0.01){
       ctx.beginPath();
       ctx.ellipse(funnelCx,cy,rx+6,ry+6,0,0,Math.PI*2);
-      ctx.fillStyle='rgba(0,114,255,'+(0.06*hoverSmooth[i])+')';
+      ctx.fillStyle='rgba(212,175,55,'+(0.06*hoverSmooth[i])+')';
       ctx.fill();
     }
 
@@ -5010,7 +5076,7 @@ function renderBiliSidebarSummary(){
       '<b style="color:#fb7293">数据范围</b><br>'+(minDate?minDate+' → '+maxDate:'暂无数据')+'<br>'+
       '<span style="color:var(--t3);font-size:11px">共'+totalRows+'条记录 · 来源于B站投放明细</span>'+
     '</div>'+
-    '<div style="padding:8px;background:rgba(0,114,255,.04);border-radius:8px;border:1px solid rgba(0,114,255,.08);margin-bottom:8px">'+
+    '<div style="padding:8px;background:rgba(212,175,55,.04);border-radius:8px;border:1px solid rgba(212,175,55,.08);margin-bottom:8px">'+
       '<b style="color:var(--gold)">核心指标</b>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;font-size:11px">'+
         '<div>总消耗 <b style="color:var(--gold)">'+_bfmt(totalCost)+'</b></div>'+
@@ -5045,6 +5111,7 @@ let plEvolutionData = [];  // profit/break-even/loss counts per day
 
 /* ── Sub-tab switching ── */
 function switchBiliSubTab(sub){
+  localStorage.setItem('xtb_biliSubTab', sub);
   document.getElementById('subTabBtnData').classList.toggle('active', sub==='data');
   document.getElementById('subTabBtnPL').classList.toggle('active', sub==='pl');
   document.getElementById('biliSubTabData').classList.toggle('active', sub==='data');
@@ -5434,19 +5501,32 @@ function renderBiliDashboard(){
   renderMonthGrid('bili');
   buildBiliFilters();
   const items=getBiliFiltered();
+  // Above-fold charts — render immediately
   renderBiliDailyOverview(items);
   renderBiliKPI(items);
   renderBiliTop10(items);
-  renderBiliBreakEven(items);
   renderBiliCostRoi(items);
-  renderBiliChannelPie(items);
-  renderBiliUpRanking(items);
-  renderBiliOrderVolume(items);
-  renderBiliPlayClickTrend(items);
-  renderBiliQualityAssess(items);
-  renderBili5AFunnel(items);
+  // Below-fold charts — lazy load via IntersectionObserver
+  lazyLoad('biliUpRanking', function(){ renderBiliUpRanking(items); });
+  lazyLoad('biliOrderTrendChart', function(){ renderBiliOrderVolume(items); });
+  lazyLoad('biliPlayClickChart', function(){ renderBiliPlayClickTrend(items); });
+  lazyLoad('biliChannelPieChart', function(){ renderBiliChannelPie(items); });
+  lazyLoad('biliQualityKpiRow', function(){ renderBiliQualityAssess(items); }, '400px');
+  lazyLoad('bili5AFunnel', function(){ renderBili5AFunnel(items); }, '400px');
+  lazyLoad('biliBEDonut', function(){ renderBiliBreakEven(items); }, '400px');
   generateBiliReport(items);
   renderBiliTable(items);
+}
+
+/* ── Lazy Chart Loader ── */
+function lazyLoad(containerId, fn, rootMargin){
+  if(typeof IntersectionObserver==='undefined'){ fn(); return; }
+  var el = document.getElementById(containerId);
+  if(!el){ fn(); return; }
+  var obs = new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting){ fn(); obs.disconnect(); }
+  }, {rootMargin: rootMargin || '200px'});
+  obs.observe(el);
 }
 
 /* ══════════════════════════════════════
@@ -6183,7 +6263,7 @@ function renderDailyOverview(){
 
   Plotly.newPlot('dailyOverviewChart',[
     {type:'scatter',mode:'lines',x:x,y:costs,fill:'tozeroy',
-     name:'每日消耗(¥)',fillcolor:'rgba(0,114,255,0.12)',
+     name:'每日消耗(¥)',fillcolor:'rgba(212,175,55,0.12)',
      line:{color:'#0072FF',width:2,shape:'spline'},
      yaxis:'y'},
     {type:'scatter',mode:'lines+markers',x:x,y:rois,
@@ -6260,7 +6340,7 @@ function renderChannelTrend(items,containerId){
     return order.indexOf(a)-order.indexOf(b);
   });
   Plotly.newPlot(containerId,[
-    {type:'bar',x:months,y:months.map(m=>mCost[m]),name:'消耗(¥)',marker:{color:'rgba(0,114,255,0.55)',cornerradius:4},yaxis:'y'},
+    {type:'bar',x:months,y:months.map(m=>mCost[m]),name:'消耗(¥)',marker:{color:'rgba(212,175,55,0.55)',cornerradius:4},yaxis:'y'},
     {type:'scatter',mode:'lines+markers',x:months,y:months.map(m=>mGMV[m]),name:'GMV(¥)',line:{color:'#30D158',width:2},marker:{size:6},yaxis:'y2'},
   ],{
     ...baseLayout(),height:260,margin:{t:10,r:50,b:30,l:45},barmode:'group',
@@ -6576,7 +6656,7 @@ function generateReport(){
 
   const x=chartRows.map(r=>r.period);
   Plotly.newPlot('reportChart',[
-    {type:'bar',x:x,y:chartRows.map(r=>r.cost),name:'消耗(¥)',marker:{color:'rgba(0,114,255,0.55)',cornerradius:5},yaxis:'y'},
+    {type:'bar',x:x,y:chartRows.map(r=>r.cost),name:'消耗(¥)',marker:{color:'rgba(212,175,55,0.55)',cornerradius:5},yaxis:'y'},
     {type:'scatter',mode:'lines+markers',x:x,y:chartRows.map(r=>r.roi),name:'ROI',line:{color:'#FF9F0A',width:2.5},marker:{size:8},yaxis:'y2'},
     {type:'scatter',mode:'lines+markers',x:x,y:chartRows.map(r=>r.orders),name:'订单',line:{color:'#30D158',width:2},marker:{size:6,color:'#30D158'},yaxis:'y3'},
   ],{
@@ -6700,7 +6780,7 @@ function renderAdCostRoi(items){
     }
   });
   Plotly.newPlot('adCostRoiChart',[
-    {type:'bar',x:x,y:yCost,name:'消耗(¥)',marker:{color:'rgba(0,114,255,0.55)',cornerradius:5},yaxis:'y'},
+    {type:'bar',x:x,y:yCost,name:'消耗(¥)',marker:{color:'rgba(212,175,55,0.55)',cornerradius:5},yaxis:'y'},
     {type:'scatter',mode:'lines+markers',x:x,y:yRoi,name:'ROI',line:{color:'#FF9F0A',width:2.5},marker:{size:8},yaxis:'y2'},
   ],{
     ...baseLayout(),height:360,margin:{t:20,r:60,b:40,l:50},
