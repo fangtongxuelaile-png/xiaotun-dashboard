@@ -476,6 +476,32 @@ select option{background:#FFF;color:var(--t1)}
   .mobile-sb-backdrop{display:none!important}
 }
 
+/* ── 意见反馈 ── */
+.feedback-fab{
+  position:fixed;bottom:24px;right:20px;z-index:600;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;
+}
+.feedback-fab-btn{
+  width:48px;height:48px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,#3478F6,#0052CC);
+  color:#FFF;font-size:20px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(52,120,246,.4);transition:transform .2s,box-shadow .2s;
+  cursor:pointer;
+}
+.feedback-fab-btn:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(52,120,246,.5)}
+.feedback-fab-label{font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.02em;white-space:nowrap}
+.feedback-modal-dev{font-size:12px;color:var(--t3);margin-bottom:16px;padding:8px 12px;background:rgba(52,120,246,.04);border:1px solid rgba(52,120,246,.1);border-radius:8px;display:flex;align-items:center;gap:6px}
+.feedback-type-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.feedback-type-btn{padding:5px 14px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--border-strong);background:#FFF;color:var(--t2);cursor:pointer;transition:all .2s}
+.feedback-type-btn.active{background:var(--blue);color:#FFF;border-color:var(--blue)}
+.feedback-textarea{width:100%;min-height:100px;resize:vertical;border:1px solid var(--border-strong);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--t1);line-height:1.6;transition:border .2s}
+.feedback-textarea:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(52,120,246,.1)}
+.feedback-footer{font-size:11px;color:var(--t3);margin-top:12px;text-align:center}
+@media(max-width:768px){
+  .feedback-fab{bottom:80px;right:14px}
+}
+
 /* ── Break-Even / Investor View ── */
 .breakeven-section{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
 .breakeven-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
@@ -1768,6 +1794,47 @@ select option{background:#FFF;color:var(--t1)}
 <!-- ═══ Toast Area ═══ -->
 <div class="toast-area" id="toastArea"></div>
 
+<!-- ═══ 意见反馈 FAB ═══ -->
+<div class="feedback-fab" onclick="openFeedbackModal()">
+  <div class="feedback-fab-btn">💬</div>
+  <span class="feedback-fab-label">意见反馈</span>
+</div>
+
+<!-- ═══ 意见反馈 Modal ═══ -->
+<div class="modal-mask" id="feedbackModal">
+  <div class="modal" style="width:480px;max-width:95vw">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:17px">💬 意见反馈</h3>
+      <button onclick="closeFeedbackModal()" style="background:none;border:none;font-size:20px;color:var(--t3);cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="feedback-modal-dev">
+      👤 反馈将发送至开发管理者：<strong style="color:var(--blue)">品牌运营部 · 小五</strong>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--t2);font-weight:600;display:block;margin-bottom:6px">反馈类型</label>
+      <div class="feedback-type-row" id="feedbackTypeRow">
+        <button class="feedback-type-btn active" onclick="selectFeedbackType(this,'功能建议')">💡 功能建议</button>
+        <button class="feedback-type-btn" onclick="selectFeedbackType(this,'问题报告')">🐛 问题报告</button>
+        <button class="feedback-type-btn" onclick="selectFeedbackType(this,'数据异常')">📊 数据异常</button>
+        <button class="feedback-type-btn" onclick="selectFeedbackType(this,'其他')">📝 其他</button>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--t2);font-weight:600;display:block;margin-bottom:6px">反馈内容 <span style="color:var(--err)">*</span></label>
+      <textarea class="feedback-textarea" id="feedbackText" placeholder="请描述您的意见或建议，越详细越好…"></textarea>
+    </div>
+    <div class="field" style="margin-bottom:16px">
+      <label style="font-size:11px;color:var(--t2);font-weight:600;display:block;margin-bottom:6px">联系方式（选填）</label>
+      <input type="text" id="feedbackContact" placeholder="微信 / 手机号，方便小五联系您" style="width:100%">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="closeFeedbackModal()" class="act-btn act-sec" style="padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;background:#FFF;border:1px solid var(--border-strong);color:var(--t2);cursor:pointer">取消</button>
+      <button onclick="submitFeedback()" style="padding:9px 24px;border-radius:8px;font-size:13px;font-weight:700;background:var(--blue);color:#FFF;border:none;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">📤 提交反馈</button>
+    </div>
+    <div class="feedback-footer">反馈记录将由管理员统一查阅 · 数据中台开发管理：品牌运营部-小五</div>
+  </div>
+</div>
+
 <!-- ═══ 审计日志 Modal ═══ -->
 <div class="modal-mask" id="auditModal">
   <div class="modal" style="width:820px;max-width:95vw;max-height:88vh">
@@ -1839,6 +1906,40 @@ function canDo(action){
   return false;
 }
 /* ══════ 审计日志弹窗 ══════ */
+/* ── 意见反馈 ── */
+var _feedbackType = '功能建议';
+function openFeedbackModal(){
+  document.getElementById('feedbackModal').classList.add('show');
+  document.getElementById('feedbackText').focus();
+}
+function closeFeedbackModal(){
+  document.getElementById('feedbackModal').classList.remove('show');
+  document.getElementById('feedbackText').value='';
+  document.getElementById('feedbackContact').value='';
+  _feedbackType='功能建议';
+  document.querySelectorAll('.feedback-type-btn').forEach(function(b,i){b.classList.toggle('active',i===0)});
+}
+function selectFeedbackType(btn, type){
+  _feedbackType=type;
+  document.querySelectorAll('.feedback-type-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+}
+async function submitFeedback(){
+  var text=document.getElementById('feedbackText').value.trim();
+  if(!text){toast('⚠️ 请填写反馈内容','warn');return}
+  var contact=document.getElementById('feedbackContact').value.trim();
+  var who=(currentUser?currentUser.name:'未登录')+'('+((currentUser&&currentUser.username)||'?')+')';
+  var detail='['+_feedbackType+'] '+text+(contact?' | 联系:'+contact:'');
+  await _supaInsert('operation_history',{
+    username:(currentUser&&currentUser.username)||'visitor',
+    action:'用户反馈',
+    detail:detail,
+    ip:_userIP||'未知'
+  });
+  closeFeedbackModal();
+  toast('✅ 反馈已提交，感谢您的意见！','ok');
+}
+
 function openAuditModal(){
   document.getElementById('auditModal').classList.add('show');
   switchAuditTab('login');
