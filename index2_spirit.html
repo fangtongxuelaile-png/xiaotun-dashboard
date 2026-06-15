@@ -6545,11 +6545,12 @@ function processBiliJSON(json,_filename){
     let dateVal=row[colMap.date];
     // XLSX.js 可能把日期解析为 JS Date 对象
     if(dateVal instanceof Date){
-      dateVal=dateVal.getFullYear()+'-'+(dateVal.getMonth()+1).toString().padStart(2,'0')+'-'+dateVal.getDate().toString().padStart(2,'0');
+      // JS Date 对象：用 UTC 方法取日期，避免时区偏移
+      dateVal=dateVal.getUTCFullYear()+'-'+String(dateVal.getUTCMonth()+1).padStart(2,'0')+'-'+String(dateVal.getUTCDate()).padStart(2,'0');
     } else if(typeof dateVal==='number'&&dateVal>40000){
-      const excelEpoch=new Date(1899,11,30);
-      dateVal=new Date(excelEpoch.getTime()+dateVal*86400000);
-      dateVal=dateVal.getFullYear()+'-'+(dateVal.getMonth()+1).toString().padStart(2,'0')+'-'+dateVal.getDate().toString().padStart(2,'0');
+      // Excel 序列号：必须用 Date.UTC 作为 epoch，否则 UTC+8 下会偏移 8h 导致月份错误
+      const d=new Date(Date.UTC(1899,11,30)+dateVal*86400000);
+      dateVal=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
     }
     let dateStr=String(dateVal).trim();
     dateStr=dateStr.replace(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/,(_,y,m,d)=>y+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0'));
