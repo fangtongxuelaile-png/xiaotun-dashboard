@@ -1852,6 +1852,21 @@ select option{background:#FFF;color:var(--t1)}
   </div>
 </div>
 
+<!-- ═══ B站导入预览 Modal ═══ -->
+<div class="modal-mask" id="biliPreviewModal">
+  <div class="modal" style="width:660px;max-width:96vw;max-height:90vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="font-size:16px;font-weight:700">📊 导入预览 — 请核对数据后再确认</h3>
+      <button onclick="cancelBiliImport()" style="background:transparent;border:none;font-size:22px;color:var(--t3);cursor:pointer;line-height:1">×</button>
+    </div>
+    <div id="biliPreviewContent" style="max-height:60vh;overflow-y:auto;border-radius:10px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <button onclick="cancelBiliImport()" style="padding:9px 22px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--t2);font-size:14px;cursor:pointer;font-weight:600">取消</button>
+      <button onclick="confirmBiliImport()" style="padding:9px 28px;border-radius:8px;border:none;background:var(--blue);color:#fff;font-size:14px;cursor:pointer;font-weight:700">✅ 确认导入</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════
    Constants
@@ -2797,9 +2812,14 @@ function handleFile(file){
       const sn=wb.SheetNames.find(n=>n.includes('单日')||n.includes('汇总'))||wb.SheetNames[0];
       const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''});
       if(raw.length>=3){
-        const h3=raw[2]||[];
-        const isBili=h3.some(v=>String(v).trim()==='达人名称')||h3.some(v=>String(v).trim()==='视频BV号');
-        if(isBili){if(importBiliExcelXLSX(raw))saveDataSnapshot('bili',file.name);return}
+        // 扫描前6行，找到有"达人名称"或"视频BV号"的那行即认定为B站文件
+        let isBili=false;
+        for(let ti=0;ti<Math.min(6,raw.length);ti++){
+          const tr=raw[ti]||[];
+          if(tr.some(v=>String(v).trim()==='达人名称')||tr.some(v=>String(v).trim()==='视频BV号')){isBili=true;break}
+        }
+        // saveDataSnapshot 已移入 confirmBiliImport，用户确认预览后自动触发
+        if(isBili){importBiliExcelXLSX(raw,file.name);return}
       }
       const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
       importRows(rows,file.name);
@@ -6459,10 +6479,20 @@ function exportBiliCSV(){
   downloadCSV(csv,'bilibili_投放明细.csv');
 }
 
+// ── 待确认的导入数据 ──
+var _pendingBiliImport=null;
+
 // B站 数据解析核心（json 为 header:1 格式的二维数组）
-function processBiliJSON(json){
+// 解析后先展示预览弹窗，用户确认后再写入 BILIBILI_RAW
+function processBiliJSON(json,_filename){
   if(json.length<4){toast('数据行数不足，请检查Excel格式','err');return false}
-  const headerRow=json[2];
+  // 自动探测表头行（支持第2~5行）
+  let headerRowIdx=2;
+  for(let ti=1;ti<=5;ti++){
+    const tr=json[ti]||[];
+    if(tr.some(v=>String(v).trim()==='时间')&&tr.some(v=>String(v).trim()==='总花费')){headerRowIdx=ti;break}
+  }
+  const headerRow=json[headerRowIdx];
   const colMap={};
   headerRow.forEach((h,i)=>{
     const key=String(h).trim();
@@ -6502,25 +6532,39 @@ function processBiliJSON(json){
     if(key==='转化目标')colMap.goal=i;
     if(key==='账号类型')colMap.accountType=i;
   });
-  if(colMap.date===undefined||colMap.cost===undefined){toast('未识别到关键字段（时间/总花费），请检查表头在第3行','err');return false}
+  if(colMap.date===undefined||colMap.cost===undefined){
+    toast('未识别到关键字段（时间/总花费），请检查表头行','err');
+    return false;
+  }
   const rows=[];
   const monthMap={};
-  for(let i=3;i<json.length;i++){
+  let skipNoDate=0,skipZero=0;
+  for(let i=headerRowIdx+1;i<json.length;i++){
     const row=json[i];
-    if(!row[colMap.date])continue;
+    if(!row[colMap.date]){skipNoDate++;continue}
     let dateVal=row[colMap.date];
-    if(typeof dateVal==='number'){
+    // XLSX.js 可能把日期解析为 JS Date 对象
+    if(dateVal instanceof Date){
+      dateVal=dateVal.getFullYear()+'-'+(dateVal.getMonth()+1).toString().padStart(2,'0')+'-'+dateVal.getDate().toString().padStart(2,'0');
+    } else if(typeof dateVal==='number'&&dateVal>40000){
       const excelEpoch=new Date(1899,11,30);
       dateVal=new Date(excelEpoch.getTime()+dateVal*86400000);
       dateVal=dateVal.getFullYear()+'-'+(dateVal.getMonth()+1).toString().padStart(2,'0')+'-'+dateVal.getDate().toString().padStart(2,'0');
     }
     let dateStr=String(dateVal).trim();
-    // 统一斜杠日期 2026/6/12 → 2026-06-12
     dateStr=dateStr.replace(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/,(_,y,m,d)=>y+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0'));
-    if(!dateStr||dateStr==='undefined')continue;
+    if(!dateStr||dateStr==='undefined'){skipNoDate++;continue}
     const monthMatch=dateStr.match(/(\d{4})[-\/](\d{1,2})/);
     const month=monthMatch?parseInt(monthMatch[2])+'月':'';
-    const getNum=(k)=>{const v=row[colMap[k]];return v===''||v==null?0:(typeof v==='number'?v:parseFloat(String(v).replace(/,/g,'')))||0};
+    // 解析数字：兼容字符串千分符 "1,234.56"、百分比 "12.3%"
+    const getNum=(k)=>{
+      if(colMap[k]===undefined)return 0;
+      const v=row[colMap[k]];
+      if(v===''||v==null)return 0;
+      if(typeof v==='number')return v;
+      const s=String(v).replace(/,/g,'').replace(/%$/,'');
+      return parseFloat(s)||0;
+    };
     const getStr=(k)=>{const v=row[colMap[k]];return v==null?'':String(v).trim()};
     const r={
       date:dateStr,month,
@@ -6539,22 +6583,94 @@ function processBiliJSON(json){
       adPosition:getStr('adPosition'),contentType:getStr('contentType'),
       goal:getStr('goal'),accountType:getStr('accountType'),
     };
-    if(r.cost===0&&r.gmv===0&&r.orders===0&&r.plays===0)continue;
+    if(r.cost===0&&r.gmv===0&&r.orders===0&&r.plays===0){skipZero++;continue}
     rows.push(r);
     if(!monthMap[month])monthMap[month]=[];
     monthMap[month].push(r);
   }
   if(rows.length===0){toast('未解析到有效数据行，所有行消耗/GMV/订单/播放均为0','err');return false}
-  BILIBILI_RAW=Object.entries(monthMap).map(([month,rows])=>({month,rows}));
-  saveBiliToStorage();
-  _biliInited=false;
-  renderBiliDashboard();
-  toast('B站数据导入成功：共'+rows.length+'条记录','ok');
+  // 不立即写入，先展示预览弹窗让用户核对
+  const monthData=Object.entries(monthMap).map(([month,rs])=>({month,rows:rs}));
+  _pendingBiliImport={monthData,totalRows:rows.length,skipNoDate,skipZero,filename:_filename||'未知文件',colMap,headerRowIdx};
+  _showBiliPreview(_pendingBiliImport);
   return true;
 }
 
-// 供 handleFile 智能路由调用的 Wrapper
-function importBiliExcelXLSX(json){return processBiliJSON(json)}
+function _showBiliPreview(p){
+  // 按月份数字排序
+  const sorted=[...p.monthData].sort((a,b)=>{
+    const ma=parseInt(a.month)||0,mb=parseInt(b.month)||0;
+    return ma-mb;
+  });
+  const fmt=(n)=>n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtN=(n)=>n.toLocaleString('zh-CN');
+  let rows=sorted.map(({month,rows})=>{
+    const cost=rows.reduce((s,r)=>s+r.cost,0);
+    const gmv=rows.reduce((s,r)=>s+r.gmv,0);
+    const orders=rows.reduce((s,r)=>s+r.orders,0);
+    return `<tr>
+      <td style="padding:8px 12px;font-weight:600;color:var(--blue)">${month}</td>
+      <td style="padding:8px 12px;text-align:right">${rows.length}</td>
+      <td style="padding:8px 12px;text-align:right;color:#22C55E;font-weight:700">¥${fmt(cost)}</td>
+      <td style="padding:8px 12px;text-align:right">¥${fmt(gmv)}</td>
+      <td style="padding:8px 12px;text-align:right">${fmtN(orders)}</td>
+    </tr>`;
+  }).join('');
+  const totalCost=p.monthData.reduce((s,b)=>s+b.rows.reduce((a,r)=>a+r.cost,0),0);
+  const skipInfo=[];
+  if(p.skipNoDate>0)skipInfo.push(`<span style="color:#F59E0B">日期为空跳过 ${p.skipNoDate} 行</span>`);
+  if(p.skipZero>0)skipInfo.push(`<span style="color:var(--t3)">全零行跳过 ${p.skipZero} 行</span>`);
+  document.getElementById('biliPreviewContent').innerHTML=`
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.7">
+      <div><b>文件：</b>${p.filename}</div>
+      <div><b>有效数据行：</b><span style="color:var(--blue);font-weight:700">${p.totalRows} 条</span>
+        ${skipInfo.length?' &nbsp;|&nbsp; '+skipInfo.join(' &nbsp;|&nbsp; '):''}
+      </div>
+      <div style="margin-top:4px"><b>表头识别于第 ${p.headerRowIdx+1} 行</b>，已识别字段：时间✓ 总花费✓${p.colMap.orders!==undefined?' 订单✓':''} ${p.colMap.gmv!==undefined?' GMV✓':''}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <thead>
+        <tr style="background:var(--bg2)">
+          <th style="padding:9px 12px;text-align:left;font-weight:700;color:var(--t2)">月份</th>
+          <th style="padding:9px 12px;text-align:right;font-weight:700;color:var(--t2)">行数</th>
+          <th style="padding:9px 12px;text-align:right;font-weight:700;color:var(--t2)">总消耗</th>
+          <th style="padding:9px 12px;text-align:right;font-weight:700;color:var(--t2)">总GMV</th>
+          <th style="padding:9px 12px;text-align:right;font-weight:700;color:var(--t2)">总订单</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr style="background:var(--bg2);border-top:2px solid var(--border)">
+          <td colspan="2" style="padding:9px 12px;font-weight:700">合计</td>
+          <td style="padding:9px 12px;text-align:right;font-weight:700;color:#22C55E">¥${fmt(totalCost)}</td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+    <div style="margin-top:12px;padding:10px 14px;background:rgba(52,120,246,.06);border-radius:8px;font-size:12px;color:var(--t3)">
+      💡 请核对"总消耗"合计是否与 Excel 里的总计一致，确认无误后点击「确认导入」
+    </div>`;
+  document.getElementById('biliPreviewModal').classList.add('show');
+}
+
+function cancelBiliImport(){
+  _pendingBiliImport=null;
+  document.getElementById('biliPreviewModal').classList.remove('show');
+}
+
+function confirmBiliImport(){
+  if(!_pendingBiliImport){cancelBiliImport();return}
+  BILIBILI_RAW=_pendingBiliImport.monthData;
+  saveBiliToStorage();
+  _biliInited=false;
+  renderBiliDashboard();
+  toast('B站数据导入成功：共'+_pendingBiliImport.totalRows+'条记录','ok');
+  saveDataSnapshot('bili',_pendingBiliImport.filename);
+  cancelBiliImport();
+}
+
+// 供 handleFile 智能路由调用的 Wrapper（filename 传给预览弹窗）
+function importBiliExcelXLSX(json,filename){return processBiliJSON(json,filename)}
 
 function importBiliExcel(){
   const input=document.createElement('input');
@@ -6571,7 +6687,8 @@ function importBiliExcel(){
         const sheetName=workbook.SheetNames.find(n=>n.includes('单日')||n.includes('汇总'))||workbook.SheetNames[0];
         const sheet=workbook.Sheets[sheetName];
         const json=XLSX.utils.sheet_to_json(sheet,{header:1,defval:''});
-        if(processBiliJSON(json)) saveDataSnapshot('bili',file.name);
+        // saveDataSnapshot 已移入 confirmBiliImport
+        processBiliJSON(json,file.name);
       }catch(err){toast('读取失败: '+err.message,'err');console.error(err);}
     };
     reader.readAsArrayBuffer(file);
