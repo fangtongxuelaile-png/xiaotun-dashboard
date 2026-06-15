@@ -4079,6 +4079,21 @@ function renderMonthReport(tab,month){
   document.getElementById('monthReportContent').innerHTML=html;
 }
 
+// ── 环比辅助 ──
+function getPrevMonthStr(month){
+  var m=parseInt(month);
+  if(isNaN(m)) return '';
+  return (m>1?m-1:12)+'月';
+}
+function momTag(cur,prev,inverse){
+  if(!prev||prev===0) return '<div style="font-size:10px;color:var(--t3);margin-top:4px">上月无数据</div>';
+  var pct=(cur-prev)/prev*100;
+  var positive=pct>=0;
+  var better=inverse?!positive:positive;
+  var color=better?'#22C55E':'#EF4444';
+  return '<div style="font-size:11px;font-weight:700;color:'+color+';margin-top:4px">'+(positive?'↑':'↓')+Math.abs(pct).toFixed(1)+'% <span style="font-size:10px;font-weight:500;color:var(--t3)">环比</span></div>';
+}
+
 // ── B站月报渲染 ──
 function renderBiliMonthReport(month){
   var blocks=BILIBILI_RAW.filter(function(b){return b.month===month;});
@@ -4093,6 +4108,17 @@ function renderBiliMonthReport(month){
   var roi=totalCost?+(totalGmv/totalCost).toFixed(2):0;
   var ctr=totalImp?+(totalClicks/totalImp*100).toFixed(2):0;
   var cvr=totalPlays?+(totalOrders/totalPlays*100).toFixed(2):0;
+  // 计算上月数据（环比）
+  var prevMonth=getPrevMonthStr(month);
+  var prevBlocks=BILIBILI_RAW.filter(function(b){return b.month===prevMonth;});
+  var prevCost=0,prevGmv=0,prevOrders=0;
+  var hasPrev=prevBlocks.length>0;
+  if(hasPrev){
+    var prevItems=[];
+    prevBlocks.forEach(function(b){prevItems=prevItems.concat(b.rows||[]);});
+    prevItems.forEach(function(r){prevCost+=r.cost||0;prevGmv+=r.gmv||0;prevOrders+=r.orders||0;});
+  }
+  var prevRoi=prevCost?+(prevGmv/prevCost).toFixed(2):0;
   // 达人统计
   var upMap={};
   items.forEach(function(r){if(!r.up) return;var d=upMap[r.up]||(upMap[r.up]={cost:0,gmv:0,orders:0});d.cost+=r.cost||0;d.gmv+=r.gmv||0;d.orders+=r.orders||0;});
@@ -4106,10 +4132,10 @@ function renderBiliMonthReport(month){
   var dayRoi=days.map(function(d){var c=dayMap[d].cost;return c?+(dayMap[d].gmv/c).toFixed(2):0;});
 
   var html='<div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'+
-    '<div class="kpi-card"><div class="kpi-label">总消耗</div><div class="kpi-value">'+fmtMoney(totalCost)+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">总GMV</div><div class="kpi-value">'+fmtMoney(totalGmv)+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">综合ROI</div><div class="kpi-value" style="color:'+(roi>=4?'#22C55E':roi>=2.5?'#3B82F6':'#EF4444')+'">'+roi.toFixed(2)+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">总订单</div><div class="kpi-value">'+fmtN(totalOrders)+'</div></div>'+
+    '<div class="kpi-card"><div class="kpi-label">总消耗</div><div class="kpi-value">'+fmtMoney(totalCost)+'</div>'+(hasPrev?momTag(totalCost,prevCost,true):'<div style="font-size:10px;color:var(--t3);margin-top:4px">无上月数据</div>')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">总GMV</div><div class="kpi-value">'+fmtMoney(totalGmv)+'</div>'+(hasPrev?momTag(totalGmv,prevGmv,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">综合ROI</div><div class="kpi-value" style="color:'+(roi>=4?'#22C55E':roi>=2.5?'#3B82F6':'#EF4444')+'">'+roi.toFixed(2)+'</div>'+(hasPrev?momTag(roi,prevRoi,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">总订单</div><div class="kpi-value">'+fmtN(totalOrders)+'</div>'+(hasPrev?momTag(totalOrders,prevOrders,false):'')+'</div>'+
     '</div>';
 
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">'+
@@ -4157,6 +4183,15 @@ function renderAdMonthReport(month){
   var totalCost=0,totalGmv=0,totalOrders=0;
   Object.values(lines).forEach(function(l){totalCost+=l.cost;totalGmv+=l.gmv;totalOrders+=l.orders;});
   var roi=totalCost?+(totalGmv/totalCost).toFixed(2):0;
+  // 上月环比
+  var prevMonthAd=getPrevMonthStr(month);
+  var prevBlocksAd=CID_RAW.filter(function(c){return c.month===prevMonthAd;});
+  var prevCostAd=0,prevGmvAd=0,prevOrdersAd=0;
+  var hasPrevAd=prevBlocksAd.length>0;
+  if(hasPrevAd){
+    prevBlocksAd.forEach(function(b){b.rows.forEach(function(r){prevCostAd+=r.cost||0;prevGmvAd+=r.gmv||0;prevOrdersAd+=r.orders||0;});});
+  }
+  var prevRoiAd=prevCostAd?+(prevGmvAd/prevCostAd).toFixed(2):0;
   // 日趋势
   var dayMap={};
   blocks.forEach(function(b){b.rows.forEach(function(r){if(!r.d) return;var d=dayMap[r.d]||(dayMap[r.d]={cost:0,gmv:0});d.cost+=r.cost||0;d.gmv+=r.gmv||0;});});
@@ -4168,10 +4203,10 @@ function renderAdMonthReport(month){
   var lineList=Object.entries(lines).map(function(e){return{name:e[0],cost:e[1].cost,gmv:e[1].gmv,roi:e[1].cost?+(e[1].gmv/e[1].cost).toFixed(2):0,orders:e[1].orders};}).sort(function(a,b){return b.gmv-a.gmv;});
 
   var html='<div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'+
-    '<div class="kpi-card"><div class="kpi-label">总消耗</div><div class="kpi-value">'+fmtMoney(totalCost)+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">总GMV</div><div class="kpi-value">'+fmtMoney(totalGmv)+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">综合ROI</div><div class="kpi-value" style="color:'+(roi>=4?'#22C55E':roi>=2.5?'#3B82F6':'#EF4444')+'">'+roi.toFixed(2)+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">总订单</div><div class="kpi-value">'+fmtN(totalOrders)+'</div></div>'+
+    '<div class="kpi-card"><div class="kpi-label">总消耗</div><div class="kpi-value">'+fmtMoney(totalCost)+'</div>'+(hasPrevAd?momTag(totalCost,prevCostAd,true):'<div style="font-size:10px;color:var(--t3);margin-top:4px">无上月数据</div>')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">总GMV</div><div class="kpi-value">'+fmtMoney(totalGmv)+'</div>'+(hasPrevAd?momTag(totalGmv,prevGmvAd,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">综合ROI</div><div class="kpi-value" style="color:'+(roi>=4?'#22C55E':roi>=2.5?'#3B82F6':'#EF4444')+'">'+roi.toFixed(2)+'</div>'+(hasPrevAd?momTag(roi,prevRoiAd,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">总订单</div><div class="kpi-value">'+fmtN(totalOrders)+'</div>'+(hasPrevAd?momTag(totalOrders,prevOrdersAd,false):'')+'</div>'+
     '</div>';
 
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">'+
