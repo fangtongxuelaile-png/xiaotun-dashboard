@@ -1897,6 +1897,54 @@ function logOp(action, detail){
   _supaInsert('operation_history',{username:currentUser.name||currentUser.username, action, detail:String(detail||'').substring(0,400), ip_address:_userIP});
 }
 
+/* ══════════════════════════════════════
+   云端数据同步（data_uploads 表）
+   ══════════════════════════════════════ */
+async function pushDataToCloud(tab, filename, snapData, rowCount){
+  if(!currentUser) return;
+  try{
+    await _supaInsert('data_uploads',{
+      tab:tab,
+      uploader:currentUser.username||currentUser.name,
+      filename:filename||'未知文件',
+      row_count:rowCount,
+      data:JSON.stringify(snapData)
+    });
+    toast('☁️ 数据已同步至云端','ok');
+  }catch(e){console.warn('云端推送失败',e);}
+}
+
+async function syncLatestCloudData(){
+  try{
+    // 拉取最新 B站 数据
+    var bRes=await fetch(SUPA_URL+'/rest/v1/data_uploads?tab=eq.bili&order=uploaded_at.desc&limit=1',
+      {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    if(bRes.ok){
+      var bList=await bRes.json();
+      if(bList.length>0){
+        var lb=bList[0];
+        BILIBILI_RAW=JSON.parse(lb.data);
+        saveBiliToStorage();
+        _biliInited=false;
+        renderBiliDashboard();
+        toast('📡 B站数据已同步 · 最后上传：'+lb.uploader+'（'+lb.row_count+'条）','info');
+      }
+    }
+    // 拉取最新内容管理数据
+    var cRes=await fetch(SUPA_URL+'/rest/v1/data_uploads?tab=eq.content&order=uploaded_at.desc&limit=1',
+      {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    if(cRes.ok){
+      var cList=await cRes.json();
+      if(cList.length>0){
+        var lc=cList[0];
+        DATA.contents=JSON.parse(lc.data);
+        saveData();buildFilters();render();
+        toast('📡 内容数据已同步 · 最后上传：'+lc.uploader+'（'+lc.row_count+'条）','info');
+      }
+    }
+  }catch(e){console.warn('云端数据同步失败',e);}
+}
+
 function canDo(action){
   if(!currentUser)return false;
   const p=currentUser.perm||'view';
@@ -2140,6 +2188,7 @@ function doLogin(){
       initApp();
       initMetricsPanel();
       _loginSetLoading(false);
+      syncLatestCloudData();
     },550);
   },320);
 }
@@ -2656,6 +2705,9 @@ function saveDataSnapshot(tab,filename){
   if(snaps.length>15) snaps=snaps.slice(0,15);
   saveSnapshots(snaps);
   renderSnapHistory();
+  // 同步至云端
+  pushDataToCloud(tab, filename, snapData, rowCount);
+  logOp('上传数据','['+tagLabel+'] '+filename+'（'+rowCount+'条）');
 }
 function callSnapshot(sid){
   var snaps=loadSnapshots();
