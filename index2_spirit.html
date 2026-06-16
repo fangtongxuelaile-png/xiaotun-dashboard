@@ -998,8 +998,8 @@ select option{background:#FFF;color:var(--t1)}
         <span id="dateScopeHint" style="font-size:10px;font-weight:600;color:var(--gold);background:rgba(212,175,55,.12);padding:1px 7px;border-radius:6px">B站投放</span>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:6px">
-        <div style="flex:1"><label style="font-size:11px;color:var(--t3);display:block;margin-bottom:3px">起始</label><input type="date" id="dateFrom"></div>
-        <div style="flex:1"><label style="font-size:11px;color:var(--t3);display:block;margin-bottom:3px">截止</label><input type="date" id="dateTo"></div>
+        <div style="flex:1;min-width:0"><label style="font-size:11px;color:var(--t3);display:block;margin-bottom:3px">起始</label><input type="date" id="dateFrom" style="width:100%;min-width:0;box-sizing:border-box;font-size:11px;padding:5px 6px"></div>
+        <div style="flex:1;min-width:0"><label style="font-size:11px;color:var(--t3);display:block;margin-bottom:3px">截止</label><input type="date" id="dateTo" style="width:100%;min-width:0;box-sizing:border-box;font-size:11px;padding:5px 6px"></div>
       </div>
       <button class="sb-btn sb-btn-ghost" style="font-size:11px;padding:4px 8px;width:100%" onclick="clearSidebarDate()">✕ 清除日期筛选</button>
     </div>
