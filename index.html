@@ -1151,10 +1151,10 @@ select option{background:#FFF;color:var(--t1)}
 
     <!-- Tab Bar -->
     <div class="tab-bar">
-      <button class="tab-btn active" id="tabBtnBili" onclick="switchTab('bili')">📺 B站投放</button>
+      <button class="tab-btn active" id="tabBtnSummary" onclick="switchTab('summary')">📈 数据汇总</button>
+      <button class="tab-btn" id="tabBtnBili" onclick="switchTab('bili')">📺 B站投放</button>
       <button class="tab-btn" id="tabBtnAd" onclick="switchTab('ad')">💰 抖音投放</button>
       <button class="tab-btn" id="tabBtnContent" onclick="switchTab('content')">📊 内容管理</button>
-      <button class="tab-btn" id="tabBtnSummary" onclick="switchTab('summary')">📈 数据汇总</button>
     </div>
 
     <!-- ═══ Tab: B站投放 ═══ -->
@@ -2451,7 +2451,7 @@ function initApp(){
   // 恢复上次会话的 Tab 和子 Tab 状态
   var savedTab = localStorage.getItem('xtb_lastTab');
   // 总是调用 switchTab，确保 currentTab、侧边栏 section、日期联动标签三者一致
-  switchTab(savedTab||'bili');
+  switchTab(savedTab||'summary');
   var savedBiliSub = localStorage.getItem('xtb_biliSubTab');
   if(savedBiliSub && savedBiliSub !== 'data') switchBiliSubTab(savedBiliSub);
   var savedAdSub = localStorage.getItem('xtb_adSubTab');
