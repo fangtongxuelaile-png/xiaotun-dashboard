@@ -992,6 +992,18 @@ select option{background:#FFF;color:var(--t1)}
     <button class="sb-collapse-toggle" onclick="toggleSidebar()" title="折叠侧边栏">◀</button>
     <div class="sb-divider"></div>
 
+    <!-- 统一日期筛选（所有 Tab 通用，按当前 Tab 联动对应数据）-->
+    <div class="sb-section" id="sidebarDateSection">
+      <div class="sb-label" style="display:flex;align-items:center;gap:6px">📅 日期范围
+        <span id="dateScopeHint" style="font-size:10px;font-weight:600;color:var(--gold);background:rgba(212,175,55,.12);padding:1px 7px;border-radius:6px">B站投放</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <div style="flex:1"><label style="font-size:11px;color:var(--t3);display:block;margin-bottom:3px">起始</label><input type="date" id="dateFrom"></div>
+        <div style="flex:1"><label style="font-size:11px;color:var(--t3);display:block;margin-bottom:3px">截止</label><input type="date" id="dateTo"></div>
+      </div>
+      <button class="sb-btn sb-btn-ghost" style="font-size:11px;padding:4px 8px;width:100%" onclick="clearSidebarDate()">✕ 清除日期筛选</button>
+    </div>
+
     <!-- Filters (Content Tab) -->
     <div id="sidebarContentSection" class="sb-section">
     <div>
@@ -1003,10 +1015,6 @@ select option{background:#FFF;color:var(--t1)}
       <div style="margin-bottom:8px">
         <label style="font-size:11px;color:var(--t3);margin-bottom:3px;display:block">内容状态</label>
         <select id="statusFilter"><option value="">全部状态</option></select>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <div style="flex:1"><label style="font-size:11px;color:var(--t3);display:block;margin-bottom:3px">起始</label><input type="date" id="dateFrom"></div>
-        <div style="flex:1"><label style="font-size:11px;color:var(--t3);display:block;margin-bottom:3px">截止</label><input type="date" id="dateTo"></div>
       </div>
       <input type="text" id="searchInput" placeholder="🔎 搜索标题/达人/备注..." style="font-size:12px">
     </div>
@@ -2355,15 +2363,16 @@ function initApp(){
   renderBiliDashboard();
   // Filter change listeners
   document.getElementById('statusFilter').addEventListener('change',render);
-  document.getElementById('dateFrom').addEventListener('change',render);
-  document.getElementById('dateTo').addEventListener('change',render);
+  document.getElementById('dateFrom').addEventListener('change',applySidebarDate);
+  document.getElementById('dateTo').addEventListener('change',applySidebarDate);
   document.getElementById('searchInput').addEventListener('input',render);
   renderMonthGrid('ad');
   renderMonthGrid('content');
   
   // 恢复上次会话的 Tab 和子 Tab 状态
   var savedTab = localStorage.getItem('xtb_lastTab');
-  if(savedTab && savedTab !== 'bili') switchTab(savedTab);
+  // 总是调用 switchTab，确保 currentTab、侧边栏 section、日期联动标签三者一致
+  switchTab(savedTab||'bili');
   var savedBiliSub = localStorage.getItem('xtb_biliSubTab');
   if(savedBiliSub && savedBiliSub !== 'data') switchBiliSubTab(savedBiliSub);
   var savedContentSub = localStorage.getItem('xtb_contentSubTab');
@@ -2424,6 +2433,36 @@ function getLatestMetric(cid){
   return ms[0]||null;
 }
 function getPlatform(pid){return PLATFORMS.find(p=>p.id===pid)||PLATFORMS[0]}
+
+/* ══════════════════════════════════════
+   统一侧边栏日期筛选（按当前 Tab 联动）
+   ══════════════════════════════════════ */
+function applySidebarDate(){
+  var from=document.getElementById('dateFrom').value;
+  var to=document.getElementById('dateTo').value;
+  if(currentTab==='bili'){
+    // 同步到 B站主面板日期框，复用 getBiliFiltered 的日期逻辑
+    var bs=document.getElementById('biliDateStart'),be=document.getElementById('biliDateEnd');
+    if(bs) bs.value=from; if(be) be.value=to;
+    if(typeof renderBiliDashboard==='function') renderBiliDashboard();
+  }else if(currentTab==='ad'){
+    if(typeof renderAdDashboard==='function') renderAdDashboard();
+  }else{
+    render();
+  }
+}
+function clearSidebarDate(){
+  document.getElementById('dateFrom').value='';
+  document.getElementById('dateTo').value='';
+  var bs=document.getElementById('biliDateStart'),be=document.getElementById('biliDateEnd');
+  if(bs) bs.value=''; if(be) be.value='';
+  applySidebarDate();
+}
+// 更新日期筛选区右上角的范围标签
+function updateDateScopeHint(tab){
+  var hint=document.getElementById('dateScopeHint');
+  if(hint) hint.textContent=tab==='bili'?'B站投放':tab==='ad'?'抖音投放':'内容管理';
+}
 
 /* ══════════════════════════════════════
    Render
@@ -3096,6 +3135,9 @@ function switchTab(tab){
   var dshTabs=document.querySelectorAll('#dshFilterRow .dsh-tab');
   for(var i=0;i<dshTabs.length;i++){dshTabs[i].classList.remove('active');if(dshTabs[i].textContent.trim()===(tab==='bili'?'B站':tab==='ad'?'抖音':tab==='content'?'内容':'全部'))dshTabs[i].classList.add('active');}
   renderSnapHistory();
+  // 切Tab后更新日期范围标签，并让侧边栏日期对新Tab的数据生效
+  updateDateScopeHint(tab);
+  applySidebarDate();
 }
 
 /* ── Content sub-tab switching ── */
@@ -3764,7 +3806,13 @@ function buildBiliFilters(){
       if(!ds.value) ds.value=dates[0];
       if(!de.value) de.value=dates[dates.length-1];
     }
-    ds.onchange=renderBiliDashboard;de.onchange=renderBiliDashboard;
+    // 把 B站 默认日期范围同步到侧边栏统一筛选（仅当侧边栏为空）
+    var sbF=document.getElementById('dateFrom'),sbT=document.getElementById('dateTo');
+    if(sbF&&!sbF.value) sbF.value=ds.value;
+    if(sbT&&!sbT.value) sbT.value=de.value;
+    // 主面板日期框改动 → 反向同步到侧边栏，保持两处一致
+    ds.onchange=function(){var f=document.getElementById('dateFrom');if(f)f.value=ds.value;renderBiliDashboard();};
+    de.onchange=function(){var t=document.getElementById('dateTo');if(t)t.value=de.value;renderBiliDashboard();};
   }
 }
 
@@ -6782,9 +6830,14 @@ function getAdFiltered(){
   const all=flattenCID();
   const m=document.getElementById('adMonthFilter').value;
   const l=document.getElementById('adLineFilter').value;
+  // 侧边栏统一日期筛选
+  const df=(document.getElementById('dateFrom')||{}).value;
+  const dt=(document.getElementById('dateTo')||{}).value;
   return all.filter(r=>{
     if(m&&r.month!==m)return false;
     if(l&&r.line!==l)return false;
+    if(df&&r.date<df)return false;
+    if(dt&&r.date>dt)return false;
     return true;
   });
 }
