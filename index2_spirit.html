@@ -1492,6 +1492,12 @@ select option{background:#FFF;color:var(--t1)}
 
     <!-- ═══ Tab: 抖音投放 ═══ -->
     <div class="tab-panel" id="tabAdPanel">
+      <!-- 子Tab栏：投放数据 / 老板盈亏 -->
+      <div class="sub-tab-bar" id="adSubTabBar" style="display:none">
+        <button class="sub-tab-btn active" id="adSubBtnData" onclick="switchAdSubTab('data')">📊 投放数据</button>
+        <button class="sub-tab-btn" id="adSubBtnPL" onclick="switchAdSubTab('pl')">💰 老板盈亏</button>
+      </div>
+      <div class="sub-tab-panel active" id="adSubTabData">
       <!-- 代理商月报表 -->
       <div class="collapsible" id="adReportWrap">
         <div class="collapsible-header" onclick="toggleMonthlyReport('ad')">
@@ -1609,6 +1615,32 @@ select option{background:#FFF;color:var(--t1)}
         <button class="act-btn act-sec" style="padding:6px 14px;font-size:11px" onclick="exportAdCSV()">📥 导出</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll" id="adTableWrap" style="max-height:520px"></div></div>
+      </div><!-- end adSubTabData -->
+
+      <!-- ═══ 老板盈亏 子Tab ═══ -->
+      <div class="sub-tab-panel" id="adSubTabPL">
+        <!-- 打平线调节 -->
+        <div class="be-slider-row">
+          <label>⚖️ 打平线 ROI</label>
+          <input type="range" id="adBeSlider" min="20" max="60" value="40" step="1" oninput="updateAdBreakEven(this.value/10)">
+          <span class="be-value" id="adBeValue">4.0</span>
+          <span style="font-size:11px;color:var(--t3)">对应毛利率 <b id="adBeMargin">25%</b> · ROI≥<span id="adBeRoiTxt">4.0</span> 才回本</span>
+        </div>
+        <!-- 盈亏总览大卡片 -->
+        <div id="adProfitOverview" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0"></div>
+        <!-- 产品线盈亏分解 -->
+        <div class="sec-header"><h3>🏭 产品线盈亏分解</h3><span style="font-size:11px;color:var(--t3);margin-left:8px">按净盈亏排序 · 🟢盈利 🔴亏损</span></div>
+        <div class="tbl-wrap" style="margin-bottom:22px"><div id="adProfitTable"></div></div>
+        <!-- 月度盈亏趋势 -->
+        <div class="sec-header"><h3>📈 月度盈亏趋势</h3></div>
+        <div class="chart-box" style="margin-bottom:22px"><div id="adMonthlyProfitChart" style="height:380px"></div></div>
+        <!-- 产品线订单/GMV 占比 -->
+        <div class="sec-header"><h3>🥧 产品线 GMV / 订单 占比</h3></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="chart-box"><div id="adGmvPieChart" style="height:320px"></div></div>
+          <div class="chart-box"><div id="adOrderPieChart" style="height:320px"></div></div>
+        </div>
+      </div>
     </div><!-- end tabAdPanel -->
 
     <!-- ═══ Tab: 内容管理 ═══ -->
@@ -2384,6 +2416,8 @@ function initApp(){
   switchTab(savedTab||'bili');
   var savedBiliSub = localStorage.getItem('xtb_biliSubTab');
   if(savedBiliSub && savedBiliSub !== 'data') switchBiliSubTab(savedBiliSub);
+  var savedAdSub = localStorage.getItem('xtb_adSubTab');
+  if(savedAdSub && savedAdSub !== 'data') switchAdSubTab(savedAdSub);
   var savedContentSub = localStorage.getItem('xtb_contentSubTab');
   if(savedContentSub && savedContentSub !== 'manage') switchContentSubTab(savedContentSub);
 }
@@ -6935,6 +6969,121 @@ function renderAdDashboard(){
   renderChannelTrend(tmItems,'tmTrendChart');
   renderChannelTrend(ddItems,'ddTrendChart');
   renderAdTable(items);
+  // 老板盈亏子Tab：显示子Tab栏，若盈亏面板激活则渲染
+  var adbar=document.getElementById('adSubTabBar');
+  if(adbar) adbar.style.display=(typeof CID_RAW!=='undefined'&&CID_RAW.length>0)?'flex':'none';
+  var plPanel=document.getElementById('adSubTabPL');
+  if(plPanel&&plPanel.classList.contains('active')) renderAdProfit();
+}
+
+/* ══════════════════════════════════════
+   老板视角 · 盈亏概况（毛利率=1/打平ROI，默认25%/ROI4）
+   ══════════════════════════════════════ */
+var adBreakEvenRoi=4.0;
+function switchAdSubTab(sub){
+  try{localStorage.setItem('xtb_adSubTab',sub);}catch(e){}
+  document.getElementById('adSubBtnData').classList.toggle('active',sub==='data');
+  document.getElementById('adSubBtnPL').classList.toggle('active',sub==='pl');
+  document.getElementById('adSubTabData').classList.toggle('active',sub==='data');
+  document.getElementById('adSubTabPL').classList.toggle('active',sub==='pl');
+  if(sub==='pl') renderAdProfit();
+}
+function updateAdBreakEven(roi){
+  adBreakEvenRoi=roi;
+  var v=document.getElementById('adBeValue'); if(v)v.textContent=roi.toFixed(1);
+  var t=document.getElementById('adBeRoiTxt'); if(t)t.textContent=roi.toFixed(1);
+  var m=document.getElementById('adBeMargin'); if(m)m.textContent=(Math.round(1000/roi)/10)+'%';
+  renderAdProfit();
+}
+function _adMonthKey(m){var y=parseInt(_yearOfMonth('ad',m))||9999;return y*100+(parseInt(m)||0);}
+function renderAdProfit(){
+  var data=getAdFiltered();
+  var margin=1/adBreakEvenRoi;
+  var fmt=function(n){return '¥'+Math.round(n).toLocaleString();};
+  var signed=function(n){return (n>=0?'+¥':'-¥')+Math.abs(Math.round(n)).toLocaleString();};
+  var tc=0,tg=0,to=0,byLine={};
+  data.forEach(function(r){
+    tc+=r.cost||0; tg+=r.gmv||0; to+=r.orders||0;
+    var l=r.line||'未知';
+    if(!byLine[l])byLine[l]={cost:0,gmv:0,orders:0};
+    byLine[l].cost+=r.cost||0; byLine[l].gmv+=r.gmv||0; byLine[l].orders+=r.orders||0;
+  });
+  var gross=tg*margin, net=gross-tc, roi=tc?tg/tc:0;
+  var nColor=net>=0?'#22C55E':'#EF4444';
+  // 盈亏总览卡片
+  var ov=document.getElementById('adProfitOverview');
+  if(ov){
+    var cards=[
+      ['总投放消耗',fmt(tc),'var(--t1)'],
+      ['总成交GMV',fmt(tg),'var(--t1)'],
+      ['预估毛利（'+Math.round(margin*100)+'%）',fmt(gross),'var(--t1)'],
+      ['净盈亏',signed(net),nColor],
+      ['整体ROI · 状态',roi.toFixed(2)+' · '+(net>=0?'盈利✓':'亏损⚠'),nColor]
+    ];
+    ov.innerHTML=cards.map(function(c){return '<div class="kpi-card"><div class="kpi-label">'+c[0]+'</div><div class="kpi-value" style="color:'+c[2]+'">'+c[1]+'</div></div>';}).join('');
+  }
+  // 产品线盈亏分解表
+  var lines=Object.keys(byLine).map(function(l){
+    var b=byLine[l]; var g=b.gmv*margin; var n=g-b.cost; var r=b.cost?b.gmv/b.cost:0;
+    return {line:l,cost:b.cost,gmv:b.gmv,orders:b.orders,gross:g,net:n,roi:r};
+  }).sort(function(a,b){return b.net-a.net;});
+  var tbl=document.getElementById('adProfitTable');
+  if(tbl){
+    var head=['产品线','消耗','GMV','预估毛利','净盈亏','ROI','状态'];
+    var body=lines.map(function(x){
+      var nc=x.net>=0?'#22C55E':'#EF4444';
+      var rc=x.roi>=adBreakEvenRoi?'#22C55E':'#EF4444';
+      return '<tr style="border-top:1px solid var(--border)">'+
+        '<td style="padding:8px 12px;font-weight:600">'+x.line+'</td>'+
+        '<td style="padding:8px 12px;text-align:right">'+fmt(x.cost)+'</td>'+
+        '<td style="padding:8px 12px;text-align:right">'+fmt(x.gmv)+'</td>'+
+        '<td style="padding:8px 12px;text-align:right">'+fmt(x.gross)+'</td>'+
+        '<td style="padding:8px 12px;text-align:right;font-weight:700;color:'+nc+'">'+signed(x.net)+'</td>'+
+        '<td style="padding:8px 12px;text-align:right;font-weight:600;color:'+rc+'">'+x.roi.toFixed(2)+'</td>'+
+        '<td style="padding:8px 12px;text-align:center">'+(x.net>=0?'🟢 盈利':'🔴 亏损')+'</td></tr>';
+    }).join('');
+    tbl.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:13px">'+
+      '<thead><tr style="background:var(--bg2)">'+head.map(function(h,i){return '<th style="padding:9px 12px;text-align:'+(i===0?'left':i===6?'center':'right')+';font-weight:700;color:var(--t2)">'+h+'</th>';}).join('')+'</tr></thead>'+
+      '<tbody>'+body+'</tbody></table>';
+  }
+  renderAdMonthlyProfit(data,margin);
+  renderAdPies(lines);
+}
+function renderAdMonthlyProfit(data,margin){
+  var el=document.getElementById('adMonthlyProfitChart');
+  if(!el||typeof Plotly==='undefined')return;
+  var byM={};
+  data.forEach(function(r){var m=r.month;if(!byM[m])byM[m]={cost:0,gmv:0};byM[m].cost+=r.cost||0;byM[m].gmv+=r.gmv||0;});
+  var months=Object.keys(byM).sort(function(a,b){return _adMonthKey(a)-_adMonthKey(b);});
+  var net=[],cum=[],roi=[],c=0;
+  months.forEach(function(m){var n=byM[m].gmv*margin-byM[m].cost;c+=n;net.push(Math.round(n));cum.push(Math.round(c));roi.push(byM[m].cost?+(byM[m].gmv/byM[m].cost).toFixed(2):0);});
+  var colors=net.map(function(v){return v>=0?'#22C55E':'#EF4444';});
+  Plotly.newPlot(el.id,[
+    {type:'bar',x:months,y:net,name:'月度净盈亏',marker:{color:colors,cornerradius:4}},
+    {type:'scatter',mode:'lines+markers',x:months,y:cum,name:'累计盈亏',line:{color:'#D4AF37',width:2}},
+    {type:'scatter',mode:'lines+markers',x:months,y:roi,name:'月度ROI',line:{color:'#3478F6',width:2,dash:'dot'},yaxis:'y2'}
+  ],Object.assign({},baseLayout(),{
+    height:360,margin:{t:30,r:60,b:40,l:70},
+    yaxis:{title:'盈亏(¥)',zeroline:true,zerolinecolor:'rgba(150,150,150,.5)'},
+    yaxis2:{title:'ROI',overlaying:'y',side:'right',showgrid:false},
+    legend:{orientation:'h',y:1.12,x:0}
+  }),{responsive:true,displayModeBar:false});
+}
+function renderAdPies(lines){
+  if(typeof Plotly==='undefined')return;
+  var palette=['#0072FF','#30D158','#FF9F0A','#FF375F','#AF52DE','#5AC8FA','#FFD60A','#FF6B35','#34C759'];
+  var labels=lines.map(function(x){return x.line;});
+  function pie(elid,vals,title){
+    var el=document.getElementById(elid); if(!el)return;
+    Plotly.newPlot(elid,[{type:'pie',labels:labels,values:vals,hole:.5,
+      marker:{colors:palette},textinfo:'label+percent',textfont:{size:11},
+      hovertemplate:'%{label}<br>%{value:,.0f} (%{percent})<extra></extra>'}],
+      {title:{text:title,font:{size:13}},height:320,margin:{t:36,r:10,b:10,l:10},
+       showlegend:false,paper_bgcolor:'transparent',plot_bgcolor:'transparent'},
+      {responsive:true,displayModeBar:false});
+  }
+  pie('adGmvPieChart',lines.map(function(x){return Math.round(x.gmv);}),'GMV 占比');
+  pie('adOrderPieChart',lines.map(function(x){return x.orders;}),'订单占比');
 }
 
 /* ── Channel filters ── */
