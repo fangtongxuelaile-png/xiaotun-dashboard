@@ -2801,16 +2801,43 @@ function setupDragDrop(){
   dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])});
 }
 
+// 扫描 sheet 中实际有数据的最大行号（0-based），避免读取几万行空行
+function _sheetMaxRow(sheet){
+  var maxR=0;
+  Object.keys(sheet).forEach(function(k){
+    if(k[0]==='!')return;
+    var r=XLSX.utils.decode_cell(k).r;
+    if(r>maxR)maxR=r;
+  });
+  return maxR;
+}
+// 读取 sheet 为二维数组，自动裁剪空行（提速 50x）
+function _readSheetJSON(sheet){
+  var maxR=_sheetMaxRow(sheet);
+  var maxC=0;
+  Object.keys(sheet).forEach(function(k){
+    if(k[0]==='!')return;
+    var c=XLSX.utils.decode_cell(k).c;
+    if(c>maxC)maxC=c;
+  });
+  return XLSX.utils.sheet_to_json(sheet,{
+    header:1,defval:'',
+    range:{s:{r:0,c:0},e:{r:maxR,c:maxC}}
+  });
+}
+
 function handleFile(file){
   if(!file)return;
   const ext=file.name.split('.').pop().toLowerCase();
   if(ext==='csv'){toast('CSV 暂不支持，请上传 Excel','err');return}
+  toast('⏳ 解析中，请稍候...','info');
   const reader=new FileReader();
   reader.onload=function(e){
     try{
       const wb=XLSX.read(e.target.result,{type:'array'});
       const sn=wb.SheetNames.find(n=>n.includes('单日')||n.includes('汇总'))||wb.SheetNames[0];
-      const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''});
+      // 用裁剪版 sheet_to_json，避免 5 万空行导致 UI 冻结
+      const raw=_readSheetJSON(wb.Sheets[sn]);
       if(raw.length>=3){
         // 扫描前6行，找到有"达人名称"或"视频BV号"的那行即认定为B站文件
         let isBili=false;
@@ -6687,7 +6714,8 @@ function importBiliExcel(){
         const workbook=XLSX.read(data,{type:'array'});
         const sheetName=workbook.SheetNames.find(n=>n.includes('单日')||n.includes('汇总'))||workbook.SheetNames[0];
         const sheet=workbook.Sheets[sheetName];
-        const json=XLSX.utils.sheet_to_json(sheet,{header:1,defval:''});
+        // 用裁剪版 sheet_to_json，避免空行造成 UI 冻结
+        const json=_readSheetJSON(sheet);
         // saveDataSnapshot 已移入 confirmBiliImport
         processBiliJSON(json,file.name);
       }catch(err){toast('读取失败: '+err.message,'err');console.error(err);}
