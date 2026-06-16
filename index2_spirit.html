@@ -3638,12 +3638,22 @@ function _migrateBiliMonths(data){
 }
 
 /* load from localStorage, fallback to embedded data */
+// 内置数据版本号：每次更新 BILI_EMBEDDED_DATA 时递增。
+// localStorage 缓存只有版本号匹配才采用，否则自动改用内置数据，
+// 从而让历史脏缓存（旧的/无版本的）在加载新代码后自动失效。
+const BILI_DATA_VERSION='2026-06-15-clean7m-58572';
+
 function loadBiliFromStorage(){
   try{
     const raw=localStorage.getItem('bili_data');
-    if(raw){BILIBILI_RAW=_migrateBiliMonths(JSON.parse(raw));return;}
+    const ver=localStorage.getItem('bili_data_version');
+    // 仅当缓存版本与当前内置版本一致（即用户在本版本内上传过的数据）才采用
+    if(raw && ver===BILI_DATA_VERSION){
+      BILIBILI_RAW=_migrateBiliMonths(JSON.parse(raw));
+      return;
+    }
   }catch(e){BILIBILI_RAW=[];}
-  /* fallback: embedded Excel data */
+  /* 缓存不存在/版本不符/旧脏缓存 → 采用内置正确数据 */
   if(typeof BILI_EMBEDDED_DATA!=='undefined'&&BILI_EMBEDDED_DATA.length>0){
     BILIBILI_RAW=_migrateBiliMonths(BILI_EMBEDDED_DATA);
   }
@@ -3651,6 +3661,8 @@ function loadBiliFromStorage(){
 
 function saveBiliToStorage(){
   localStorage.setItem('bili_data',JSON.stringify(BILIBILI_RAW));
+  // 标记为当前版本，用户上传的数据下次加载才会被保留
+  localStorage.setItem('bili_data_version',BILI_DATA_VERSION);
 }
 
 function clearBiliData(){
