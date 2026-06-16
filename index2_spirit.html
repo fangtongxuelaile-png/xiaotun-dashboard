@@ -3641,7 +3641,7 @@ function _migrateBiliMonths(data){
 // 内置数据版本号：每次更新 BILI_EMBEDDED_DATA 时递增。
 // localStorage 缓存只有版本号匹配才采用，否则自动改用内置数据，
 // 从而让历史脏缓存（旧的/无版本的）在加载新代码后自动失效。
-const BILI_DATA_VERSION='2026-06-16-orders-fix';
+const BILI_DATA_VERSION='2026-06-16-orders-alias';
 
 function loadBiliFromStorage(){
   try{
@@ -6654,13 +6654,15 @@ function processBiliJSON(json,_filename){
   }
   const headerRow=json[headerRowIdx];
   const colMap={};
-  // 表头名 → 内部字段映射。注意：Excel 可能存在重复表头（如两列都叫"总成交订单"，
-  // 第一列才是真实订单），因此统一取「首次出现」为准，避免后面的重复列覆盖。
+  // 表头名 → 内部字段映射。订单/金额支持多种别名（合计交订单/合计成交订单/总成交订单…），
+  // 并统一取「首次出现」为准——这样"后端交订单"等参考列不在名单内会被忽略，
+  // 且即使存在重复同名表头也只认第一列（避免被参考列覆盖）。
   const _BILI_COLS={
     '时间':'date','达人名称':'up','视频BV号':'bv','现金花费':'cashCost','总花费':'cost',
     '展示量':'impressions','点击量':'clicks','点击率':'ctr','千次展示价格':'cpm','单次点击价格':'cpc',
     '播放量':'plays','播放成本':'playCost','评论点击数':'commentClicks','评论点击成本':'commentCost',
-    '总成交订单':'orders','总成交金额':'gmv','ROI':'roi',
+    '合计交订单':'orders','合计成交订单':'orders','总成交订单':'orders','成交订单':'orders',
+    '总成交金额':'gmv','合计成交金额':'gmv','ROI':'roi',
     '京东引流':'jdTraffic','京东订单':'jdOrders','京东GMV':'jdGmv',
     '天猫引流':'tmTraffic','天猫订单':'tmOrders','天猫GMV':'tmGmv',
     '京东外溢引流':'jdOfTraffic','京东外溢订单':'jdOfOrders','京东外溢金额':'jdOfGmv',
