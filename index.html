@@ -2380,10 +2380,9 @@ function initApp(){
 }
 
 function setDefaultDates(){
-  const now=new Date();
-  const from=new Date(now);from.setMonth(from.getMonth()-1);
-  document.getElementById('dateFrom').value=from.toISOString().split('T')[0];
-  document.getElementById('dateTo').value=new Date(now.getTime()+14*864e5).toISOString().split('T')[0];
+  // 日期筛选现为全局（按 Tab 联动），不再硬设"最近一月"默认值。
+  // B站默认日期范围由 buildBiliFilters 按数据实际范围（最早→最晚）填充，
+  // 这样登录即显示全部数据，且日期框正确反映数据范围。
 }
 
 function buildFilters(){
@@ -3058,16 +3057,24 @@ function baseLayout(){
 
 /* ══════ KPI 数字动画 ══════ */
 function animateNumber(el, start, end, duration, formatter){
-  var startTime = null;
+  var startTime = null, done = false;
+  function setFinal(){
+    if(done) return; done = true;
+    el.textContent = formatter ? formatter(end) : Math.round(end).toLocaleString();
+  }
   function step(ts){
+    if(done) return;
     if(!startTime) startTime = ts;
     var progress = Math.min((ts - startTime) / duration, 1);
     var ease = 1 - Math.pow(1 - progress, 3);
     var current = start + (end - start) * ease;
     el.textContent = formatter ? formatter(current) : Math.round(current).toLocaleString();
-    if(progress < 1) requestAnimationFrame(step);
+    if(progress < 1) requestAnimationFrame(step); else done = true;
   }
   requestAnimationFrame(step);
+  // 兜底：当 requestAnimationFrame 被浏览器节流（后台标签/部分环境不触发）时，
+  // duration 后直接落到终值，避免 KPI 永久停留在 0
+  setTimeout(setFinal, duration + 150);
 }
 
 function fmtNum(v){
@@ -3604,21 +3611,20 @@ function exportMetrics(){
    ══════════════════════════════════════ */
 let BILIBILI_RAW=[];
 
-// 将旧格式月份 ("6月"/"06月") 迁移为 "YYYY年M月"，使用行内 date 字段推算年份
+// 规范化月份为纯 "N月" 格式：去掉 "YYYY年" 前缀和前导 0，
+// 兼容历史数据（"06月"）以及曾被错误写成 "YYYY年M月" 的数据。
 function _migrateBiliMonths(data){
   if(!Array.isArray(data)) return data;
   return data.map(function(block){
-    if(!block.month||/^\d{4}年/.test(block.month)) return block; // 已是新格式
-    var firstDate=(block.rows&&block.rows[0]&&block.rows[0].date)||'';
-    var yearMatch=firstDate.match(/^(\d{4})/);
-    if(!yearMatch) return block;
-    var year=yearMatch[1];
-    var mNum=parseInt(block.month); // "06月"→6, "12月"→12
-    var newMonth=year+'年'+mNum+'月';
+    if(!block.month) return block;
+    var mNum=parseInt(String(block.month).replace(/^\d{4}年/,'')); // "2026年6月"/"06月"→6
+    if(!mNum) return block;
+    var norm=mNum+'月';
+    if(norm===block.month) return block; // 已规范
     var newRows=(block.rows||[]).map(function(r){
-      return Object.assign({},r,{month:newMonth});
+      return Object.assign({},r,{month:norm});
     });
-    return Object.assign({},block,{month:newMonth,rows:newRows});
+    return Object.assign({},block,{month:norm,rows:newRows});
   });
 }
 
@@ -4074,39 +4080,59 @@ function toggleMonthlyReport(tab){
   arrow.classList.toggle('open');
 }
 
+// 从某月数据块的首行日期推断年份（month 字段内部为纯 "N月"）
+function _yearOfMonth(tab,month){
+  var arr=tab==='bili'?BILIBILI_RAW:(tab==='ad'&&typeof CID_RAW!=='undefined'?CID_RAW:[]);
+  for(var i=0;i<(arr||[]).length;i++){
+    if(arr[i].month===month){
+      var r0=arr[i].rows&&arr[i].rows[0];
+      var fd=r0?(r0.date||r0.d||''):'';
+      var ym=String(fd).match(/(\d{4})/);
+      return ym?ym[1]:'';
+    }
+  }
+  return '';
+}
+
 function renderMonthGrid(tab){
   var grid=document.getElementById(tab+'MonthGrid');
   if(!grid) return;
-  var months=[], label;
-  if(tab==='bili'){
-    months=[...new Set(BILIBILI_RAW.map(function(b){return b.month;}))];
-    label='B站';
-  }else if(tab==='ad'){
-    months=[...new Set(CID_RAW.map(function(c){return c.month;}))];
-    label='抖音';
+  var label, list=[]; // [{month, year, mNum, key}]
+  if(tab==='bili'||tab==='ad'){
+    label=tab==='bili'?'B站':'抖音';
+    var arr=tab==='bili'?BILIBILI_RAW:CID_RAW;
+    var seen={};
+    (arr||[]).forEach(function(b){
+      if(seen[b.month]) return; seen[b.month]=1;
+      var r0=b.rows&&b.rows[0];
+      var fd=r0?(r0.date||r0.d||''):'';
+      var ym=String(fd).match(/(\d{4})/);
+      var year=ym?ym[1]:'';
+      var mNum=parseInt(b.month)||0;
+      list.push({month:b.month,year:year,mNum:mNum,key:(year?+year:9999)*100+mNum});
+    });
   }else{
-    // 内容管理：从contentData中提取月份
-    months=[];
-    if(typeof contentData!=='undefined'&&contentData){
-      contentData.forEach(function(c){if(c.pubDate){var m=c.pubDate.slice(0,7);if(months.indexOf(m)<0) months.push(m);}});
-    }
-    months.sort();
+    // 内容管理：pubDate 形如 "2026-06"
     label='内容';
+    var seenC={};
+    if(typeof contentData!=='undefined'&&contentData){
+      contentData.forEach(function(c){
+        if(!c.pubDate) return;
+        var m=c.pubDate.slice(0,7);
+        if(seenC[m]) return; seenC[m]=1;
+        var yr=m.slice(0,4),mn=parseInt(m.slice(5,7))||0;
+        list.push({month:m,year:yr,mNum:mn,key:parseInt(yr)*100+mn});
+      });
+    }
   }
-  if(months.length===0){grid.innerHTML='<div style="color:var(--t3);font-size:12px;padding:8px">暂无数据</div>';return;}
-  // 排序：先按年升序，再按月升序
-  function monthSortKey(m){
-    var ym=m.match(/^(\d{4})年(\d+)月$/);
-    if(ym) return parseInt(ym[1])*100+parseInt(ym[2]);
-    return parseInt(m)||0;
-  }
-  months.sort(function(a,b){return monthSortKey(a)-monthSortKey(b);});
-  grid.innerHTML=months.map(function(m){
-    var ym=m.match(/^(\d{4})年(\d+)月$/);
-    var bigLabel=ym?ym[2]+'月':m;
-    var yearLabel=ym?'<span class="mb-year">'+ym[1]+'年</span>':'';
-    return '<button class="month-btn" onclick="openMonthReport(\''+tab+'\',\''+m+'\')">'+
-      yearLabel+'<span class="mb-label">'+bigLabel+'</span>'+
+  if(list.length===0){grid.innerHTML='<div style="color:var(--t3);font-size:12px;padding:8px">暂无数据</div>';return;}
+  // 按 年×100+月 升序（12月2025 → 1月2026 → … → 6月2026）
+  list.sort(function(a,b){return a.key-b.key;});
+  grid.innerHTML=list.map(function(e){
+    var yearLabel=e.year?'<span class="mb-year">'+e.year+'年</span>':'';
+    var big=e.mNum?e.mNum+'月':e.month;
+    return '<button class="month-btn" onclick="openMonthReport(\''+tab+'\',\''+e.month+'\')">'+
+      yearLabel+'<span class="mb-label">'+big+'</span>'+
       '<span class="mb-sub">'+label+'月报</span></button>';
   }).join('');
 }
@@ -4114,7 +4140,9 @@ function renderMonthGrid(tab){
 var activeReportTab='bili'; // 当前月报弹窗所属的Tab，用于链接库自动筛选
 function openMonthReport(tab,month){
   activeReportTab=tab;
-  document.getElementById('monthReportTitle').innerHTML='📊 '+month+' '+getTabName(tab)+' 代理商月报';
+  var yr=_yearOfMonth(tab,month);
+  var monthLabel=yr?yr+'年'+month:month;
+  document.getElementById('monthReportTitle').innerHTML='📊 '+monthLabel+' '+getTabName(tab)+' 代理商月报';
   document.getElementById('monthReportContent').innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">加载中...</div>';
   document.getElementById('monthReportModal').classList.add('show');
   setTimeout(function(){renderMonthReport(tab,month);},50);
@@ -6667,7 +6695,8 @@ function processBiliJSON(json,_filename){
     dateStr=dateStr.replace(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/,(_,y,m,d)=>y+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0'));
     if(!dateStr||dateStr==='undefined'){skipNoDate++;continue}
     const monthMatch=dateStr.match(/(\d{4})[-\/](\d{1,2})/);
-    const month=monthMatch?monthMatch[1]+'年'+parseInt(monthMatch[2])+'月':'';
+    // month 内部保持纯月份（"6月"），年份在显示层由数据日期推断
+    const month=monthMatch?parseInt(monthMatch[2])+'月':'';
     // 解析数字：兼容字符串千分符 "1,234.56"、百分比 "12.3%"
     const getNum=(k)=>{
       if(colMap[k]===undefined)return 0;
