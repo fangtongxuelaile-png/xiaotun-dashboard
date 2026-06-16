@@ -3641,7 +3641,7 @@ function _migrateBiliMonths(data){
 // 内置数据版本号：每次更新 BILI_EMBEDDED_DATA 时递增。
 // localStorage 缓存只有版本号匹配才采用，否则自动改用内置数据，
 // 从而让历史脏缓存（旧的/无版本的）在加载新代码后自动失效。
-const BILI_DATA_VERSION='2026-06-15-clean7m-58572';
+const BILI_DATA_VERSION='2026-06-16-orders-fix';
 
 function loadBiliFromStorage(){
   try{
@@ -6654,43 +6654,24 @@ function processBiliJSON(json,_filename){
   }
   const headerRow=json[headerRowIdx];
   const colMap={};
+  // 表头名 → 内部字段映射。注意：Excel 可能存在重复表头（如两列都叫"总成交订单"，
+  // 第一列才是真实订单），因此统一取「首次出现」为准，避免后面的重复列覆盖。
+  const _BILI_COLS={
+    '时间':'date','达人名称':'up','视频BV号':'bv','现金花费':'cashCost','总花费':'cost',
+    '展示量':'impressions','点击量':'clicks','点击率':'ctr','千次展示价格':'cpm','单次点击价格':'cpc',
+    '播放量':'plays','播放成本':'playCost','评论点击数':'commentClicks','评论点击成本':'commentCost',
+    '总成交订单':'orders','总成交金额':'gmv','ROI':'roi',
+    '京东引流':'jdTraffic','京东订单':'jdOrders','京东GMV':'jdGmv',
+    '天猫引流':'tmTraffic','天猫订单':'tmOrders','天猫GMV':'tmGmv',
+    '京东外溢引流':'jdOfTraffic','京东外溢订单':'jdOfOrders','京东外溢金额':'jdOfGmv',
+    '天猫外溢引流':'tmOfTraffic','天猫外溢订单':'tmOfOrders','天猫外溢金额':'tmOfGmv',
+    '主推型号':'model','上线日期':'launchDate','广告位置':'adPosition',
+    '内容类型':'contentType','转化目标':'goal','账号类型':'accountType'
+  };
   headerRow.forEach((h,i)=>{
     const key=String(h).trim();
-    if(key==='时间')colMap.date=i;
-    if(key==='达人名称')colMap.up=i;
-    if(key==='视频BV号')colMap.bv=i;
-    if(key==='现金花费')colMap.cashCost=i;
-    if(key==='总花费')colMap.cost=i;
-    if(key==='展示量')colMap.impressions=i;
-    if(key==='点击量')colMap.clicks=i;
-    if(key==='点击率')colMap.ctr=i;
-    if(key==='千次展示价格')colMap.cpm=i;
-    if(key==='单次点击价格')colMap.cpc=i;
-    if(key==='播放量')colMap.plays=i;
-    if(key==='播放成本')colMap.playCost=i;
-    if(key==='评论点击数')colMap.commentClicks=i;
-    if(key==='评论点击成本')colMap.commentCost=i;
-    if(key==='总成交订单')colMap.orders=i;
-    if(key==='总成交金额')colMap.gmv=i;
-    if(key==='ROI')colMap.roi=i;
-    if(key==='京东引流')colMap.jdTraffic=i;
-    if(key==='京东订单')colMap.jdOrders=i;
-    if(key==='京东GMV')colMap.jdGmv=i;
-    if(key==='天猫引流')colMap.tmTraffic=i;
-    if(key==='天猫订单')colMap.tmOrders=i;
-    if(key==='天猫GMV')colMap.tmGmv=i;
-    if(key==='京东外溢引流')colMap.jdOfTraffic=i;
-    if(key==='京东外溢订单')colMap.jdOfOrders=i;
-    if(key==='京东外溢金额')colMap.jdOfGmv=i;
-    if(key==='天猫外溢引流')colMap.tmOfTraffic=i;
-    if(key==='天猫外溢订单')colMap.tmOfOrders=i;
-    if(key==='天猫外溢金额')colMap.tmOfGmv=i;
-    if(key==='主推型号')colMap.model=i;
-    if(key==='上线日期')colMap.launchDate=i;
-    if(key==='广告位置')colMap.adPosition=i;
-    if(key==='内容类型')colMap.contentType=i;
-    if(key==='转化目标')colMap.goal=i;
-    if(key==='账号类型')colMap.accountType=i;
+    const f=_BILI_COLS[key];
+    if(f && colMap[f]===undefined) colMap[f]=i; // 首次出现为准
   });
   if(colMap.date===undefined||colMap.cost===undefined){
     toast('未识别到关键字段（时间/总花费），请检查表头行','err');
