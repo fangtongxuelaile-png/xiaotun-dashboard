@@ -183,6 +183,7 @@ select option{background:#FFF;color:var(--t1)}
 .month-btn:active{transform:translateY(0)}
 .month-btn .mb-label{display:block;font-size:13px;font-weight:700;margin-bottom:2px}
 .month-btn .mb-sub{display:block;font-size:10px;color:var(--t3);font-weight:500}
+.month-btn .mb-year{display:block;font-size:9px;color:var(--t3);font-weight:500;margin-bottom:1px}
 .month-btn.gold{border-color:var(--gold);background:linear-gradient(135deg,rgba(212,175,55,.08),rgba(212,175,55,.02))}
 
 /* ── KPI Cards ── */
@@ -1938,7 +1939,7 @@ async function syncLatestCloudData(){
       var bList=await bRes.json();
       if(bList.length>0){
         var lb=bList[0];
-        BILIBILI_RAW=JSON.parse(lb.data);
+        BILIBILI_RAW=_migrateBiliMonths(JSON.parse(lb.data));
         saveBiliToStorage();
         _biliInited=false;
         renderBiliDashboard();
@@ -2731,7 +2732,7 @@ function callSnapshot(sid){
   if(!snap) return;
   if(!confirm('确定调用「'+snap.filename+'」的数据？当前Tab数据将被替换。')) return;
   if(snap.tab==='bili'){
-    BILIBILI_RAW=JSON.parse(JSON.stringify(snap.data));
+    BILIBILI_RAW=_migrateBiliMonths(JSON.parse(JSON.stringify(snap.data)));
     saveBiliToStorage();
     _biliInited=false;
     switchTab('bili');
@@ -3561,15 +3562,33 @@ function exportMetrics(){
    ══════════════════════════════════════ */
 let BILIBILI_RAW=[];
 
+// 将旧格式月份 ("6月"/"06月") 迁移为 "YYYY年M月"，使用行内 date 字段推算年份
+function _migrateBiliMonths(data){
+  if(!Array.isArray(data)) return data;
+  return data.map(function(block){
+    if(!block.month||/^\d{4}年/.test(block.month)) return block; // 已是新格式
+    var firstDate=(block.rows&&block.rows[0]&&block.rows[0].date)||'';
+    var yearMatch=firstDate.match(/^(\d{4})/);
+    if(!yearMatch) return block;
+    var year=yearMatch[1];
+    var mNum=parseInt(block.month); // "06月"→6, "12月"→12
+    var newMonth=year+'年'+mNum+'月';
+    var newRows=(block.rows||[]).map(function(r){
+      return Object.assign({},r,{month:newMonth});
+    });
+    return Object.assign({},block,{month:newMonth,rows:newRows});
+  });
+}
+
 /* load from localStorage, fallback to embedded data */
 function loadBiliFromStorage(){
   try{
     const raw=localStorage.getItem('bili_data');
-    if(raw){BILIBILI_RAW=JSON.parse(raw);return;}
+    if(raw){BILIBILI_RAW=_migrateBiliMonths(JSON.parse(raw));return;}
   }catch(e){BILIBILI_RAW=[];}
   /* fallback: embedded Excel data */
   if(typeof BILI_EMBEDDED_DATA!=='undefined'&&BILI_EMBEDDED_DATA.length>0){
-    BILIBILI_RAW=BILI_EMBEDDED_DATA;
+    BILIBILI_RAW=_migrateBiliMonths(BILI_EMBEDDED_DATA);
   }
 }
 
@@ -3705,7 +3724,7 @@ function getBiliFiltered(){
 
 function buildBiliFilters(){
   const all=flattenBili();
-  const months=[...new Set(BILIBILI_RAW.map(b=>b.month))];
+  const months=[...new Set(BILIBILI_RAW.map(b=>b.month))].sort((a,b)=>_monthSortKey(a)-_monthSortKey(b));
   const ups=[...new Set(all.map(r=>r.up).filter(Boolean))];
   const contents=[...new Set(all.map(r=>r.contentType).filter(Boolean))];
   const positions=[...new Set(all.map(r=>r.adPosition).filter(Boolean))];
@@ -4027,9 +4046,19 @@ function renderMonthGrid(tab){
     label='内容';
   }
   if(months.length===0){grid.innerHTML='<div style="color:var(--t3);font-size:12px;padding:8px">暂无数据</div>';return;}
+  // 排序：先按年升序，再按月升序
+  function monthSortKey(m){
+    var ym=m.match(/^(\d{4})年(\d+)月$/);
+    if(ym) return parseInt(ym[1])*100+parseInt(ym[2]);
+    return parseInt(m)||0;
+  }
+  months.sort(function(a,b){return monthSortKey(a)-monthSortKey(b);});
   grid.innerHTML=months.map(function(m){
+    var ym=m.match(/^(\d{4})年(\d+)月$/);
+    var bigLabel=ym?ym[2]+'月':m;
+    var yearLabel=ym?'<span class="mb-year">'+ym[1]+'年</span>':'';
     return '<button class="month-btn" onclick="openMonthReport(\''+tab+'\',\''+m+'\')">'+
-      '<span class="mb-label">'+m+'</span>'+
+      yearLabel+'<span class="mb-label">'+bigLabel+'</span>'+
       '<span class="mb-sub">'+label+'月报</span></button>';
   }).join('');
 }
@@ -4180,9 +4209,16 @@ function renderMonthReport(tab,month){
 
 // ── 环比辅助 ──
 function getPrevMonthStr(month){
-  var m=parseInt(month);
-  if(isNaN(m)) return '';
-  return (m>1?m-1:12)+'月';
+  // 支持 "2026年6月" 格式
+  var ym=month.match(/^(\d{4})年(\d+)月$/);
+  if(ym){
+    var y=parseInt(ym[1]),m=parseInt(ym[2]);
+    return m>1?y+'年'+(m-1)+'月':(y-1)+'年12月';
+  }
+  // 兼容旧格式 "6月"
+  var m2=parseInt(month);
+  if(isNaN(m2)) return '';
+  return (m2>1?m2-1:12)+'月';
 }
 function momTag(cur,prev,inverse){
   if(!prev||prev===0) return '<div style="font-size:10px;color:var(--t3);margin-top:4px">上月无数据</div>';
@@ -6583,7 +6619,7 @@ function processBiliJSON(json,_filename){
     dateStr=dateStr.replace(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/,(_,y,m,d)=>y+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0'));
     if(!dateStr||dateStr==='undefined'){skipNoDate++;continue}
     const monthMatch=dateStr.match(/(\d{4})[-\/](\d{1,2})/);
-    const month=monthMatch?parseInt(monthMatch[2])+'月':'';
+    const month=monthMatch?monthMatch[1]+'年'+parseInt(monthMatch[2])+'月':'';
     // 解析数字：兼容字符串千分符 "1,234.56"、百分比 "12.3%"
     const getNum=(k)=>{
       if(colMap[k]===undefined)return 0;
@@ -6624,12 +6660,14 @@ function processBiliJSON(json,_filename){
   return true;
 }
 
+function _monthSortKey(m){
+  var ym=m.match(/^(\d{4})年(\d+)月$/);
+  if(ym) return parseInt(ym[1])*100+parseInt(ym[2]);
+  return parseInt(m)||0;
+}
 function _showBiliPreview(p){
-  // 按月份数字排序
-  const sorted=[...p.monthData].sort((a,b)=>{
-    const ma=parseInt(a.month)||0,mb=parseInt(b.month)||0;
-    return ma-mb;
-  });
+  // 按年月升序排序
+  const sorted=[...p.monthData].sort((a,b)=>_monthSortKey(a.month)-_monthSortKey(b.month));
   const fmt=(n)=>n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
   const fmtN=(n)=>n.toLocaleString('zh-CN');
   let rows=sorted.map(({month,rows})=>{
