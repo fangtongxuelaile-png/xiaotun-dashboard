@@ -4550,6 +4550,18 @@ function momTag(cur,prev,inverse){
   var color=better?'#22C55E':'#EF4444';
   return '<div style="font-size:11px;font-weight:700;color:'+color+';margin-top:4px">'+(positive?'↑':'↓')+Math.abs(pct).toFixed(1)+'% <span style="font-size:10px;font-weight:500;color:var(--t3)">环比</span></div>';
 }
+// 去年同月（用于同比）："2026年1月" → "2025年1月"
+function getSameMonthLastYear(month){
+  var ym=String(month).match(/^(\d{4})年(\d+)月$/);
+  if(ym) return (parseInt(ym[1])-1)+'年'+parseInt(ym[2])+'月';
+  return '';
+}
+function yoyTag(cur,prev,inverse){
+  if(!prev||prev===0) return '';
+  var pct=(cur-prev)/prev*100, positive=pct>=0, better=inverse?!positive:positive;
+  var color=better?'#22C55E':'#EF4444';
+  return '<div style="font-size:11px;font-weight:700;color:'+color+';margin-top:2px">'+(positive?'↑':'↓')+Math.abs(pct).toFixed(1)+'% <span style="font-size:10px;font-weight:500;color:var(--t3)">同比</span></div>';
+}
 
 // ── B站月报渲染 ──
 function renderBiliMonthReport(month){
@@ -4649,6 +4661,12 @@ function renderAdMonthReport(month){
     prevBlocksAd.forEach(function(b){b.rows.forEach(function(r){prevCostAd+=r.cost||0;prevGmvAd+=r.gmv||0;prevOrdersAd+=r.orders||0;});});
   }
   var prevRoiAd=prevCostAd?+(prevGmvAd/prevCostAd).toFixed(2):0;
+  // 去年同月同比（26年起，25年同月有数据）
+  var yoyMonthAd=getSameMonthLastYear(month);
+  var yoyBlocksAd=yoyMonthAd?CID_RAW.filter(function(c){return c.month===yoyMonthAd;}):[];
+  var yoyCostAd=0,yoyGmvAd=0,yoyOrdersAd=0,hasYoyAd=yoyBlocksAd.length>0;
+  if(hasYoyAd){yoyBlocksAd.forEach(function(b){b.rows.forEach(function(r){yoyCostAd+=r.cost||0;yoyGmvAd+=r.gmv||0;yoyOrdersAd+=r.orders||0;});});}
+  var yoyRoiAd=yoyCostAd?+(yoyGmvAd/yoyCostAd).toFixed(2):0;
   // 日趋势
   var dayMap={};
   blocks.forEach(function(b){b.rows.forEach(function(r){if(!r.d) return;var d=dayMap[r.d]||(dayMap[r.d]={cost:0,gmv:0});d.cost+=r.cost||0;d.gmv+=r.gmv||0;});});
@@ -4660,10 +4678,10 @@ function renderAdMonthReport(month){
   var lineList=Object.entries(lines).map(function(e){return{name:e[0],cost:e[1].cost,gmv:e[1].gmv,roi:e[1].cost?+(e[1].gmv/e[1].cost).toFixed(2):0,orders:e[1].orders};}).sort(function(a,b){return b.gmv-a.gmv;});
 
   var html='<div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'+
-    '<div class="kpi-card"><div class="kpi-label">总消耗</div><div class="kpi-value">'+fmtMoney(totalCost)+'</div>'+(hasPrevAd?momTag(totalCost,prevCostAd,true):'<div style="font-size:10px;color:var(--t3);margin-top:4px">无上月数据</div>')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">总GMV</div><div class="kpi-value">'+fmtMoney(totalGmv)+'</div>'+(hasPrevAd?momTag(totalGmv,prevGmvAd,false):'')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">综合ROI</div><div class="kpi-value" style="color:'+(roi>=4?'#22C55E':roi>=2.5?'#3B82F6':'#EF4444')+'">'+roi.toFixed(2)+'</div>'+(hasPrevAd?momTag(roi,prevRoiAd,false):'')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">总订单</div><div class="kpi-value">'+fmtN(totalOrders)+'</div>'+(hasPrevAd?momTag(totalOrders,prevOrdersAd,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">总消耗</div><div class="kpi-value">'+fmtMoney(totalCost)+'</div>'+(hasPrevAd?momTag(totalCost,prevCostAd,true):'<div style="font-size:10px;color:var(--t3);margin-top:4px">无上月数据</div>')+(hasYoyAd?yoyTag(totalCost,yoyCostAd,true):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">总GMV</div><div class="kpi-value">'+fmtMoney(totalGmv)+'</div>'+(hasPrevAd?momTag(totalGmv,prevGmvAd,false):'')+(hasYoyAd?yoyTag(totalGmv,yoyGmvAd,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">综合ROI</div><div class="kpi-value" style="color:'+(roi>=4?'#22C55E':roi>=2.5?'#3B82F6':'#EF4444')+'">'+roi.toFixed(2)+'</div>'+(hasPrevAd?momTag(roi,prevRoiAd,false):'')+(hasYoyAd?yoyTag(roi,yoyRoiAd,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">总订单</div><div class="kpi-value">'+fmtN(totalOrders)+'</div>'+(hasPrevAd?momTag(totalOrders,prevOrdersAd,false):'')+(hasYoyAd?yoyTag(totalOrders,yoyOrdersAd,false):'')+'</div>'+
     '</div>';
 
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">'+
