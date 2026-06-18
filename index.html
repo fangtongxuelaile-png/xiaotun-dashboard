@@ -975,11 +975,10 @@ select option{background:#FFF;color:var(--t1)}
         <label>PASSWORD &nbsp;密码</label>
         <div class="login-field-wrap">
           <span class="login-field-icon">🔒</span>
-          <input id="loginPass" type="password" placeholder="输入登录密码" autocomplete="current-password"
-            onkeydown="if(event.key==='Enter')doLogin()">
+          <input id="loginPass" type="password" placeholder="输入登录密码" autocomplete="current-password">
         </div>
       </div>
-      <button class="login-btn" id="loginBtn" onclick="window._doLoginSafe()">
+      <button class="login-btn" id="loginBtn">
         <div class="login-btn-inner">
           <div class="login-btn-spinner" id="loginSpinner"></div>
           <span id="loginBtnText">登 录 系 统</span>
@@ -2487,17 +2486,32 @@ function doLogout(){
 })();
 // Enter key login
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-// 🔧 强制绑定登录按钮事件（确保 onclick 失效时有备份）
-document.addEventListener('DOMContentLoaded', function() {
+// 🔧 绑定登录按钮和密码框回车事件（脚本加载完成后立即执行）
+setTimeout(function() {
   var loginBtn = document.getElementById('loginBtn');
-  if (loginBtn && typeof doLogin !== 'undefined') {
+  var loginPass = document.getElementById('loginPass');
+
+  if (loginBtn && typeof doLogin === 'function') {
     loginBtn.addEventListener('click', function(e) {
       e.preventDefault();
+      console.log('📝 [按钮点击] 调用 doLogin');
       doLogin();
     });
-    console.log('✅ 登录按钮事件绑定成功');
+    console.log('✅ [事件绑定] 登录按钮绑定成功');
+  } else {
+    console.error('❌ [错误] doLogin 未定义或按钮不存在');
   }
-});
+
+  if (loginPass && typeof doLogin === 'function') {
+    loginPass.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        console.log('📝 [回车键] 调用 doLogin');
+        doLogin();
+      }
+    });
+  }
+}, 100);
 
 /* ══════════════════════════════════════
    Init
