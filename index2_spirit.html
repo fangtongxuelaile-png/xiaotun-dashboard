@@ -3,25 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>小豚当家内容投放数据中台 V3.12.3</title>
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script>
-console.log('🚀 [脚本初始化] 页面加载开始');
-
-// 全局错误捕获
-window.addEventListener('error', function(e) {
-  console.error('🔴 [全局错误]', e.message);
-  if (e.filename && (e.filename.includes('cdn.plot.ly') || e.filename.includes('cdn.sheetjs') || e.filename.includes('jsdelivr'))) {
-    console.warn('⚠ CDN 加载失败:', e.filename);
-  }
-});
-</script>
 <style>
 /* ── Reset & Root ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -591,7 +577,7 @@ select option{background:#FFF;color:var(--t1)}
 .big-screen-mode .collapsible-body{padding:0 !important}
 .big-screen-mode .billiards-screen-badge{position:fixed;top:8px;right:12px;z-index:9998;font-size:11px;color:var(--t3);background:var(--bg-card);padding:4px 12px;border-radius:999px;border:1px solid var(--border);cursor:pointer}
 
-  
+
 /* ══════ 盈亏监控子Tab ══════ */
 .sub-tab-bar{display:flex;gap:2px;margin-bottom:16px;padding:4px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
 .sub-tab-btn{flex:1;padding:8px 12px;border:none;background:transparent;border-radius:6px;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;transition:all .2s}
@@ -957,11 +943,12 @@ select option{background:#FFF;color:var(--t1)}
         <label>PASSWORD &nbsp;密码</label>
         <div class="login-field-wrap">
           <span class="login-field-icon">🔒</span>
-          <input id="loginPass" type="password" placeholder="输入登录密码" autocomplete="current-password">
+          <input id="loginPass" type="password" placeholder="输入登录密码" autocomplete="current-password"
+            onkeydown="if(event.key==='Enter')doLogin()">
         </div>
       </div>
-      <button class="login-btn" id="loginBtn">
-        <div class="login-btn-inner" style="pointer-events:none">
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">
+        <div class="login-btn-inner">
           <div class="login-btn-spinner" id="loginSpinner"></div>
           <span id="loginBtnText">登 录 系 统</span>
         </div>
@@ -2283,13 +2270,11 @@ function _loginSetLoading(on){
   }
 }
 function doLogin(){
-  console.log('🔑 [doLogin] 被调用');
-  try {
-    const u=document.getElementById('loginUser').value.trim();
-    const p=document.getElementById('loginPass').value;
-    _loginClearError();
-    if(!u||!p){_loginSetError('请输入账号和密码');return}
-    _loginSetLoading(true);
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  _loginClearError();
+  if(!u||!p){_loginSetError('请输入账号和密码');return}
+  _loginSetLoading(true);
   // 模拟300ms验证延迟（增加质感）
   setTimeout(function(){
     const user=USERS[u];
@@ -2306,86 +2291,35 @@ function doLogin(){
     var overlay=document.getElementById('loginOverlay');
     overlay.classList.add('fade-out');
     setTimeout(function(){
-      try {
-        console.log('✅ [页面切换] 开始切换界面');
-        // 暂停地球动画
-        var gc=document.getElementById('globeCanvas');
-        if(gc){
-          console.log('✅ [地球] 隐藏地球动画');
-          if(window._globeAnimId){cancelAnimationFrame(window._globeAnimId);window._globeAnimId=null;}
-          gc.style.display='none';
-        }
-        overlay.style.display='none';
-        overlay.classList.remove('fade-out');
-        console.log('✅ [登录界面] 已隐藏');
-
-        // 主界面 brightness 过渡 0.2→1
-        var appShell=document.getElementById('appShell');
-        if(!appShell){console.error('❌ [严重] appShell 不存在!');throw new Error('appShell not found');}
-        console.log('✅ [应用界面] 找到 appShell');
-
-        appShell.style.filter='brightness(0.2)';
-        appShell.style.display='flex';
-        console.log('✅ [应用界面] 已显示');
-
-        requestAnimationFrame(function(){
-          requestAnimationFrame(function(){
-            appShell.style.filter='brightness(1)';
-          });
-        });
-
-        document.getElementById('sbUser').textContent=user.name;
-        document.getElementById('sbRole').textContent='@'+u+' · '+user.role;
-        document.getElementById('heroBadge').innerHTML='👤 '+user.name;
-        console.log('✅ [用户信息] 已更新');
-
-        applyPermissions();
-        console.log('✅ [权限] 已应用');
-
-        logLogin(u, 'success');
-        console.log('✅ [日志] 登录日志已记录');
-
-        console.log('📍 [初始化] 开始 initApp');
-        initApp();
-        console.log('✅ [初始化] initApp 完成');
-
-        console.log('📍 [初始化] 开始 initMetricsPanel');
-        initMetricsPanel();
-        console.log('✅ [初始化] initMetricsPanel 完成');
-
-        _loginSetLoading(false);
-        console.log('✅ [按钮] 加载状态关闭');
-
-        console.log('📍 [同步] 开始 syncLatestCloudData');
-        syncLatestCloudData();
-        console.log('✅ [同步] syncLatestCloudData 完成');
-
-        console.log('🎉 [登录完成] 所有流程已完成!');
-      } catch(err) {
-        console.error('❌ [页面切换失败]', err.message, err);
-        _loginSetLoading(false);
-        _loginSetError('页面切换失败: ' + err.message);
+      // 暂停地球动画
+      var gc=document.getElementById('globeCanvas');
+      if(gc){
+        if(window._globeAnimId){cancelAnimationFrame(window._globeAnimId);window._globeAnimId=null;}
+        gc.style.display='none';
       }
+      overlay.style.display='none';
+      overlay.classList.remove('fade-out');
+      // 主界面 brightness 过渡 0.2→1
+      var appShell=document.getElementById('appShell');
+      appShell.style.filter='brightness(0.2)';
+      appShell.style.display='flex';
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          appShell.style.filter='brightness(1)';
+        });
+      });
+      document.getElementById('sbUser').textContent=user.name;
+      document.getElementById('sbRole').textContent='@'+u+' · '+user.role;
+      document.getElementById('heroBadge').innerHTML='👤 '+user.name;
+      applyPermissions();
+      logLogin(u, 'success');
+      initApp();
+      initMetricsPanel();
+      _loginSetLoading(false);
+      syncLatestCloudData();
     },550);
   },320);
-  } catch(e) {
-    console.error('❌ 登录错误:', e);
-    _loginSetLoading(false);
-    _loginSetError('登录出错，请刷新页面重试');
-  }
 }
-// 直接绑定登录按钮点击事件
-document.addEventListener('DOMContentLoaded', function(){
-  var btn = document.getElementById('loginBtn');
-  var pass = document.getElementById('loginPass');
-  console.log('🔗 [登录事件绑定] btn:', !!btn, 'pass:', !!pass, 'doLogin:', typeof doLogin);
-  if (btn) {
-    btn.addEventListener('click', function(e){ e.preventDefault(); doLogin(); });
-  }
-  if (pass) {
-    pass.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); doLogin(); } });
-  }
-});
 /* ══════════════════════════════════════
    END LOGIN MODULE
    ══════════════════════════════════════ */
@@ -2508,11 +2442,13 @@ function doLogout(){
     });
   });
 }
-// 自动填充上次登录账号（无自动登录）
+// Auto-fill username only (no password, no auto-login)
 (function(){
   const u=sessionStorage.getItem('xtb_user');
   if(u&&USERS[u]){document.getElementById('loginUser').value=u;}
 })();
+// Enter key login
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 
 /* ══════════════════════════════════════
    Init
@@ -2537,7 +2473,7 @@ function initApp(){
   document.getElementById('searchInput').addEventListener('input',render);
   renderMonthGrid('ad');
   renderMonthGrid('content');
-  
+
   // 恢复上次会话的 Tab 和子 Tab 状态
   var savedTab = localStorage.getItem('xtb_lastTab');
   // 总是调用 switchTab，确保 currentTab、侧边栏 section、日期联动标签三者一致
@@ -3793,7 +3729,7 @@ function calcMetric(row, metricKey) {
 // 语义层聚合计算：根据指标Key聚合数据（求和/平均/加权平均）
 function aggregateMetric(rows, metricKey, aggType) {
   if (!METRICS[metricKey] || !rows || rows.length === 0) return 0;
-  
+
   if (aggType === 'sum') {
     // 简单求和（适用于：消耗、GMV、订单数、点击数、播放数）
     return rows.reduce((sum, row) => sum + calcMetric(row, metricKey), 0);
@@ -9138,36 +9074,6 @@ const BILI_EMBEDDED_DATA = [{"month":"01月","rows":[{"date":"2026-01-01","month
 /* ══════════════════════════════════════
    END LOGIN MODULE — 3D地球渲染
    ══════════════════════════════════════ */
-
-// 🔧 绑定登录按钮事件（使用 addEventListener 确保脚本加载完后再绑定）
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('✅ [DOMContentLoaded] 页面加载完成，绑定事件');
-
-  var loginBtn = document.getElementById('loginBtn');
-  var loginPass = document.getElementById('loginPass');
-
-  if (loginBtn && typeof doLogin === 'function') {
-    loginBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      console.log('🖱️ [登录按钮] 点击');
-      doLogin();
-    });
-    console.log('✅ [事件绑定] 登录按钮 click 事件已绑定');
-  } else {
-    console.error('❌ [错误] 登录按钮不存在或 doLogin 未定义');
-  }
-
-  if (loginPass && typeof doLogin === 'function') {
-    loginPass.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        console.log('⌨️ [密码框] 回车键');
-        doLogin();
-      }
-    });
-    console.log('✅ [事件绑定] 密码框 keydown 事件已绑定');
-  }
-});
 </script>
 </body>
 </html>
