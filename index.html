@@ -2104,16 +2104,21 @@ async function submitFeedback(){
   var text=document.getElementById('feedbackText').value.trim();
   if(!text){toast('⚠️ 请填写反馈内容','warn');return}
   var contact=document.getElementById('feedbackContact').value.trim();
-  var who=(currentUser?currentUser.name:'未登录')+'('+((currentUser&&currentUser.username)||'?')+')';
   var detail='['+_feedbackType+'] '+text+(contact?' | 联系:'+contact:'');
-  await _supaInsert('operation_history',{
-    username:(currentUser&&currentUser.username)||'visitor',
-    action:'用户反馈',
-    detail:detail,
-    ip:_userIP||'未知'
-  });
-  closeFeedbackModal();
-  toast('✅ 反馈已提交，感谢您的意见！','ok');
+  try{
+    await _supaInsert('operation_history',{
+      username:(currentUser&&currentUser.username)||'visitor',
+      action:'用户反馈',
+      detail:detail,
+      ip_address:_userIP||'未知'
+    });
+    closeFeedbackModal();
+    toast('✅ 反馈已提交，感谢您的意见！','ok');
+  }catch(e){
+    console.error('反馈提交失败:',e.message);
+    closeFeedbackModal();
+    toast('⚠️ 反馈提交失败，请稍后重试','warn');
+  }
 }
 
 function openAuditModal(){
