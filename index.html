@@ -9,36 +9,25 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
+console.log('🚀 [脚本初始化] 页面加载开始');
+
+// ⚠️ 临时占位符 doLogin 函数（防止 onclick 调用时函数未定义）
+window.doLogin = function() {
+  console.log('📝 [临时登录] 原始 doLogin 未加载，使用临时版本');
+  alert('⏳ 页面还在加载中，请稍候...');
+};
+
 // 安全保障：确保登录功能不被阻塞
 window._loginReady = true;
 window._cdnErrors = [];
-console.log('🚀 页面加载开始，准备设置登录保护...');
 
 window.addEventListener('error', e => {
+  console.error('❌ [全局错误事件]', e.message || e);
   if (e.filename && (e.filename.includes('cdn.plot.ly') || e.filename.includes('cdn.sheetjs') || e.filename.includes('jsdelivr'))) {
     window._cdnErrors.push(e.filename);
     console.warn('⚠ CDN 加载失败:', e.filename);
-  } else if (e.error) {
-    console.error('❌ 页面全局错误:', e.error);
   }
 });
-
-// 全局 doLogin 包装器（如果原始 doLogin 失败）
-window._originalDoLogin = null;
-window._doLoginSafe = function() {
-  console.log('📝 点击了登录按钮');
-  try {
-    if (window._originalDoLogin) {
-      window._originalDoLogin();
-    } else if (typeof doLogin !== 'undefined') {
-      doLogin();
-    } else {
-      throw new Error('doLogin 函数未定义');
-    }
-  } catch(err) {
-    console.error('❌ 登录执行错误:', err.message);
-  }
-};
 </script>
 <style>
 /* ── Reset & Root ── */
@@ -2484,34 +2473,52 @@ function doLogout(){
   const u=sessionStorage.getItem('xtb_user');
   if(u&&USERS[u]){document.getElementById('loginUser').value=u;}
 })();
-// Enter key login
-document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-// 🔧 绑定登录按钮和密码框回车事件（脚本加载完成后立即执行）
+// 🔧 脚本加载完成：注册真实的 doLogin 并覆盖占位符版本
+console.log('✅ [脚本加载完] 注册真实的 doLogin 函数');
+
+// 如果原始 doLogin 已定义，将其保存并在事件中调用
+var _realDoLogin = (typeof doLogin === 'function') ? doLogin : null;
+
+// 覆盖占位符版本为真实版本
+if (_realDoLogin) {
+  window.doLogin = _realDoLogin;
+  console.log('✅ [函数覆盖] 已替换为真实的 doLogin');
+} else {
+  console.error('❌ [加载失败] 真实的 doLogin 函数未找到!');
+}
+
+// 现在绑定事件监听器
 setTimeout(function() {
   var loginBtn = document.getElementById('loginBtn');
   var loginPass = document.getElementById('loginPass');
+  console.log('🔍 [事件绑定检查] 按钮:', !!loginBtn, '密码框:', !!loginPass, 'doLogin类型:', typeof doLogin);
 
-  if (loginBtn && typeof doLogin === 'function') {
+  if (loginBtn) {
     loginBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      console.log('📝 [按钮点击] 调用 doLogin');
-      doLogin();
+      console.log('📝 [按钮点击事件触发]');
+      if (typeof doLogin === 'function') {
+        console.log('📝 [调用 doLogin]');
+        doLogin();
+      } else {
+        console.error('❌ [严重错误] doLogin 不是函数, 类型:', typeof doLogin);
+      }
     });
-    console.log('✅ [事件绑定] 登录按钮绑定成功');
-  } else {
-    console.error('❌ [错误] doLogin 未定义或按钮不存在');
+    console.log('✅ [事件绑定成功] 登录按钮已绑定 click 事件');
   }
 
-  if (loginPass && typeof doLogin === 'function') {
+  if (loginPass) {
     loginPass.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        console.log('📝 [回车键] 调用 doLogin');
-        doLogin();
+        console.log('📝 [回车键事件触发]');
+        if (typeof doLogin === 'function') {
+          doLogin();
+        }
       }
     });
   }
-}, 100);
+}, 50);
 
 /* ══════════════════════════════════════
    Init
