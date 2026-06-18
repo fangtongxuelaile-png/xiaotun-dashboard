@@ -8600,6 +8600,7 @@ const BILI_EMBEDDED_DATA = [{"month":"01月","rows":[{"date":"2026-01-01","month
       // 三模型并行加载
       var loadCounter = 0;
       var totalModels = 3;
+      var loadTimeout=setTimeout(function(){console.warn("⏱️ 3D模型加载超时5秒，允许继续登录");},5000);
 
       function modelProgress(prefix, progress){
         if(progress.total)
@@ -8607,7 +8608,7 @@ const BILI_EMBEDDED_DATA = [{"month":"01月","rows":[{"date":"2026-01-01","month
       }
       function onAllModelsLoaded(){
         loadCounter++;
-        if(loadCounter >= totalModels){
+        if(loadCounter >= totalModels){clearTimeout(loadTimeout);
           console.log('🎭 All 4 characters loaded (3 models + 1 clone)!');
         }
       }
