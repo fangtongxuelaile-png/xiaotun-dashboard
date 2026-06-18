@@ -960,8 +960,8 @@ select option{background:#FFF;color:var(--t1)}
           <input id="loginPass" type="password" placeholder="输入登录密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
         </div>
       </div>
-      <button class="login-btn" id="loginBtn" onclick="doLogin()">
-        <div class="login-btn-inner">
+      <button class="login-btn" id="loginBtn">
+        <div class="login-btn-inner" style="pointer-events:none">
           <div class="login-btn-spinner" id="loginSpinner"></div>
           <span id="loginBtnText">登 录 系 统</span>
         </div>
@@ -2283,6 +2283,7 @@ function _loginSetLoading(on){
   }
 }
 function doLogin(){
+  console.log('🔑 [doLogin] 被调用');
   try {
     const u=document.getElementById('loginUser').value.trim();
     const p=document.getElementById('loginPass').value;
@@ -2305,32 +2306,66 @@ function doLogin(){
     var overlay=document.getElementById('loginOverlay');
     overlay.classList.add('fade-out');
     setTimeout(function(){
-      // 暂停地球动画
-      var gc=document.getElementById('globeCanvas');
-      if(gc){
-        if(window._globeAnimId){cancelAnimationFrame(window._globeAnimId);window._globeAnimId=null;}
-        gc.style.display='none';
-      }
-      overlay.style.display='none';
-      overlay.classList.remove('fade-out');
-      // 主界面 brightness 过渡 0.2→1
-      var appShell=document.getElementById('appShell');
-      appShell.style.filter='brightness(0.2)';
-      appShell.style.display='flex';
-      requestAnimationFrame(function(){
+      try {
+        console.log('✅ [页面切换] 开始切换界面');
+        // 暂停地球动画
+        var gc=document.getElementById('globeCanvas');
+        if(gc){
+          console.log('✅ [地球] 隐藏地球动画');
+          if(window._globeAnimId){cancelAnimationFrame(window._globeAnimId);window._globeAnimId=null;}
+          gc.style.display='none';
+        }
+        overlay.style.display='none';
+        overlay.classList.remove('fade-out');
+        console.log('✅ [登录界面] 已隐藏');
+
+        // 主界面 brightness 过渡 0.2→1
+        var appShell=document.getElementById('appShell');
+        if(!appShell){console.error('❌ [严重] appShell 不存在!');throw new Error('appShell not found');}
+        console.log('✅ [应用界面] 找到 appShell');
+
+        appShell.style.filter='brightness(0.2)';
+        appShell.style.display='flex';
+        console.log('✅ [应用界面] 已显示');
+
         requestAnimationFrame(function(){
-          appShell.style.filter='brightness(1)';
+          requestAnimationFrame(function(){
+            appShell.style.filter='brightness(1)';
+          });
         });
-      });
-      document.getElementById('sbUser').textContent=user.name;
-      document.getElementById('sbRole').textContent='@'+u+' · '+user.role;
-      document.getElementById('heroBadge').innerHTML='👤 '+user.name;
-      applyPermissions();
-      logLogin(u, 'success');
-      initApp();
-      initMetricsPanel();
-      _loginSetLoading(false);
-      syncLatestCloudData();
+
+        document.getElementById('sbUser').textContent=user.name;
+        document.getElementById('sbRole').textContent='@'+u+' · '+user.role;
+        document.getElementById('heroBadge').innerHTML='👤 '+user.name;
+        console.log('✅ [用户信息] 已更新');
+
+        applyPermissions();
+        console.log('✅ [权限] 已应用');
+
+        logLogin(u, 'success');
+        console.log('✅ [日志] 登录日志已记录');
+
+        console.log('📍 [初始化] 开始 initApp');
+        initApp();
+        console.log('✅ [初始化] initApp 完成');
+
+        console.log('📍 [初始化] 开始 initMetricsPanel');
+        initMetricsPanel();
+        console.log('✅ [初始化] initMetricsPanel 完成');
+
+        _loginSetLoading(false);
+        console.log('✅ [按钮] 加载状态关闭');
+
+        console.log('📍 [同步] 开始 syncLatestCloudData');
+        syncLatestCloudData();
+        console.log('✅ [同步] syncLatestCloudData 完成');
+
+        console.log('🎉 [登录完成] 所有流程已完成!');
+      } catch(err) {
+        console.error('❌ [页面切换失败]', err.message, err);
+        _loginSetLoading(false);
+        _loginSetError('页面切换失败: ' + err.message);
+      }
     },550);
   },320);
   } catch(e) {
@@ -2339,6 +2374,18 @@ function doLogin(){
     _loginSetError('登录出错，请刷新页面重试');
   }
 }
+// 直接绑定登录按钮点击事件
+document.addEventListener('DOMContentLoaded', function(){
+  var btn = document.getElementById('loginBtn');
+  var pass = document.getElementById('loginPass');
+  console.log('🔗 [登录事件绑定] btn:', !!btn, 'pass:', !!pass, 'doLogin:', typeof doLogin);
+  if (btn) {
+    btn.addEventListener('click', function(e){ e.preventDefault(); doLogin(); });
+  }
+  if (pass) {
+    pass.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); doLogin(); } });
+  }
+});
 /* ══════════════════════════════════════
    END LOGIN MODULE
    ══════════════════════════════════════ */
