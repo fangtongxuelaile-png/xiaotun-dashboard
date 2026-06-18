@@ -12,12 +12,33 @@
 // 安全保障：确保登录功能不被阻塞
 window._loginReady = true;
 window._cdnErrors = [];
+console.log('🚀 页面加载开始，准备设置登录保护...');
+
 window.addEventListener('error', e => {
   if (e.filename && (e.filename.includes('cdn.plot.ly') || e.filename.includes('cdn.sheetjs') || e.filename.includes('jsdelivr'))) {
     window._cdnErrors.push(e.filename);
     console.warn('⚠ CDN 加载失败:', e.filename);
+  } else if (e.error) {
+    console.error('❌ 页面全局错误:', e.error);
   }
 });
+
+// 全局 doLogin 包装器（如果原始 doLogin 失败）
+window._originalDoLogin = null;
+window._doLoginSafe = function() {
+  console.log('📝 点击了登录按钮');
+  try {
+    if (window._originalDoLogin) {
+      window._originalDoLogin();
+    } else if (typeof doLogin !== 'undefined') {
+      doLogin();
+    } else {
+      throw new Error('doLogin 函数未定义');
+    }
+  } catch(err) {
+    console.error('❌ 登录执行错误:', err.message);
+  }
+};
 </script>
 <style>
 /* ── Reset & Root ── */
@@ -958,7 +979,7 @@ select option{background:#FFF;color:var(--t1)}
             onkeydown="if(event.key==='Enter')doLogin()">
         </div>
       </div>
-      <button class="login-btn" id="loginBtn" onclick="doLogin()">
+      <button class="login-btn" id="loginBtn" onclick="window._doLoginSafe()">
         <div class="login-btn-inner">
           <div class="login-btn-spinner" id="loginSpinner"></div>
           <span id="loginBtnText">登 录 系 统</span>
@@ -2466,6 +2487,17 @@ function doLogout(){
 })();
 // Enter key login
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+// 🔧 强制绑定登录按钮事件（确保 onclick 失效时有备份）
+document.addEventListener('DOMContentLoaded', function() {
+  var loginBtn = document.getElementById('loginBtn');
+  if (loginBtn && typeof doLogin !== 'undefined') {
+    loginBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      doLogin();
+    });
+    console.log('✅ 登录按钮事件绑定成功');
+  }
+});
 
 /* ══════════════════════════════════════
    Init
