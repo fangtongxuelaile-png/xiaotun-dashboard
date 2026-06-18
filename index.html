@@ -3326,10 +3326,10 @@ function renderSummary(){
     var mm={};[cid,dd,bili].forEach(function(arr){arr.forEach(function(d){var o=mm[d.n]||(mm[d.n]={year:d.year,mon:d.mon,cost:0,gmv:0});o.cost+=d.cost;o.gmv+=d.gmv;});});
     var ns=Object.keys(mm).map(Number).sort(function(a,b){return a-b;}),x=ns.map(function(k){return mm[k].year+'年'+mm[k].mon+'月';});
     Plotly.newPlot(te.id,[
-      {type:'bar',x:x,y:ns.map(function(n){return Math.round(mm[n].gmv);}),name:'销售额',marker:{color:'rgba(52,120,246,.7)',cornerradius:4}},
-      {type:'bar',x:x,y:ns.map(function(n){return Math.round(mm[n].cost);}),name:'消耗',marker:{color:'rgba(212,175,55,.75)',cornerradius:4}},
+      {type:'bar',x:x,y:ns.map(function(n){return Math.round(mm[n].gmv);}),name:'销售额',marker:{color:'rgba(52,120,246,.7)',cornerradius:4},text:ns.map(function(n){return '¥'+Math.round(mm[n].gmv).toLocaleString();}),textposition:'outside',textangle:-45,textfont:{size:9,color:'#3478F6'},cliponaxis:false},
+      {type:'bar',x:x,y:ns.map(function(n){return Math.round(mm[n].cost);}),name:'消耗',marker:{color:'rgba(212,175,55,.75)',cornerradius:4},text:ns.map(function(n){return '¥'+Math.round(mm[n].cost).toLocaleString();}),textposition:'outside',textangle:-45,textfont:{size:9,color:'#A8862F'},cliponaxis:false},
       {type:'scatter',mode:'lines+markers',x:x,y:ns.map(function(n){return +(mm[n].cost?mm[n].gmv/mm[n].cost:0).toFixed(2);}),name:'综合ROI',line:{color:'#EF4444',width:2},yaxis:'y2'}
-    ],Object.assign({},baseLayout(),{height:360,margin:{t:30,r:60,b:40,l:70},barmode:'group',yaxis:{title:'金额(¥)'},yaxis2:{title:'ROI',overlaying:'y',side:'right',showgrid:false},legend:{orientation:'h',y:1.12,x:0}}),{responsive:true,displayModeBar:false});
+    ],Object.assign({},baseLayout(),{height:380,margin:{t:55,r:60,b:40,l:70},barmode:'group',yaxis:{title:'金额(¥)'},yaxis2:{title:'ROI',overlaying:'y',side:'right',showgrid:false},legend:{orientation:'h',y:1.16,x:0}}),{responsive:true,displayModeBar:false});
   }
   // 三大板块矩阵
   var be=document.getElementById('sumBlocks');
