@@ -8,6 +8,17 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+// 安全保障：确保登录功能不被阻塞
+window._loginReady = true;
+window._cdnErrors = [];
+window.addEventListener('error', e => {
+  if (e.filename && (e.filename.includes('cdn.plot.ly') || e.filename.includes('cdn.sheetjs') || e.filename.includes('jsdelivr'))) {
+    window._cdnErrors.push(e.filename);
+    console.warn('⚠ CDN 加载失败:', e.filename);
+  }
+});
+</script>
 <style>
 /* ── Reset & Root ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -2270,11 +2281,12 @@ function _loginSetLoading(on){
   }
 }
 function doLogin(){
-  const u=document.getElementById('loginUser').value.trim();
-  const p=document.getElementById('loginPass').value;
-  _loginClearError();
-  if(!u||!p){_loginSetError('请输入账号和密码');return}
-  _loginSetLoading(true);
+  try {
+    const u=document.getElementById('loginUser').value.trim();
+    const p=document.getElementById('loginPass').value;
+    _loginClearError();
+    if(!u||!p){_loginSetError('请输入账号和密码');return}
+    _loginSetLoading(true);
   // 模拟300ms验证延迟（增加质感）
   setTimeout(function(){
     const user=USERS[u];
@@ -2319,6 +2331,11 @@ function doLogin(){
       syncLatestCloudData();
     },550);
   },320);
+  } catch(e) {
+    console.error('❌ 登录错误:', e);
+    _loginSetLoading(false);
+    _loginSetError('登录出错，请刷新页面重试');
+  }
 }
 /* ══════════════════════════════════════
    END LOGIN MODULE
