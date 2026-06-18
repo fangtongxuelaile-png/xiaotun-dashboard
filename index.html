@@ -957,7 +957,7 @@ select option{background:#FFF;color:var(--t1)}
         <label>PASSWORD &nbsp;密码</label>
         <div class="login-field-wrap">
           <span class="login-field-icon">🔒</span>
-          <input id="loginPass" type="password" placeholder="输入登录密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+          <input id="loginPass" type="password" placeholder="输入登录密码" autocomplete="current-password">
         </div>
       </div>
       <button class="login-btn" id="loginBtn">
@@ -9138,6 +9138,36 @@ const BILI_EMBEDDED_DATA = [{"month":"01月","rows":[{"date":"2026-01-01","month
 /* ══════════════════════════════════════
    END LOGIN MODULE — 3D地球渲染
    ══════════════════════════════════════ */
+
+// 🔧 绑定登录按钮事件（使用 addEventListener 确保脚本加载完后再绑定）
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('✅ [DOMContentLoaded] 页面加载完成，绑定事件');
+
+  var loginBtn = document.getElementById('loginBtn');
+  var loginPass = document.getElementById('loginPass');
+
+  if (loginBtn && typeof doLogin === 'function') {
+    loginBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('🖱️ [登录按钮] 点击');
+      doLogin();
+    });
+    console.log('✅ [事件绑定] 登录按钮 click 事件已绑定');
+  } else {
+    console.error('❌ [错误] 登录按钮不存在或 doLogin 未定义');
+  }
+
+  if (loginPass && typeof doLogin === 'function') {
+    loginPass.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        console.log('⌨️ [密码框] 回车键');
+        doLogin();
+      }
+    });
+    console.log('✅ [事件绑定] 密码框 keydown 事件已绑定');
+  }
+});
 </script>
 </body>
 </html>
