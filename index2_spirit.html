@@ -7927,7 +7927,7 @@ function renderAdRoi(items){
     const mRoi={};
     const mCount={};
     lItems.forEach(r=>{
-      const m=r.month.match(/(\d+)月/)?.[1]+'月':r.month;
+      const m=r.month.match(/(\d+)月/)?r.month.match(/(\d+)月/)[1]+'月':r.month;
       if(!mRoi[m]){mRoi[m]={t:0,c:0}}
       mRoi[m].t+=r.roi;
       mRoi[m].c++;
@@ -7952,7 +7952,7 @@ function renderAdRoi(items){
 function renderAdCostRoi(items){
   const mCost={},mRoiSum={},mRoiCount={};
   items.forEach(r=>{
-    const m=r.month.match(/(\d+)月/)?.[1]+'月':r.month;
+    const m=r.month.match(/(\d+)月/)?r.month.match(/(\d+)月/)[1]+'月':r.month;
     if(!mCost[m]){mCost[m]=0;mRoiSum[m]=0;mRoiCount[m]=0}
     mCost[m]+=r.cost;
     if(r.roi>0){mRoiSum[m]+=r.roi;mRoiCount[m]++}
