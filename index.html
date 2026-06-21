@@ -2567,6 +2567,8 @@ function applySidebarDate(){
     if(typeof renderBiliDashboard==='function') renderBiliDashboard();
   }else if(currentTab==='ad'){
     if(typeof renderAdDashboard==='function') renderAdDashboard();
+  }else if(currentTab==='summary'){
+    if(typeof renderSummary==='function') renderSummary();
   }else{
     render();
   }
@@ -2581,7 +2583,7 @@ function clearSidebarDate(){
 // 更新日期筛选区右上角的范围标签
 function updateDateScopeHint(tab){
   var hint=document.getElementById('dateScopeHint');
-  if(hint) hint.textContent=tab==='bili'?'B站投放':tab==='ad'?'抖音投放':'内容管理';
+  if(hint) hint.textContent=tab==='bili'?'B站投放':tab==='ad'?'抖音投放':tab==='summary'?'数据汇总':'内容管理';
 }
 // 切 Tab 时把侧边栏日期范围重置为该 Tab 数据的完整范围，
 // 避免某个 Tab 的日期范围套到另一个 Tab 上误过滤（如 B站12月起 套到 抖音9月起）。
@@ -2589,7 +2591,9 @@ function setSidebarDateToTabRange(tab){
   var dates=[];
   if(tab==='bili') dates=flattenBili().map(function(r){return r.date;}).filter(Boolean);
   else if(tab==='ad') dates=flattenCID().map(function(r){return r.date;}).filter(Boolean);
-  else if(typeof contentData!=='undefined'&&contentData) contentData.forEach(function(c){if(c.pubDate)dates.push(c.pubDate);});
+  else if(tab==='summary'){
+    dates=flattenBili().concat(flattenCID()).map(function(r){return r.date;}).filter(Boolean);
+  }else if(typeof contentData!=='undefined'&&contentData) contentData.forEach(function(c){if(c.pubDate)dates.push(c.pubDate);});
   if(!dates.length) return;
   dates.sort();
   var f=document.getElementById('dateFrom'),t=document.getElementById('dateTo');
@@ -3298,10 +3302,16 @@ function _sumFmt(n){return '¥'+Math.round(n).toLocaleString();}
 // 按板块(cid/douten/bili)逐月聚合。抖店=CID_RAW中含"抖店/千川"的产品线，CID=其余抖音，bili=全部B站
 function _collectBlock(block){
   var by={}; // key = year*100+mon（区分跨年同月）
+  var _df=document.getElementById('dateFrom')&&document.getElementById('dateFrom').value;
+  var _dt=document.getElementById('dateTo')&&document.getElementById('dateTo').value;
   function add(b,withClick){
     var pm=_parseYM(b.month, b.rows&&b.rows[0]); var key=pm.year*100+pm.mon;
     var o=by[key]||(by[key]={year:pm.year,mon:pm.mon,cost:0,gmv:0,ord:0,clicks:0,imp:0});
-    (b.rows||[]).forEach(function(r){o.cost+=r.cost||0;o.gmv+=r.gmv||0;o.ord+=r.orders||0;if(withClick){o.clicks+=r.clicks||0;o.imp+=r.impressions||0;}});
+    (b.rows||[]).forEach(function(r){
+      if(_df&&r.date&&r.date<_df) return;
+      if(_dt&&r.date&&r.date>_dt) return;
+      o.cost+=r.cost||0;o.gmv+=r.gmv||0;o.ord+=r.orders||0;if(withClick){o.clicks+=r.clicks||0;o.imp+=r.impressions||0;}
+    });
   }
   if(block==='bili'){
     (typeof BILIBILI_RAW!=='undefined'?BILIBILI_RAW:[]).forEach(function(b){add(b,true);});
