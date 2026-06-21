@@ -1775,6 +1775,15 @@ select option{background:#FFF;color:var(--t1)}
         <!-- 月度趋势 -->
         <div class="sec-header"><h3>📈 月度趋势（销售额 / 消耗 / ROI）</h3></div>
         <div class="chart-box" style="margin-bottom:20px"><div id="sumTrendChart" style="height:380px"></div></div>
+        <!-- 全平台月报格子 -->
+        <div class="collapsible-header" onclick="toggleSumMonthGrid()">
+          <span class="toggle-arrow open" id="sumMonthGridArrow">▼</span>
+          <h3>📋 全平台月报总览</h3>
+          <span class="badge-sm">点击月份查看详情</span>
+        </div>
+        <div class="collapsible-body" id="sumMonthGridBody" style="max-height:600px">
+          <div class="month-grid" id="sumMonthGrid"></div>
+        </div>
         <!-- 三大板块月度矩阵 -->
         <div id="sumBlocks"></div>
       </div>
@@ -3337,6 +3346,8 @@ function renderSummary(){
   // 月度选择器
   var sel=document.getElementById('sumMonthSel');
   if(sel){var ml={};[cid,dd,bili].forEach(function(arr){arr.forEach(function(d){ml[d.n]=d.month;});});var ks=Object.keys(ml).map(Number).sort(function(a,b){return a-b;});var cur=sel.value;sel.innerHTML=ks.map(function(k){return '<option value="'+ml[k]+'">'+ml[k]+'</option>';}).join('');if(cur&&ml[Object.keys(ml).find(function(k){return ml[k]===cur;})])sel.value=cur;else if(ks.length)sel.value=ml[ks[ks.length-1]];}
+  // 全平台月报格子
+  renderSumMonthGrid();
 }
 function _blockMatrix(title,block,data){
   var na='<span style="color:var(--t4)">待补充</span>';
@@ -3371,6 +3382,12 @@ function renderSumMonth(){
   var ml={};[cid,dd,bili].forEach(function(a){a.forEach(function(d){ml[d.n]=d.month;});});
   var ks=Object.keys(ml).map(Number).sort(function(a,b){return a-b;});
   var sel=document.getElementById('sumMonthSel');
+  if(sel&&!sel.options.length){
+    var cur=sel.value;
+    sel.innerHTML=ks.map(function(k){return '<option value="'+ml[k]+'">'+ml[k]+'</option>';}).join('');
+    if(cur&&sel.querySelector('option[value="'+cur+'"]')) sel.value=cur;
+    else if(ks.length) sel.value=ml[ks[ks.length-1]];
+  }
   var m=sel&&sel.value?sel.value:(ks.length?ml[ks[ks.length-1]]:'');
   var body=document.getElementById('sumMonthBody'); if(!body)return;
 
@@ -3439,6 +3456,96 @@ function renderSumMonth(){
       (hasYoy?'<span style="font-size:11px;color:var(--t3)">· vs 去年同月 '+yoyM+'</span>':'')+
     '</div>'+
     kpi+
+    '<div class="sec-header" style="margin:0 0 10px"><h3>📋 平台明细</h3></div>'+
+    '<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:var(--bg2)">'+head+'</tr></thead><tbody>'+bodyRows+'</tbody></table></div>';
+}
+
+// ══ 全平台月报格子 ══
+function toggleSumMonthGrid(){
+  var body=document.getElementById('sumMonthGridBody');
+  var arrow=document.getElementById('sumMonthGridArrow');
+  if(body) body.classList.toggle('collapsed');
+  if(arrow) arrow.classList.toggle('open');
+}
+function renderSumMonthGrid(){
+  var grid=document.getElementById('sumMonthGrid');
+  if(!grid) return;
+  var cid=_collectBlock('cid'),dd=_collectBlock('douten'),bili=_collectBlock('bili');
+  var ml={};
+  [cid,dd,bili].forEach(function(a){a.forEach(function(d){ml[d.n]=d.month;});});
+  var ks=Object.keys(ml).map(Number).sort(function(a,b){return a-b;});
+  if(!ks.length){grid.innerHTML='<div style="color:var(--t3);font-size:12px;padding:8px">暂无数据</div>';return;}
+  grid.innerHTML=ks.map(function(k){
+    var month=ml[k];
+    var yr=String(month).match(/(\d{4})年/);
+    var mn=String(month).match(/(\d+)月/);
+    var yearLabel=yr?'<span class="mb-year">'+yr[1]+'年</span>':'';
+    var big=mn?mn[1]+'月':month;
+    return '<button class="month-btn" onclick="openSumMonthReport(\''+month+'\')">'+yearLabel+'<span class="mb-label">'+big+'</span><span class="mb-sub">全平台月报</span></button>';
+  }).join('');
+}
+function openSumMonthReport(month){
+  document.getElementById('monthReportTitle').innerHTML='📊 '+month+' 全平台数据总览';
+  document.getElementById('monthReportContent').innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">加载中...</div>';
+  document.getElementById('monthReportModal').classList.add('show');
+  setTimeout(function(){document.getElementById('monthReportContent').innerHTML=renderSumMonthDetail(month);},50);
+}
+function renderSumMonthDetail(month){
+  var cid=_collectBlock('cid'),dd=_collectBlock('douten'),bili=_collectBlock('bili');
+  function findM(arr,mon){return arr.filter(function(x){return x.month===mon;})[0]||{cost:0,gmv:0,ord:0,cpa:0,cvr:0,ctr:0,roi:0};}
+  var c=findM(cid,month),dn=findM(dd,month),b=findM(bili,month);
+  var totCost=c.cost+dn.cost+b.cost, totGmv=c.gmv+dn.gmv+b.gmv, totOrd=c.ord+dn.ord+b.ord;
+  var totRoi=totCost?totGmv/totCost:0;
+  var prevM=getPrevMonthStr(month);
+  var pc=findM(cid,prevM),pdn=findM(dd,prevM),pb=findM(bili,prevM);
+  var prevCost=pc.cost+pdn.cost+pb.cost, prevGmv=pc.gmv+pdn.gmv+pb.gmv, prevOrd=pc.ord+pdn.ord+pb.ord;
+  var prevRoi=prevCost?prevGmv/prevCost:0;
+  var hasPrev=[cid,dd,bili].some(function(a){return a.some(function(x){return x.month===prevM;});});
+  var yoyM=getSameMonthLastYear(month);
+  var yc=findM(cid,yoyM),ydn=findM(dd,yoyM),yb=findM(bili,yoyM);
+  var yoyCost=yc.cost+ydn.cost+yb.cost, yoyGmv=yc.gmv+ydn.gmv+yb.gmv, yoyOrd=yc.ord+ydn.ord+yb.ord;
+  var yoyRoi=yoyCost?yoyGmv/yoyCost:0;
+  var hasYoy=[cid,dd,bili].some(function(a){return a.some(function(x){return x.month===yoyM;});});
+  var roiColor=totRoi>=2.5?'#22C55E':totRoi>=2?'#3B82F6':'#EF4444';
+  var na='<span style="color:var(--t4)">待补充</span>';
+  var node=SUM_NODES[String(month).replace(/^\d{4}年/,'')]||'';
+  // KPI 卡片
+  var kpi='<div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">'+
+    '<div class="kpi-card"><div class="kpi-label">全平台销售额</div><div class="kpi-value" style="font-size:22px">'+_sumFmt(totGmv)+'</div>'+(hasPrev?momTag(totGmv,prevGmv,false):'')+(hasYoy?yoyTag(totGmv,yoyGmv,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">全平台消耗</div><div class="kpi-value" style="font-size:22px">'+_sumFmt(totCost)+'</div>'+(hasPrev?momTag(totCost,prevCost,true):'')+(hasYoy?yoyTag(totCost,yoyCost,true):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">综合 ROI</div><div class="kpi-value" style="font-size:26px;color:'+roiColor+'">'+totRoi.toFixed(2)+'</div>'+(hasPrev?momTag(totRoi,prevRoi,false):'')+(hasYoy?yoyTag(totRoi,yoyRoi,false):'')+'</div>'+
+    '<div class="kpi-card"><div class="kpi-label">全平台订单</div><div class="kpi-value" style="font-size:22px">'+Math.round(totOrd).toLocaleString()+'</div>'+(hasPrev?momTag(totOrd,prevOrd,false):'')+(hasYoy?yoyTag(totOrd,yoyOrd,false):'')+'</div>'+
+    '</div>';
+  // 平台明细表
+  var blocks=[['📱 抖音CID',c,'cid'],['🛒 抖音抖店',dn,'douten'],['📺 B站',b,'bili']];
+  var rows=[
+    ['目标ROI',function(x,blk){return SUM_TARGET[blk];}],
+    ['实际销售额',function(x){return _sumFmt(x.gmv);}],
+    ['实际转化销量',function(x){return Math.round(x.ord).toLocaleString();}],
+    ['广告消耗',function(x){return _sumFmt(x.cost);}],
+    ['转化成本',function(x){return x.ord?'¥'+Math.round(x.cpa).toLocaleString():'—';}],
+    ['转化率',function(x,blk){return blk==='bili'?(x.cvr*100).toFixed(2)+'%':na;}],
+    ['综合ROI',function(x,blk){var t=SUM_TARGET[blk];var col=x.roi>=t?'#22C55E':'#EF4444';return '<b style="color:'+col+'">'+x.roi.toFixed(2)+'</b>';}],
+    ['广告点击率',function(x,blk){return blk==='bili'?(x.ctr*100).toFixed(2)+'%':na;}]
+  ];
+  var head='<th style="padding:9px 12px;text-align:left">指标</th>'+
+    blocks.map(function(bl){return '<th style="padding:9px 12px;text-align:right">'+bl[0]+'</th>';}).join('')+
+    '<th style="padding:9px 12px;text-align:right;background:var(--bg2)">合计</th>';
+  var bodyRows=rows.map(function(rd){
+    var cells=blocks.map(function(bl){return '<td style="padding:8px 12px;text-align:right">'+rd[1](bl[1],bl[2])+'</td>';}).join('');
+    var label=rd[0],total='—';
+    if(label==='实际销售额') total=_sumFmt(totGmv);
+    else if(label==='实际转化销量') total=Math.round(totOrd).toLocaleString();
+    else if(label==='广告消耗') total=_sumFmt(totCost);
+    else if(label==='转化成本'){total=totOrd?'¥'+Math.round(totCost/totOrd).toLocaleString():'—';}
+    else if(label==='综合ROI'){total='<b style="color:'+roiColor+'">'+totRoi.toFixed(2)+'</b>';}
+    return '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 12px;font-weight:600">'+label+'</td>'+cells+'<td style="padding:8px 12px;text-align:right;font-weight:700;background:var(--bg2)">'+total+'</td></tr>';
+  }).join('');
+  return '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'+
+    (node?'<span class="badge-sm">'+node+'</span>':'')+
+    (hasPrev?'<span style="font-size:11px;color:var(--t3)">vs 上月 '+prevM+'</span>':'')+
+    (hasYoy?'<span style="font-size:11px;color:var(--t3)">· vs 去年同月 '+yoyM+'</span>':'')+
+    '</div>'+kpi+
     '<div class="sec-header" style="margin:0 0 10px"><h3>📋 平台明细</h3></div>'+
     '<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:var(--bg2)">'+head+'</tr></thead><tbody>'+bodyRows+'</tbody></table></div>';
 }
