@@ -2048,7 +2048,7 @@ async function syncLatestCloudData(){
         var lb=bList[0];
         BILIBILI_RAW=_migrateBiliMonths(JSON.parse(lb.data));
         saveBiliToStorage();
-        _biliInited=false;
+        _biliInited=false;_summaryInited=false;
         renderBiliDashboard();
         toast('📡 B站数据已同步 · 最后上传：'+lb.uploader+'（'+lb.row_count+'条）','info');
       }
@@ -2073,7 +2073,7 @@ async function syncLatestCloudData(){
       if(aList.length>0){
         var la=aList[0];
         CID_RAW=JSON.parse(la.data);
-        saveCIDToStorage();_adInited=false;
+        saveCIDToStorage();_adInited=false;_summaryInited=false;
         if(typeof renderAdDashboard==='function') renderAdDashboard();
         if(currentTab==='summary'&&typeof renderSummary==='function') renderSummary();
         toast('📡 抖音数据已同步 · 最后上传：'+la.uploader+'（'+la.row_count+'条）','info');
@@ -3247,7 +3247,7 @@ function toast(msg,type='info'){
    Tab Switching
    ══════════════════════════════════════ */
 let currentTab = 'content';
-var _adInited=false,_biliInited=false,_contentInited=false;
+var _adInited=false,_biliInited=false,_contentInited=false,_summaryInited=false;
 function switchTab(tab){
   // 离开B站Tab时暂停盈亏监控播放，释放CPU
   if(currentTab==='bili'&&tab!=='bili'){
@@ -3278,7 +3278,7 @@ function switchTab(tab){
   });
   if(tab==='ad' && !_adInited){renderAdDashboard();_adInited=true;}
   if(tab==='bili' && !_biliInited){renderBiliDashboard();_biliInited=true;}
-  if(tab==='summary'){renderSummary();}
+  if(tab==='summary'&&!_summaryInited){renderSummary();_summaryInited=true;}
   // 自动切换数据记录面板筛选
   dshFilter=tab;
   var dshTabs=document.querySelectorAll('#dshFilterRow .dsh-tab');
@@ -3308,8 +3308,9 @@ function _collectBlock(block){
     var pm=_parseYM(b.month, b.rows&&b.rows[0]); var key=pm.year*100+pm.mon;
     var o=by[key]||(by[key]={year:pm.year,mon:pm.mon,cost:0,gmv:0,ord:0,clicks:0,imp:0});
     (b.rows||[]).forEach(function(r){
-      if(_df&&r.date&&r.date<_df) return;
-      if(_dt&&r.date&&r.date>_dt) return;
+      var _rd=r.date||r.d;
+      if(_df&&_rd&&_rd<_df) return;
+      if(_dt&&_rd&&_rd>_dt) return;
       o.cost+=r.cost||0;o.gmv+=r.gmv||0;o.ord+=r.orders||0;if(withClick){o.clicks+=r.clicks||0;o.imp+=r.impressions||0;}
     });
   }
@@ -7313,7 +7314,7 @@ function _showAdPreview(cid,filename){
 function cancelAdImport(){_pendingAdImport=null;document.getElementById('adPreviewModal').classList.remove('show');}
 function confirmAdImport(){
   if(!_pendingAdImport){cancelAdImport();return;}
-  CID_RAW=_pendingAdImport.cid; saveCIDToStorage(); _adInited=false;
+  CID_RAW=_pendingAdImport.cid; saveCIDToStorage(); _adInited=false;_summaryInited=false;
   if(typeof renderAdDashboard==='function')renderAdDashboard();
   if(typeof renderSummary==='function'&&currentTab==='summary')renderSummary();
   var rc=CID_RAW.reduce(function(s,b){return s+b.rows.length;},0);
