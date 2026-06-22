@@ -1165,6 +1165,7 @@ select option{background:#FFF;color:var(--t1)}
     <div class="sub-tab-bar" id="biliSubTabBar" style="display:none">
       <button class="sub-tab-btn active" id="subTabBtnData" onclick="switchBiliSubTab('data')">📺 投放数据</button>
       <button class="sub-tab-btn" id="subTabBtnPL" onclick="switchBiliSubTab('pl')">💰 盈亏监控</button>
+      <button class="sub-tab-btn" id="subTabBtnYoy" onclick="switchBiliSubTab('yoy')">📊 年度对比</button>
     </div>
     <div class="sub-tab-panel active" id="biliSubTabData">
       <!-- 代理商月报表 -->
@@ -1492,6 +1493,7 @@ select option{background:#FFF;color:var(--t1)}
         <div id="plDetailTable"></div>
       </div>
     </div>
+    <div class="sub-tab-panel" id="biliSubTabYoy"><div id="biliYoyBody"></div></div>
     </div><!-- end tabBiliPanel -->
 
     <!-- ═══ Tab: 抖音投放 ═══ -->
@@ -1500,6 +1502,7 @@ select option{background:#FFF;color:var(--t1)}
       <div class="sub-tab-bar" id="adSubTabBar" style="display:none">
         <button class="sub-tab-btn active" id="adSubBtnData" onclick="switchAdSubTab('data')">📊 投放数据</button>
         <button class="sub-tab-btn" id="adSubBtnPL" onclick="switchAdSubTab('pl')">💰 老板盈亏</button>
+        <button class="sub-tab-btn" id="adSubBtnYoy" onclick="switchAdSubTab('yoy')">📊 年度对比</button>
       </div>
       <div class="sub-tab-panel active" id="adSubTabData">
       <!-- 代理商月报表 -->
@@ -1645,6 +1648,7 @@ select option{background:#FFF;color:var(--t1)}
           <div class="chart-box"><div id="adOrderPieChart" style="height:320px"></div></div>
         </div>
       </div>
+      <div class="sub-tab-panel" id="adSubTabYoy"><div id="adYoyBody"></div></div>
     </div><!-- end tabAdPanel -->
 
     <!-- ═══ Tab: 内容管理 ═══ -->
@@ -3770,6 +3774,173 @@ function switchYoyMetric(metric){
   var layout=Object.assign({},baseLayout(),{height:320,margin:{t:20,r:30,b:40,l:70},legend:{orientation:'h',y:1.12,x:0}});
   layout.yaxis=Object.assign({},layout.yaxis||{},{title:ytitle});
   Plotly.react('sumYoyChart',traces,layout,{responsive:true,displayModeBar:false});
+}
+
+/* ── 平台年度对比（B站 / 抖音）共用核心 ── */
+function _renderYoyPanel(opts){
+  // opts: {bodyId, chartId, mPrefix, blocks:[], platformLabel}
+  var body=document.getElementById(opts.bodyId); if(!body) return;
+  var all={};
+  opts.blocks.forEach(function(blk){
+    _collectBlock(blk).forEach(function(d){
+      var k=d.year*100+d.mon;
+      var o=all[k]||(all[k]={year:d.year,mon:d.mon,cost:0,gmv:0,ord:0});
+      o.cost+=d.cost; o.gmv+=d.gmv; o.ord+=d.ord;
+    });
+  });
+  var y25={cost:0,gmv:0,ord:0,months:{}},y26={cost:0,gmv:0,ord:0,months:{}};
+  Object.keys(all).forEach(function(k){
+    var d=all[k];
+    if(d.year===2025){y25.cost+=d.cost;y25.gmv+=d.gmv;y25.ord+=d.ord;y25.months[d.mon]={cost:d.cost,gmv:d.gmv,ord:d.ord};}
+    else if(d.year===2026){y26.cost+=d.cost;y26.gmv+=d.gmv;y26.ord+=d.ord;y26.months[d.mon]={cost:d.cost,gmv:d.gmv,ord:d.ord};}
+  });
+  var roi25=y25.cost?y25.gmv/y25.cost:0,roi26=y26.cost?y26.gmv/y26.cost:0;
+  var ANN_TARGET=12000,Q_TARGET=3000,M_TARGET=1000;
+  var ann26Pct=Math.round(y26.ord/ANN_TARGET*100);
+  var ann26Color=ann26Pct>=100?'#22C55E':ann26Pct>=80?'#F59E0B':'#EF4444';
+
+  // KPI
+  var kpi='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px">'+
+    _yoyCard('销售额(GMV)',_sumFmt(y25.gmv),_sumFmt(y26.gmv),y25.gmv,y26.gmv,false)+
+    _yoyCard('广告消耗',_sumFmt(y25.cost),_sumFmt(y26.cost),y25.cost,y26.cost,true)+
+    _yoyCard('综合ROI',roi25.toFixed(2),roi26.toFixed(2),roi25,roi26,false)+
+    '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">'+
+    '<div style="font-size:11px;color:var(--t3);font-weight:600;margin-bottom:10px">全年订单量（目标 12,000 单）</div>'+
+    '<div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px">'+
+    '<div><div style="font-size:10px;color:var(--t3);margin-bottom:2px">2025年</div><div style="font-size:17px;font-weight:700;color:var(--t3)">'+Math.round(y25.ord).toLocaleString()+'单</div></div>'+
+    '<div style="font-size:18px;color:var(--t3);align-self:center">→</div>'+
+    '<div><div style="font-size:10px;color:var(--gold);margin-bottom:2px">2026年</div><div style="font-size:22px;font-weight:900;color:var(--t1)">'+Math.round(y26.ord).toLocaleString()+'单</div></div>'+
+    '</div>'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+    '<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">'+
+    '<div style="height:100%;width:'+Math.min(ann26Pct,100)+'%;background:'+ann26Color+';border-radius:4px"></div></div>'+
+    '<span style="font-size:12px;font-weight:800;color:'+ann26Color+'">'+ann26Pct+'%</span></div></div></div>';
+
+  // 季度卡片
+  function qOrd(yObj,mons){return mons.reduce(function(s,m){return s+(yObj.months[m]?Math.round(yObj.months[m].ord):0);},0);}
+  function rateBar(actual,target){
+    var pct=Math.min(Math.round(actual/target*100),100);
+    var c=pct>=100?'#22C55E':pct>=80?'#F59E0B':'#EF4444';
+    return {pct:pct,color:c,bar:'<div style="flex:1;height:7px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+c+';border-radius:3px"></div></div>'};
+  }
+  var quarters=[{name:'Q1 一季度',label:'1—3月',months:[1,2,3]},{name:'Q2 二季度',label:'4—6月',months:[4,5,6]},
+    {name:'Q3 三季度',label:'7—9月',months:[7,8,9]},{name:'Q4 四季度',label:'10—12月',months:[10,11,12]}];
+  var qCards=quarters.map(function(q){
+    var a25=qOrd(y25,q.months),a26=qOrd(y26,q.months);
+    var rb25=rateBar(a25,Q_TARGET),rb26=rateBar(a26,Q_TARGET);
+    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">'+
+      '<div style="font-weight:700;font-size:13px">'+q.name+'</div>'+
+      '<div style="font-size:11px;color:var(--t3);margin-bottom:12px">'+q.label+' · 目标 <b>3,000 单</b></div>'+
+      '<div style="font-size:10px;color:var(--t3);margin-bottom:4px">2025年 · '+a25.toLocaleString()+'单</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+rb25.bar+'<span style="font-size:12px;font-weight:700;color:'+rb25.color+';white-space:nowrap">'+rb25.pct+'%</span></div>'+
+      '<div style="font-size:10px;color:var(--gold);margin-bottom:4px">2026年 · '+(a26?a26.toLocaleString()+'单':'暂无数据')+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px">'+rb26.bar+'<span style="font-size:12px;font-weight:700;color:'+rb26.color+';white-space:nowrap">'+(a26?rb26.pct+'%':'—')+'</span></div></div>';
+  }).join('');
+  var quarterSection='<div style="margin-bottom:28px"><div style="font-weight:700;font-size:14px;margin-bottom:14px">🎯 季度订单达成率（目标 3,000 单/季）</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px">'+qCards+'</div></div>';
+
+  // 月度数据
+  var months=[1,2,3,4,5,6,7,8,9,10,11,12];
+  var xL=months.map(function(m){return m+'月';});
+  var mp=opts.mPrefix;
+  var chartSection='<div class="chart-box" style="margin-bottom:28px">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
+    '<span style="font-weight:700;font-size:14px">📈 月度趋势对比</span>'+
+    '<button class="sub-tab-btn active" id="'+mp+'Gmv" onclick="_switchPlatYoyMetric(\''+mp+'\',\''+opts.chartId+'\',\'gmv\')" style="padding:4px 12px;font-size:12px">销售额</button>'+
+    '<button class="sub-tab-btn" id="'+mp+'Cost" onclick="_switchPlatYoyMetric(\''+mp+'\',\''+opts.chartId+'\',\'cost\')" style="padding:4px 12px;font-size:12px">消耗</button>'+
+    '<button class="sub-tab-btn" id="'+mp+'Roi" onclick="_switchPlatYoyMetric(\''+mp+'\',\''+opts.chartId+'\',\'roi\')" style="padding:4px 12px;font-size:12px">ROI</button>'+
+    '<button class="sub-tab-btn" id="'+mp+'Ord" onclick="_switchPlatYoyMetric(\''+mp+'\',\''+opts.chartId+'\',\'ord\')" style="padding:4px 12px;font-size:12px">订单量</button>'+
+    '</div><div id="'+opts.chartId+'" style="height:320px"></div></div>';
+
+  // 明细表
+  function diffBadge(a,b,inverse){
+    if(!b||!a) return '<span style="color:var(--t4)">—</span>';
+    var p=(a-b)/b*100,up=p>=0,better=inverse?!up:up;
+    return '<span style="color:'+(better?'#22C55E':'#EF4444')+';font-weight:700">'+(up?'↑':'↓')+Math.abs(p).toFixed(1)+'%</span>';
+  }
+  var tableRows=months.map(function(m){
+    var m25=y25.months[m],m26=y26.months[m]; if(!m25&&!m26) return '';
+    var g25=m25?m25.gmv:0,g26=m26?m26.gmv:0,c25=m25?m25.cost:0,c26=m26?m26.cost:0;
+    var r25=c25?+(g25/c25).toFixed(2):0,r26=c26?+(g26/c26).toFixed(2):0;
+    var o25=m25?Math.round(m25.ord):0,o26=m26?Math.round(m26.ord):0;
+    var oPct=o26?Math.round(o26/M_TARGET*100):0;
+    var oColor=oPct>=100?'#22C55E':oPct>=80?'#F59E0B':'#EF4444';
+    var qMark=m===1||m===4||m===7||m===10?'<span style="font-size:9px;color:var(--gold);font-weight:700;margin-left:4px">Q'+Math.ceil(m/3)+'</span>':'';
+    return '<tr style="border-top:'+(m===1||m===4||m===7||m===10?'2px solid var(--gold)':'1px solid var(--border)')+'">'+
+      '<td style="padding:8px 12px;font-weight:600">'+m+'月'+qMark+'</td>'+
+      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(c25?_sumFmt(c25):'—')+'</td>'+
+      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(c26?_sumFmt(c26):'<span style="color:var(--t4)">暂无</span>')+'</td>'+
+      '<td style="padding:8px 12px;text-align:right">'+diffBadge(c26,c25,true)+'</td>'+
+      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(g25?_sumFmt(g25):'—')+'</td>'+
+      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(g26?_sumFmt(g26):'<span style="color:var(--t4)">暂无</span>')+'</td>'+
+      '<td style="padding:8px 12px;text-align:right">'+diffBadge(g26,g25,false)+'</td>'+
+      '<td style="padding:8px 12px;text-align:right;color:'+(r25>=2.3?'#22C55E':'#EF4444')+';font-weight:700">'+(r25?r25.toFixed(2):'—')+'</td>'+
+      '<td style="padding:8px 12px;text-align:right;color:'+(r26>=2.3?'#22C55E':'#EF4444')+';font-weight:700">'+(r26?r26.toFixed(2):'—')+'</td>'+
+      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(o25?o25.toLocaleString():'—')+'</td>'+
+      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(o26?o26.toLocaleString():'<span style="color:var(--t4)">暂无</span>')+'</td>'+
+      '<td style="padding:8px 12px;text-align:right">1,000</td>'+
+      '<td style="padding:8px 12px;text-align:right;font-weight:700;color:'+oColor+'">'+(o26?oPct+'%':'—')+'</td></tr>';
+  }).join('');
+  var table='<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">'+
+    '<thead><tr style="background:var(--bg2)">'+
+    '<th style="padding:9px 12px;text-align:left">月份</th>'+
+    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25消耗</th>'+
+    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26消耗</th>'+
+    '<th style="padding:9px 12px;text-align:right">消耗±</th>'+
+    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25 GMV</th>'+
+    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26 GMV</th>'+
+    '<th style="padding:9px 12px;text-align:right">GMV±</th>'+
+    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25 ROI</th>'+
+    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26 ROI</th>'+
+    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25订单</th>'+
+    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26订单</th>'+
+    '<th style="padding:9px 12px;text-align:right">月目标</th>'+
+    '<th style="padding:9px 12px;text-align:right">26达成率</th>'+
+    '</tr></thead><tbody>'+tableRows+'</tbody></table></div>';
+
+  body.innerHTML=kpi+quarterSection+chartSection+table;
+
+  var gmv25=months.map(function(m){return y25.months[m]?y25.months[m].gmv:null;});
+  var gmv26=months.map(function(m){return y26.months[m]?y26.months[m].gmv:null;});
+  var cost25=months.map(function(m){return y25.months[m]?y25.months[m].cost:null;});
+  var cost26=months.map(function(m){return y26.months[m]?y26.months[m].cost:null;});
+  var roi25m=months.map(function(m){var o=y25.months[m];return o&&o.cost?+(o.gmv/o.cost).toFixed(2):null;});
+  var roi26m=months.map(function(m){var o=y26.months[m];return o&&o.cost?+(o.gmv/o.cost).toFixed(2):null;});
+  var ord25m=months.map(function(m){return y25.months[m]?Math.round(y25.months[m].ord):null;});
+  var ord26m=months.map(function(m){return y26.months[m]?Math.round(y26.months[m].ord):null;});
+  window['_yoyData_'+opts.chartId]={x:xL,gmv25:gmv25,gmv26:gmv26,cost25:cost25,cost26:cost26,roi25m:roi25m,roi26m:roi26m,ord25m:ord25m,ord26m:ord26m,mTarget:M_TARGET};
+  _switchPlatYoyMetric(mp,opts.chartId,'gmv');
+}
+
+function _switchPlatYoyMetric(mPrefix,chartId,metric){
+  ['Gmv','Cost','Roi','Ord'].forEach(function(m){
+    var btn=document.getElementById(mPrefix+m);
+    if(btn) btn.classList.toggle('active',m.toLowerCase()===metric);
+  });
+  var d=window['_yoyData_'+chartId]; if(!d) return;
+  var y25,y26,ytitle,traces=[];
+  if(metric==='gmv'){y25=d.gmv25;y26=d.gmv26;ytitle='销售额 (¥)';}
+  else if(metric==='cost'){y25=d.cost25;y26=d.cost26;ytitle='消耗 (¥)';}
+  else if(metric==='ord'){y25=d.ord25m;y26=d.ord26m;ytitle='订单量 (单)';}
+  else{y25=d.roi25m;y26=d.roi26m;ytitle='ROI';}
+  traces=[
+    {type:'scatter',mode:'lines+markers',x:d.x,y:y25,name:'2025年',line:{color:'rgba(160,160,160,.9)',width:2,dash:'dot'},marker:{size:6,color:'rgba(160,160,160,.9)'},connectgaps:false},
+    {type:'scatter',mode:'lines+markers',x:d.x,y:y26,name:'2026年',line:{color:'#D4AF37',width:2.5},marker:{size:7,color:'#D4AF37'},connectgaps:false}
+  ];
+  if(metric==='ord'&&d.mTarget){
+    traces.push({type:'scatter',mode:'lines',x:d.x,y:d.x.map(function(){return d.mTarget;}),name:'月目标(1,000单)',
+      line:{color:'#EF4444',width:1.5,dash:'dashdot'},hoverinfo:'skip'});
+  }
+  var layout=Object.assign({},baseLayout(),{height:320,margin:{t:20,r:30,b:40,l:70},legend:{orientation:'h',y:1.12,x:0}});
+  layout.yaxis=Object.assign({},layout.yaxis||{},{title:ytitle});
+  Plotly.react(chartId,traces,layout,{responsive:true,displayModeBar:false});
+}
+
+function renderBiliYoY(){
+  _renderYoyPanel({bodyId:'biliYoyBody',chartId:'biliYoyChart',mPrefix:'biliYoyMetric',blocks:['bili']});
+}
+function renderAdYoY(){
+  _renderYoyPanel({bodyId:'adYoyBody',chartId:'adYoyChart',mPrefix:'adYoyMetric',blocks:['cid','douten']});
 }
 
 /* ── Content sub-tab switching ── */
@@ -6296,13 +6467,17 @@ function switchBiliSubTab(sub){
   localStorage.setItem('xtb_biliSubTab', sub);
   document.getElementById('subTabBtnData').classList.toggle('active', sub==='data');
   document.getElementById('subTabBtnPL').classList.toggle('active', sub==='pl');
+  document.getElementById('subTabBtnYoy').classList.toggle('active', sub==='yoy');
   document.getElementById('biliSubTabData').classList.toggle('active', sub==='data');
   document.getElementById('biliSubTabPL').classList.toggle('active', sub==='pl');
+  document.getElementById('biliSubTabYoy').classList.toggle('active', sub==='yoy');
   if(sub==='pl'){
     buildPLTimeline();
     plCurIdx = plDates.length - 1;
     plRender(plCurIdx);
     plUpdateSlider();
+  } else if(sub==='yoy'){
+    renderBiliYoY();
   }
 }
 
@@ -7693,9 +7868,12 @@ function switchAdSubTab(sub){
   try{localStorage.setItem('xtb_adSubTab',sub);}catch(e){}
   document.getElementById('adSubBtnData').classList.toggle('active',sub==='data');
   document.getElementById('adSubBtnPL').classList.toggle('active',sub==='pl');
+  document.getElementById('adSubBtnYoy').classList.toggle('active',sub==='yoy');
   document.getElementById('adSubTabData').classList.toggle('active',sub==='data');
   document.getElementById('adSubTabPL').classList.toggle('active',sub==='pl');
+  document.getElementById('adSubTabYoy').classList.toggle('active',sub==='yoy');
   if(sub==='pl') renderAdProfit();
+  else if(sub==='yoy') renderAdYoY();
 }
 function updateAdBreakEven(roi){
   adBreakEvenRoi=roi;
