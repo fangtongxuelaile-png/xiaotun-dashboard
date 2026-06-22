@@ -1544,18 +1544,18 @@ select option{background:#FFF;color:var(--t1)}
       <!-- ═══ 渠道拆分 ═══ -->
       <div class="sec-header"><h3>🏪 渠道拆分视图</h3></div>
       <div class="chart-box" style="margin-bottom:16px"><div id="channelPieChart" style="height:280px"></div></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
-        <div class="channel-card">
+      <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:10px;margin-bottom:20px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch">
+        <div class="channel-card" style="min-width:420px;flex:0 0 420px;scroll-snap-align:start">
           <div class="channel-title">🏪 京东 CID</div>
           <div class="kpi-row" id="jdKpiRow"></div>
           <div class="chart-box" style="padding:10px"><div id="jdTrendChart" style="height:260px"></div></div>
         </div>
-        <div class="channel-card">
+        <div class="channel-card" style="min-width:420px;flex:0 0 420px;scroll-snap-align:start">
           <div class="channel-title">🐱 天猫 CID</div>
           <div class="kpi-row" id="tmKpiRow"></div>
           <div class="chart-box" style="padding:10px"><div id="tmTrendChart" style="height:260px"></div></div>
         </div>
-        <div class="channel-card">
+        <div class="channel-card" style="min-width:420px;flex:0 0 420px;scroll-snap-align:start">
           <div class="channel-title">🎵 抖店（千川）</div>
           <div class="kpi-row" id="ddKpiRow"></div>
           <div class="chart-box" style="padding:10px"><div id="ddTrendChart" style="height:260px"></div></div>
