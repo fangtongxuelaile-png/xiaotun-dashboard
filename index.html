@@ -3819,9 +3819,10 @@ function _renderYoyPanel(opts){
   // 季度卡片
   function qOrd(yObj,mons){return mons.reduce(function(s,m){return s+(yObj.months[m]?Math.round(yObj.months[m].ord):0);},0);}
   function rateBar(actual,target){
-    var pct=Math.min(Math.round(actual/target*100),100);
+    var pct=Math.round(actual/target*100);
+    var barW=Math.min(pct,100);
     var c=pct>=100?'#22C55E':pct>=80?'#F59E0B':'#EF4444';
-    return {pct:pct,color:c,bar:'<div style="flex:1;height:7px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+c+';border-radius:3px"></div></div>'};
+    return {pct:pct,color:c,bar:'<div style="flex:1;height:7px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+c+';border-radius:3px"></div></div>'};
   }
   var quarters=[{name:'Q1 一季度',label:'1—3月',months:[1,2,3]},{name:'Q2 二季度',label:'4—6月',months:[4,5,6]},
     {name:'Q3 三季度',label:'7—9月',months:[7,8,9]},{name:'Q4 四季度',label:'10—12月',months:[10,11,12]}];
