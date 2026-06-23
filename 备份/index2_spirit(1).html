@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>小豚当家内容投放数据中台 V3.12.4</title>
+<title>小豚当家内容投放数据中台 V3.12.3</title>
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -906,85 +906,6 @@ select option{background:#FFF;color:var(--t1)}
   font-weight: 600;
   letter-spacing: 0.06em;
 }
-/* ═══ 千川实时同步卡片 ═══ */
-.qc-sync-card {
-  background: linear-gradient(135deg, rgba(212,175,55,.06) 0%, rgba(212,175,55,.02) 100%);
-  border: 1px solid rgba(212,175,55,.18);
-  border-radius: 10px;
-  padding: 14px 18px;
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.qc-sync-card .qc-icon {
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(212,175,55,.2), rgba(212,175,55,.08));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-.qc-sync-card .qc-info { flex: 1; min-width: 0; }
-.qc-sync-card .qc-title {
-  font-size: 13px; font-weight: 700;
-  color: var(--gold);
-  letter-spacing: .04em;
-}
-.qc-sync-card .qc-meta {
-  font-size: 11px; color: var(--t3);
-  margin-top: 2px;
-  display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
-}
-.qc-sync-card .qc-status {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px; border-radius: 10px;
-  font-size: 10px; font-weight: 600;
-}
-.qc-sync-card .qc-status.syncing { background: rgba(52,120,246,.12); color: #3478F6; }
-.qc-sync-card .qc-status.success { background: rgba(74,222,128,.12); color: #4ADE80; }
-.qc-sync-card .qc-status.error { background: rgba(248,113,113,.12); color: #F87171; }
-.qc-sync-card .qc-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-.qc-sync-card .qc-dot.syncing { background: #3478F6; animation: qc-pulse 1s infinite; }
-.qc-sync-card .qc-dot.success { background: #4ADE80; }
-.qc-sync-card .qc-dot.error { background: #F87171; }
-@keyframes qc-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-.qc-sync-card .qc-kpis {
-  display: flex; gap: 20px; flex-shrink: 0;
-  margin-left: auto;
-}
-.qc-sync-card .qc-kpi {
-  text-align: center; min-width: 60px;
-}
-.qc-sync-card .qc-kpi .val {
-  font-size: 16px; font-weight: 800;
-  color: var(--t1);
-  font-variant-numeric: tabular-nums;
-}
-.qc-sync-card .qc-kpi .lbl {
-  font-size: 10px; color: var(--t3);
-  margin-top: 2px;
-}
-.qc-sync-card .qc-btn {
-  padding: 6px 14px; border-radius: 6px;
-  border: 1px solid rgba(212,175,55,.3);
-  background: rgba(212,175,55,.08);
-  color: var(--gold); font-size: 11px; font-weight: 600;
-  cursor: pointer; transition: all .2s;
-  white-space: nowrap;
-}
-.qc-sync-card .qc-btn:hover {
-  background: rgba(212,175,55,.15);
-  border-color: rgba(212,175,55,.5);
-}
-.qc-sync-card .qc-btn:disabled {
-  opacity: .5; cursor: not-allowed;
-}
-@media (max-width: 768px) {
-  .qc-sync-card { flex-direction: column; align-items: flex-start; }
-  .qc-sync-card .qc-kpis { margin-left: 0; width: 100%; justify-content: space-around; }
-}
   </style>
 </head>
 <body>
@@ -1005,7 +926,7 @@ select option{background:#FFF;color:var(--t1)}
           <div class="brand-en">XiaoTun Smart Home</div>
         </div>
       </div>
-      <div class="login-version-badge">内容投放数据中台 &nbsp;·&nbsp; V3.12.4</div>
+      <div class="login-version-badge">内容投放数据中台 &nbsp;·&nbsp; V3.12.2</div>
     </div>
 
     <!-- 表单区 -->
@@ -1064,7 +985,7 @@ select option{background:#FFF;color:var(--t1)}
         <div class="logo-icon">🐖</div>
         <div class="logo-text">
           <div class="title">小豚当家</div>
-          <div class="sub">内容投放数据中台 V3.12.4</div>
+          <div class="sub">内容投放数据中台 V3.12.3</div>
         </div>
       </div>
     </div>
@@ -1220,7 +1141,7 @@ select option{background:#FFF;color:var(--t1)}
     <!-- Hero -->
     <div class="hero">
       <div>
-        <h1>📊 小豚当家内容投放数据中台 V3.12.4</h1>
+        <h1>📊 小豚当家内容投放数据中台 V3.12.3</h1>
         <div class="hero-sub">统一管理投放内容 · 实时追踪效果数据</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -1244,7 +1165,6 @@ select option{background:#FFF;color:var(--t1)}
     <div class="sub-tab-bar" id="biliSubTabBar" style="display:none">
       <button class="sub-tab-btn active" id="subTabBtnData" onclick="switchBiliSubTab('data')">📺 投放数据</button>
       <button class="sub-tab-btn" id="subTabBtnPL" onclick="switchBiliSubTab('pl')">💰 盈亏监控</button>
-      <button class="sub-tab-btn" id="subTabBtnYoy" onclick="switchBiliSubTab('yoy')">📊 年度对比</button>
     </div>
     <div class="sub-tab-panel active" id="biliSubTabData">
       <!-- 代理商月报表 -->
@@ -1572,7 +1492,6 @@ select option{background:#FFF;color:var(--t1)}
         <div id="plDetailTable"></div>
       </div>
     </div>
-    <div class="sub-tab-panel" id="biliSubTabYoy"><div id="biliYoyBody"></div></div>
     </div><!-- end tabBiliPanel -->
 
     <!-- ═══ Tab: 抖音投放 ═══ -->
@@ -1581,29 +1500,8 @@ select option{background:#FFF;color:var(--t1)}
       <div class="sub-tab-bar" id="adSubTabBar" style="display:none">
         <button class="sub-tab-btn active" id="adSubBtnData" onclick="switchAdSubTab('data')">📊 投放数据</button>
         <button class="sub-tab-btn" id="adSubBtnPL" onclick="switchAdSubTab('pl')">💰 老板盈亏</button>
-        <button class="sub-tab-btn" id="adSubBtnYoy" onclick="switchAdSubTab('yoy')">📊 年度对比</button>
       </div>
       <div class="sub-tab-panel active" id="adSubTabData">
-      <!-- ═══ 千川实时同步 ═══ -->
-      <div class="qc-sync-card" id="qcSyncCard">
-        <div class="qc-icon">🔄</div>
-        <div class="qc-info">
-          <div class="qc-title">巨量千川 · 实时同步</div>
-          <div class="qc-meta">
-            <span class="qc-status" id="qcStatus"><span class="qc-dot" id="qcDot"></span><span id="qcStatusText">待同步</span></span>
-            <span id="qcLastSync">—</span>
-            <span id="qcNextSync" style="opacity:0.6"></span>
-          </div>
-        </div>
-        <div class="qc-kpis" id="qcKpis">
-          <div class="qc-kpi"><div class="val" id="qcCost">—</div><div class="lbl">消耗 ¥</div></div>
-          <div class="qc-kpi"><div class="val" id="qcShow">—</div><div class="lbl">展现</div></div>
-          <div class="qc-kpi"><div class="val" id="qcClick">—</div><div class="lbl">点击</div></div>
-          <div class="qc-kpi"><div class="val" id="qcRoi">—</div><div class="lbl">ROI</div></div>
-        </div>
-        <button class="qc-btn" id="qcSyncBtn" onclick="syncQianchuan()">🔄 立即同步</button>
-      </div>
-
       <!-- 代理商月报表 -->
       <div class="collapsible" id="adReportWrap">
         <div class="collapsible-header" onclick="toggleMonthlyReport('ad')">
@@ -1646,18 +1544,18 @@ select option{background:#FFF;color:var(--t1)}
       <!-- ═══ 渠道拆分 ═══ -->
       <div class="sec-header"><h3>🏪 渠道拆分视图</h3></div>
       <div class="chart-box" style="margin-bottom:16px"><div id="channelPieChart" style="height:280px"></div></div>
-      <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:10px;margin-bottom:20px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch">
-        <div class="channel-card" style="min-width:420px;flex:0 0 420px;scroll-snap-align:start">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+        <div class="channel-card">
           <div class="channel-title">🏪 京东 CID</div>
           <div class="kpi-row" id="jdKpiRow"></div>
           <div class="chart-box" style="padding:10px"><div id="jdTrendChart" style="height:260px"></div></div>
         </div>
-        <div class="channel-card" style="min-width:420px;flex:0 0 420px;scroll-snap-align:start">
+        <div class="channel-card">
           <div class="channel-title">🐱 天猫 CID</div>
           <div class="kpi-row" id="tmKpiRow"></div>
           <div class="chart-box" style="padding:10px"><div id="tmTrendChart" style="height:260px"></div></div>
         </div>
-        <div class="channel-card" style="min-width:420px;flex:0 0 420px;scroll-snap-align:start">
+        <div class="channel-card">
           <div class="channel-title">🎵 抖店（千川）</div>
           <div class="kpi-row" id="ddKpiRow"></div>
           <div class="chart-box" style="padding:10px"><div id="ddTrendChart" style="height:260px"></div></div>
@@ -1747,7 +1645,6 @@ select option{background:#FFF;color:var(--t1)}
           <div class="chart-box"><div id="adOrderPieChart" style="height:320px"></div></div>
         </div>
       </div>
-      <div class="sub-tab-panel" id="adSubTabYoy"><div id="adYoyBody"></div></div>
     </div><!-- end tabAdPanel -->
 
     <!-- ═══ Tab: 内容管理 ═══ -->
@@ -1868,7 +1765,6 @@ select option{background:#FFF;color:var(--t1)}
       <div class="sub-tab-bar" id="sumSubTabBar">
         <button class="sub-tab-btn active" id="sumBtnYear" onclick="switchSumView('year')">🗓 全年总视图</button>
         <button class="sub-tab-btn" id="sumBtnMonth" onclick="switchSumView('month')">📅 月度分视图</button>
-        <button class="sub-tab-btn" id="sumBtnYoy" onclick="switchSumView('yoy')">📊 年度对比</button>
       </div>
 
       <!-- 全年总视图 -->
@@ -1879,15 +1775,6 @@ select option{background:#FFF;color:var(--t1)}
         <!-- 月度趋势 -->
         <div class="sec-header"><h3>📈 月度趋势（销售额 / 消耗 / ROI）</h3></div>
         <div class="chart-box" style="margin-bottom:20px"><div id="sumTrendChart" style="height:380px"></div></div>
-        <!-- 全平台月报格子 -->
-        <div class="collapsible-header" onclick="toggleSumMonthGrid()">
-          <span class="toggle-arrow open" id="sumMonthGridArrow">▼</span>
-          <h3>📋 全平台月报总览</h3>
-          <span class="badge-sm">点击月份查看详情</span>
-        </div>
-        <div class="collapsible-body" id="sumMonthGridBody" style="max-height:600px">
-          <div class="month-grid" id="sumMonthGrid"></div>
-        </div>
         <!-- 三大板块月度矩阵 -->
         <div id="sumBlocks"></div>
       </div>
@@ -1899,10 +1786,6 @@ select option{background:#FFF;color:var(--t1)}
           <select id="sumMonthSel" class="ad-sel" onchange="renderSumMonth()"></select>
         </div>
         <div id="sumMonthBody"></div>
-      </div>
-      <!-- 年度对比面板 -->
-      <div class="sub-tab-panel" id="sumViewYoy">
-        <div id="sumYoyBody"></div>
       </div>
     </div><!-- end tabSummaryPanel -->
   </div>
@@ -1932,7 +1815,7 @@ select option{background:#FFF;color:var(--t1)}
 
 <!-- ═══ 月报详情模态框 ═══ -->
 <div class="modal-mask" id="monthReportModal">
-  <div class="modal" style="max-width:1200px;width:92vw;max-height:90vh;overflow-y:auto">
+  <div class="modal" style="max-width:960px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:12px">
         <h3 id="monthReportTitle" style="margin:0">📊 月报详情</h3>
@@ -2156,7 +2039,7 @@ async function syncLatestCloudData(){
         var lb=bList[0];
         BILIBILI_RAW=_migrateBiliMonths(JSON.parse(lb.data));
         saveBiliToStorage();
-        _biliInited=false;_summaryInited=false;
+        _biliInited=false;
         renderBiliDashboard();
         toast('📡 B站数据已同步 · 最后上传：'+lb.uploader+'（'+lb.row_count+'条）','info');
       }
@@ -2181,7 +2064,7 @@ async function syncLatestCloudData(){
       if(aList.length>0){
         var la=aList[0];
         CID_RAW=JSON.parse(la.data);
-        saveCIDToStorage();_adInited=false;_summaryInited=false;
+        saveCIDToStorage();_adInited=false;
         if(typeof renderAdDashboard==='function') renderAdDashboard();
         if(currentTab==='summary'&&typeof renderSummary==='function') renderSummary();
         toast('📡 抖音数据已同步 · 最后上传：'+la.uploader+'（'+la.row_count+'条）','info');
@@ -2221,21 +2104,16 @@ async function submitFeedback(){
   var text=document.getElementById('feedbackText').value.trim();
   if(!text){toast('⚠️ 请填写反馈内容','warn');return}
   var contact=document.getElementById('feedbackContact').value.trim();
+  var who=(currentUser?currentUser.name:'未登录')+'('+((currentUser&&currentUser.username)||'?')+')';
   var detail='['+_feedbackType+'] '+text+(contact?' | 联系:'+contact:'');
-  try{
-    await _supaInsert('operation_history',{
-      username:(currentUser&&currentUser.username)||'visitor',
-      action:'用户反馈',
-      detail:detail,
-      ip_address:_userIP||'未知'
-    });
-    closeFeedbackModal();
-    toast('✅ 反馈已提交，感谢您的意见！','ok');
-  }catch(e){
-    console.error('反馈提交失败:',e.message);
-    closeFeedbackModal();
-    toast('⚠️ 反馈提交失败，请稍后重试','warn');
-  }
+  await _supaInsert('operation_history',{
+    username:(currentUser&&currentUser.username)||'visitor',
+    action:'用户反馈',
+    detail:detail,
+    ip:_userIP||'未知'
+  });
+  closeFeedbackModal();
+  toast('✅ 反馈已提交，感谢您的意见！','ok');
 }
 
 function openAuditModal(){
@@ -2675,8 +2553,6 @@ function applySidebarDate(){
     if(typeof renderBiliDashboard==='function') renderBiliDashboard();
   }else if(currentTab==='ad'){
     if(typeof renderAdDashboard==='function') renderAdDashboard();
-  }else if(currentTab==='summary'){
-    if(typeof renderSummary==='function') renderSummary();
   }else{
     render();
   }
@@ -2691,7 +2567,7 @@ function clearSidebarDate(){
 // 更新日期筛选区右上角的范围标签
 function updateDateScopeHint(tab){
   var hint=document.getElementById('dateScopeHint');
-  if(hint) hint.textContent=tab==='bili'?'B站投放':tab==='ad'?'抖音投放':tab==='summary'?'数据汇总':'内容管理';
+  if(hint) hint.textContent=tab==='bili'?'B站投放':tab==='ad'?'抖音投放':'内容管理';
 }
 // 切 Tab 时把侧边栏日期范围重置为该 Tab 数据的完整范围，
 // 避免某个 Tab 的日期范围套到另一个 Tab 上误过滤（如 B站12月起 套到 抖音9月起）。
@@ -2699,9 +2575,7 @@ function setSidebarDateToTabRange(tab){
   var dates=[];
   if(tab==='bili') dates=flattenBili().map(function(r){return r.date;}).filter(Boolean);
   else if(tab==='ad') dates=flattenCID().map(function(r){return r.date;}).filter(Boolean);
-  else if(tab==='summary'){
-    dates=flattenBili().concat(flattenCID()).map(function(r){return r.date;}).filter(Boolean);
-  }else if(typeof contentData!=='undefined'&&contentData) contentData.forEach(function(c){if(c.pubDate)dates.push(c.pubDate);});
+  else if(typeof contentData!=='undefined'&&contentData) contentData.forEach(function(c){if(c.pubDate)dates.push(c.pubDate);});
   if(!dates.length) return;
   dates.sort();
   var f=document.getElementById('dateFrom'),t=document.getElementById('dateTo');
@@ -3355,7 +3229,7 @@ function toast(msg,type='info'){
    Tab Switching
    ══════════════════════════════════════ */
 let currentTab = 'content';
-var _adInited=false,_biliInited=false,_contentInited=false,_summaryInited=false;
+var _adInited=false,_biliInited=false,_contentInited=false;
 function switchTab(tab){
   // 离开B站Tab时暂停盈亏监控播放，释放CPU
   if(currentTab==='bili'&&tab!=='bili'){
@@ -3386,7 +3260,7 @@ function switchTab(tab){
   });
   if(tab==='ad' && !_adInited){renderAdDashboard();_adInited=true;}
   if(tab==='bili' && !_biliInited){renderBiliDashboard();_biliInited=true;}
-  if(tab==='summary'&&!_summaryInited){renderSummary();_summaryInited=true;}
+  if(tab==='summary'){renderSummary();}
   // 自动切换数据记录面板筛选
   dshFilter=tab;
   var dshTabs=document.querySelectorAll('#dshFilterRow .dsh-tab');
@@ -3410,17 +3284,10 @@ function _sumFmt(n){return '¥'+Math.round(n).toLocaleString();}
 // 按板块(cid/douten/bili)逐月聚合。抖店=CID_RAW中含"抖店/千川"的产品线，CID=其余抖音，bili=全部B站
 function _collectBlock(block){
   var by={}; // key = year*100+mon（区分跨年同月）
-  var _df=document.getElementById('dateFrom')&&document.getElementById('dateFrom').value;
-  var _dt=document.getElementById('dateTo')&&document.getElementById('dateTo').value;
   function add(b,withClick){
     var pm=_parseYM(b.month, b.rows&&b.rows[0]); var key=pm.year*100+pm.mon;
     var o=by[key]||(by[key]={year:pm.year,mon:pm.mon,cost:0,gmv:0,ord:0,clicks:0,imp:0});
-    (b.rows||[]).forEach(function(r){
-      var _rd=r.date||r.d;
-      if(_df&&_rd&&_rd<_df) return;
-      if(_dt&&_rd&&_rd>_dt) return;
-      o.cost+=r.cost||0;o.gmv+=r.gmv||0;o.ord+=r.orders||0;if(withClick){o.clicks+=r.clicks||0;o.imp+=r.impressions||0;}
-    });
+    (b.rows||[]).forEach(function(r){o.cost+=r.cost||0;o.gmv+=r.gmv||0;o.ord+=r.orders||0;if(withClick){o.clicks+=r.clicks||0;o.imp+=r.impressions||0;}});
   }
   if(block==='bili'){
     (typeof BILIBILI_RAW!=='undefined'?BILIBILI_RAW:[]).forEach(function(b){add(b,true);});
@@ -3454,10 +3321,10 @@ function renderSummary(){
     var mm={};[cid,dd,bili].forEach(function(arr){arr.forEach(function(d){var o=mm[d.n]||(mm[d.n]={year:d.year,mon:d.mon,cost:0,gmv:0});o.cost+=d.cost;o.gmv+=d.gmv;});});
     var ns=Object.keys(mm).map(Number).sort(function(a,b){return a-b;}),x=ns.map(function(k){return mm[k].year+'年'+mm[k].mon+'月';});
     Plotly.newPlot(te.id,[
-      {type:'bar',x:x,y:ns.map(function(n){return Math.round(mm[n].gmv);}),name:'销售额',marker:{color:'rgba(52,120,246,.7)',cornerradius:4},text:ns.map(function(n){return '¥'+Math.round(mm[n].gmv).toLocaleString();}),textposition:'outside',textangle:-45,textfont:{size:9,color:'#3478F6'},cliponaxis:false},
-      {type:'bar',x:x,y:ns.map(function(n){return Math.round(mm[n].cost);}),name:'消耗',marker:{color:'rgba(212,175,55,.75)',cornerradius:4},text:ns.map(function(n){return '¥'+Math.round(mm[n].cost).toLocaleString();}),textposition:'outside',textangle:-45,textfont:{size:9,color:'#A8862F'},cliponaxis:false},
+      {type:'bar',x:x,y:ns.map(function(n){return Math.round(mm[n].gmv);}),name:'销售额',marker:{color:'rgba(52,120,246,.7)',cornerradius:4}},
+      {type:'bar',x:x,y:ns.map(function(n){return Math.round(mm[n].cost);}),name:'消耗',marker:{color:'rgba(212,175,55,.75)',cornerradius:4}},
       {type:'scatter',mode:'lines+markers',x:x,y:ns.map(function(n){return +(mm[n].cost?mm[n].gmv/mm[n].cost:0).toFixed(2);}),name:'综合ROI',line:{color:'#EF4444',width:2},yaxis:'y2'}
-    ],Object.assign({},baseLayout(),{height:380,margin:{t:55,r:60,b:40,l:70},barmode:'group',yaxis:{title:'金额(¥)'},yaxis2:{title:'ROI',overlaying:'y',side:'right',showgrid:false},legend:{orientation:'h',y:1.16,x:0}}),{responsive:true,displayModeBar:false});
+    ],Object.assign({},baseLayout(),{height:360,margin:{t:30,r:60,b:40,l:70},barmode:'group',yaxis:{title:'金额(¥)'},yaxis2:{title:'ROI',overlaying:'y',side:'right',showgrid:false},legend:{orientation:'h',y:1.12,x:0}}),{responsive:true,displayModeBar:false});
   }
   // 三大板块矩阵
   var be=document.getElementById('sumBlocks');
@@ -3465,8 +3332,6 @@ function renderSummary(){
   // 月度选择器
   var sel=document.getElementById('sumMonthSel');
   if(sel){var ml={};[cid,dd,bili].forEach(function(arr){arr.forEach(function(d){ml[d.n]=d.month;});});var ks=Object.keys(ml).map(Number).sort(function(a,b){return a-b;});var cur=sel.value;sel.innerHTML=ks.map(function(k){return '<option value="'+ml[k]+'">'+ml[k]+'</option>';}).join('');if(cur&&ml[Object.keys(ml).find(function(k){return ml[k]===cur;})])sel.value=cur;else if(ks.length)sel.value=ml[ks[ks.length-1]];}
-  // 全平台月报格子
-  renderSumMonthGrid();
 }
 function _blockMatrix(title,block,data){
   var na='<span style="color:var(--t4)">待补充</span>';
@@ -3492,58 +3357,21 @@ function _blockMatrix(title,block,data){
 function switchSumView(v){
   document.getElementById('sumBtnYear').classList.toggle('active',v==='year');
   document.getElementById('sumBtnMonth').classList.toggle('active',v==='month');
-  document.getElementById('sumBtnYoy').classList.toggle('active',v==='yoy');
   document.getElementById('sumViewYear').classList.toggle('active',v==='year');
   document.getElementById('sumViewMonth').classList.toggle('active',v==='month');
-  document.getElementById('sumViewYoy').classList.toggle('active',v==='yoy');
-  if(v==='year') renderSummary(); else if(v==='month') renderSumMonth(); else renderSumYoY();
+  if(v==='year') renderSummary(); else renderSumMonth();
 }
 function renderSumMonth(){
   var cid=_collectBlock('cid'),dd=_collectBlock('douten'),bili=_collectBlock('bili');
   var ml={};[cid,dd,bili].forEach(function(a){a.forEach(function(d){ml[d.n]=d.month;});});
   var ks=Object.keys(ml).map(Number).sort(function(a,b){return a-b;});
   var sel=document.getElementById('sumMonthSel');
-  if(sel&&!sel.options.length){
-    var cur=sel.value;
-    sel.innerHTML=ks.map(function(k){return '<option value="'+ml[k]+'">'+ml[k]+'</option>';}).join('');
-    if(cur&&sel.querySelector('option[value="'+cur+'"]')) sel.value=cur;
-    else if(ks.length) sel.value=ml[ks[ks.length-1]];
-  }
   var m=sel&&sel.value?sel.value:(ks.length?ml[ks[ks.length-1]]:'');
+  function find(arr){return arr.filter(function(x){return x.month===m;})[0]||{cost:0,gmv:0,ord:0,cpa:0,cvr:0,ctr:0,roi:0};}
+  var c=find(cid),dn=find(dd),b=find(bili);
   var body=document.getElementById('sumMonthBody'); if(!body)return;
-
-  function findM(arr,mon){return arr.filter(function(x){return x.month===mon;})[0]||{cost:0,gmv:0,ord:0,cpa:0,cvr:0,ctr:0,roi:0};}
-  // 当月
-  var c=findM(cid,m),dn=findM(dd,m),b=findM(bili,m);
-  var totCost=c.cost+dn.cost+b.cost, totGmv=c.gmv+dn.gmv+b.gmv, totOrd=c.ord+dn.ord+b.ord;
-  var totRoi=totCost?totGmv/totCost:0;
-  // 环比（上月）
-  var prevM=getPrevMonthStr(m);
-  var pc=findM(cid,prevM),pdn=findM(dd,prevM),pb=findM(bili,prevM);
-  var prevCost=pc.cost+pdn.cost+pb.cost, prevGmv=pc.gmv+pdn.gmv+pb.gmv, prevOrd=pc.ord+pdn.ord+pb.ord;
-  var prevRoi=prevCost?prevGmv/prevCost:0;
-  var hasPrev=[cid,dd,bili].some(function(a){return a.some(function(x){return x.month===prevM;});});
-  // 同比（去年同月）
-  var yoyM=getSameMonthLastYear(m);
-  var yc=findM(cid,yoyM),ydn=findM(dd,yoyM),yb=findM(bili,yoyM);
-  var yoyCost=yc.cost+ydn.cost+yb.cost, yoyGmv=yc.gmv+ydn.gmv+yb.gmv, yoyOrd=yc.ord+ydn.ord+yb.ord;
-  var yoyRoi=yoyCost?yoyGmv/yoyCost:0;
-  var hasYoy=[cid,dd,bili].some(function(a){return a.some(function(x){return x.month===yoyM;});});
-
   var na='<span style="color:var(--t4)">待补充</span>';
-  var node=SUM_NODES[String(m).replace(/^\d{4}年/,'')]||'';
-  var mLabel=/\d{4}年/.test(m)?m:(_sumYearOf(m)?_sumYearOf(m)+'年'+m:m);
-
-  // ── KPI 卡片（4张）含环比+同比 ──
-  var roiColor=totRoi>=2.5?'#22C55E':totRoi>=2?'#3B82F6':'#EF4444';
-  var kpi='<div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">'+
-    '<div class="kpi-card"><div class="kpi-label">全平台销售额</div><div class="kpi-value" style="font-size:22px">'+_sumFmt(totGmv)+'</div>'+(hasPrev?momTag(totGmv,prevGmv,false):'')+(hasYoy?yoyTag(totGmv,yoyGmv,false):'')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">全平台消耗</div><div class="kpi-value" style="font-size:22px">'+_sumFmt(totCost)+'</div>'+(hasPrev?momTag(totCost,prevCost,true):'')+(hasYoy?yoyTag(totCost,yoyCost,true):'')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">综合 ROI</div><div class="kpi-value" style="font-size:26px;color:'+roiColor+'">'+totRoi.toFixed(2)+'</div>'+(hasPrev?momTag(totRoi,prevRoi,false):'')+(hasYoy?yoyTag(totRoi,yoyRoi,false):'')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">全平台订单</div><div class="kpi-value" style="font-size:22px">'+Math.round(totOrd).toLocaleString()+'</div>'+(hasPrev?momTag(totOrd,prevOrd,false):'')+(hasYoy?yoyTag(totOrd,yoyOrd,false):'')+'</div>'+
-    '</div>';
-
-  // ── 平台明细对比表 ──
+  var node=SUM_NODES[String(m).replace(/^\d{4}年/,'')]||'—';
   var blocks=[['📱 抖音CID',c,'cid'],['🛒 抖音抖店',dn,'douten'],['📺 B站',b,'bili']];
   var rows=[
     ['目标ROI',function(x,blk){return SUM_TARGET[blk];}],
@@ -3552,495 +3380,22 @@ function renderSumMonth(){
     ['广告消耗',function(x){return _sumFmt(x.cost);}],
     ['转化成本',function(x){return x.ord?'¥'+Math.round(x.cpa).toLocaleString():'—';}],
     ['转化率',function(x,blk){return blk==='bili'?(x.cvr*100).toFixed(2)+'%':na;}],
-    ['综合ROI',function(x,blk){var t=SUM_TARGET[blk];var col=x.roi>=t?'#22C55E':'#EF4444';return '<b style="color:'+col+'">'+x.roi.toFixed(2)+'</b>';}],
+    ['总ROI(行业均值2)',function(x,blk){var t=SUM_TARGET[blk];var col=x.roi>=t?'#22C55E':'#EF4444';return '<b style="color:'+col+'">'+x.roi.toFixed(2)+'</b>';}],
     ['广告点击率',function(x,blk){return blk==='bili'?(x.ctr*100).toFixed(2)+'%':na;}]
   ];
-  var head='<th style="padding:9px 12px;text-align:left">指标</th>'+
-    blocks.map(function(bl){return '<th style="padding:9px 12px;text-align:right">'+bl[0]+'</th>';}).join('')+
-    '<th style="padding:9px 12px;text-align:right;background:var(--bg2)">合计</th>';
+  var head='<th style="padding:9px 12px;text-align:left">指标</th>'+blocks.map(function(bl){return '<th style="padding:9px 12px;text-align:right">'+bl[0]+'</th>';}).join('')+'<th style="padding:9px 12px;text-align:right;background:var(--bg2)">合计</th>';
   var bodyRows=rows.map(function(rd){
     var cells=blocks.map(function(bl){return '<td style="padding:8px 12px;text-align:right">'+rd[1](bl[1],bl[2])+'</td>';}).join('');
     var label=rd[0],total='—';
-    if(label==='实际销售额') total=_sumFmt(totGmv);
-    else if(label==='实际转化销量') total=Math.round(totOrd).toLocaleString();
-    else if(label==='广告消耗') total=_sumFmt(totCost);
-    else if(label==='转化成本'){total=totOrd?'¥'+Math.round(totCost/totOrd).toLocaleString():'—';}
-    else if(label==='综合ROI'){total='<b style="color:'+roiColor+'">'+totRoi.toFixed(2)+'</b>';}
+    if(label==='实际销售额')total=_sumFmt(c.gmv+dn.gmv+b.gmv);
+    else if(label==='实际转化销量')total=Math.round(c.ord+dn.ord+b.ord).toLocaleString();
+    else if(label==='广告消耗')total=_sumFmt(c.cost+dn.cost+b.cost);
+    else if(label==='转化成本'){var tc2=c.cost+dn.cost+b.cost,toq=c.ord+dn.ord+b.ord;total=toq?'¥'+Math.round(tc2/toq).toLocaleString():'—';}
+    else if(label==='总ROI(行业均值2)'){var tcc=c.cost+dn.cost+b.cost,tgg=c.gmv+dn.gmv+b.gmv;total='<b>'+(tcc?tgg/tcc:0).toFixed(2)+'</b>';}
     return '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 12px;font-weight:600">'+label+'</td>'+cells+'<td style="padding:8px 12px;text-align:right;font-weight:700;background:var(--bg2)">'+total+'</td></tr>';
   }).join('');
-
-  body.innerHTML=
-    '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'+
-      '<span style="font-size:18px;font-weight:700">'+mLabel+'</span>'+
-      (node?'<span class="badge-sm">'+node+'</span>':'')+
-      (hasPrev?'<span style="font-size:11px;color:var(--t3);margin-left:4px">vs 上月 '+prevM+'</span>':'')+
-      (hasYoy?'<span style="font-size:11px;color:var(--t3)">· vs 去年同月 '+yoyM+'</span>':'')+
-    '</div>'+
-    kpi+
-    '<div class="sec-header" style="margin:0 0 10px"><h3>📋 平台明细</h3></div>'+
+  body.innerHTML='<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px"><span style="font-size:17px;font-weight:700">'+(/\d{4}年/.test(m)?m:(_sumYearOf(m)?_sumYearOf(m)+'年'+m:m))+'</span><span class="badge-sm">'+node+'</span></div>'+
     '<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:var(--bg2)">'+head+'</tr></thead><tbody>'+bodyRows+'</tbody></table></div>';
-}
-
-// ══ 全平台月报格子 ══
-function toggleSumMonthGrid(){
-  var body=document.getElementById('sumMonthGridBody');
-  var arrow=document.getElementById('sumMonthGridArrow');
-  if(body) body.classList.toggle('collapsed');
-  if(arrow) arrow.classList.toggle('open');
-}
-function renderSumMonthGrid(){
-  var grid=document.getElementById('sumMonthGrid');
-  if(!grid) return;
-  var cid=_collectBlock('cid'),dd=_collectBlock('douten'),bili=_collectBlock('bili');
-  var ml={};
-  [cid,dd,bili].forEach(function(a){a.forEach(function(d){ml[d.n]=d.month;});});
-  var ks=Object.keys(ml).map(Number).sort(function(a,b){return a-b;});
-  if(!ks.length){grid.innerHTML='<div style="color:var(--t3);font-size:12px;padding:8px">暂无数据</div>';return;}
-  grid.innerHTML=ks.map(function(k){
-    var month=ml[k];
-    var yr=String(month).match(/(\d{4})年/);
-    var mn=String(month).match(/(\d+)月/);
-    var yearLabel=yr?'<span class="mb-year">'+yr[1]+'年</span>':'';
-    var big=mn?mn[1]+'月':month;
-    return '<button class="month-btn" onclick="openSumMonthReport(\''+month+'\')">'+yearLabel+'<span class="mb-label">'+big+'</span><span class="mb-sub">全平台月报</span></button>';
-  }).join('');
-}
-function openSumMonthReport(month){
-  document.getElementById('monthReportTitle').innerHTML='📊 '+month+' 全平台数据总览';
-  document.getElementById('monthReportContent').innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">加载中...</div>';
-  document.getElementById('monthReportModal').classList.add('show');
-  setTimeout(function(){document.getElementById('monthReportContent').innerHTML=renderSumMonthDetail(month);},50);
-}
-function renderSumMonthDetail(month){
-  var cid=_collectBlock('cid'),dd=_collectBlock('douten'),bili=_collectBlock('bili');
-  function findM(arr,mon){return arr.filter(function(x){return x.month===mon;})[0]||{cost:0,gmv:0,ord:0,cpa:0,cvr:0,ctr:0,roi:0};}
-  var c=findM(cid,month),dn=findM(dd,month),b=findM(bili,month);
-  var totCost=c.cost+dn.cost+b.cost, totGmv=c.gmv+dn.gmv+b.gmv, totOrd=c.ord+dn.ord+b.ord;
-  var totRoi=totCost?totGmv/totCost:0;
-  var prevM=getPrevMonthStr(month);
-  var pc=findM(cid,prevM),pdn=findM(dd,prevM),pb=findM(bili,prevM);
-  var prevCost=pc.cost+pdn.cost+pb.cost, prevGmv=pc.gmv+pdn.gmv+pb.gmv, prevOrd=pc.ord+pdn.ord+pb.ord;
-  var prevRoi=prevCost?prevGmv/prevCost:0;
-  var hasPrev=[cid,dd,bili].some(function(a){return a.some(function(x){return x.month===prevM;});});
-  var yoyM=getSameMonthLastYear(month);
-  var yc=findM(cid,yoyM),ydn=findM(dd,yoyM),yb=findM(bili,yoyM);
-  var yoyCost=yc.cost+ydn.cost+yb.cost, yoyGmv=yc.gmv+ydn.gmv+yb.gmv, yoyOrd=yc.ord+ydn.ord+yb.ord;
-  var yoyRoi=yoyCost?yoyGmv/yoyCost:0;
-  var hasYoy=[cid,dd,bili].some(function(a){return a.some(function(x){return x.month===yoyM;});});
-  var roiColor=totRoi>=2.5?'#22C55E':totRoi>=2?'#3B82F6':'#EF4444';
-  var na='<span style="color:var(--t4)">待补充</span>';
-  var node=SUM_NODES[String(month).replace(/^\d{4}年/,'')]||'';
-  // KPI 卡片
-  var kpi='<div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">'+
-    '<div class="kpi-card"><div class="kpi-label">全平台销售额</div><div class="kpi-value" style="font-size:22px">'+_sumFmt(totGmv)+'</div>'+(hasPrev?momTag(totGmv,prevGmv,false):'')+(hasYoy?yoyTag(totGmv,yoyGmv,false):'')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">全平台消耗</div><div class="kpi-value" style="font-size:22px">'+_sumFmt(totCost)+'</div>'+(hasPrev?momTag(totCost,prevCost,true):'')+(hasYoy?yoyTag(totCost,yoyCost,true):'')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">综合 ROI</div><div class="kpi-value" style="font-size:26px;color:'+roiColor+'">'+totRoi.toFixed(2)+'</div>'+(hasPrev?momTag(totRoi,prevRoi,false):'')+(hasYoy?yoyTag(totRoi,yoyRoi,false):'')+'</div>'+
-    '<div class="kpi-card"><div class="kpi-label">全平台订单</div><div class="kpi-value" style="font-size:22px">'+Math.round(totOrd).toLocaleString()+'</div>'+(hasPrev?momTag(totOrd,prevOrd,false):'')+(hasYoy?yoyTag(totOrd,yoyOrd,false):'')+'</div>'+
-    '</div>';
-  // 平台明细表
-  var blocks=[['📱 抖音CID',c,'cid'],['🛒 抖音抖店',dn,'douten'],['📺 B站',b,'bili']];
-  var rows=[
-    ['目标ROI',function(x,blk){return SUM_TARGET[blk];}],
-    ['实际销售额',function(x){return _sumFmt(x.gmv);}],
-    ['实际转化销量',function(x){return Math.round(x.ord).toLocaleString();}],
-    ['广告消耗',function(x){return _sumFmt(x.cost);}],
-    ['转化成本',function(x){return x.ord?'¥'+Math.round(x.cpa).toLocaleString():'—';}],
-    ['转化率',function(x,blk){return blk==='bili'?(x.cvr*100).toFixed(2)+'%':na;}],
-    ['综合ROI',function(x,blk){var t=SUM_TARGET[blk];var col=x.roi>=t?'#22C55E':'#EF4444';return '<b style="color:'+col+'">'+x.roi.toFixed(2)+'</b>';}],
-    ['广告点击率',function(x,blk){return blk==='bili'?(x.ctr*100).toFixed(2)+'%':na;}]
-  ];
-  var head='<th style="padding:9px 12px;text-align:left">指标</th>'+
-    blocks.map(function(bl){return '<th style="padding:9px 12px;text-align:right">'+bl[0]+'</th>';}).join('')+
-    '<th style="padding:9px 12px;text-align:right;background:var(--bg2)">合计</th>';
-  var bodyRows=rows.map(function(rd){
-    var cells=blocks.map(function(bl){return '<td style="padding:8px 12px;text-align:right">'+rd[1](bl[1],bl[2])+'</td>';}).join('');
-    var label=rd[0],total='—';
-    if(label==='实际销售额') total=_sumFmt(totGmv);
-    else if(label==='实际转化销量') total=Math.round(totOrd).toLocaleString();
-    else if(label==='广告消耗') total=_sumFmt(totCost);
-    else if(label==='转化成本'){total=totOrd?'¥'+Math.round(totCost/totOrd).toLocaleString():'—';}
-    else if(label==='综合ROI'){total='<b style="color:'+roiColor+'">'+totRoi.toFixed(2)+'</b>';}
-    return '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 12px;font-weight:600">'+label+'</td>'+cells+'<td style="padding:8px 12px;text-align:right;font-weight:700;background:var(--bg2)">'+total+'</td></tr>';
-  }).join('');
-  return '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'+
-    (node?'<span class="badge-sm">'+node+'</span>':'')+
-    (hasPrev?'<span style="font-size:11px;color:var(--t3)">vs 上月 '+prevM+'</span>':'')+
-    (hasYoy?'<span style="font-size:11px;color:var(--t3)">· vs 去年同月 '+yoyM+'</span>':'')+
-    '</div>'+kpi+
-    '<div class="sec-header" style="margin:0 0 10px"><h3>📋 平台明细</h3></div>'+
-    '<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:var(--bg2)">'+head+'</tr></thead><tbody>'+bodyRows+'</tbody></table></div>';
-}
-
-/* ── 年度对比 YoY ── */
-function _yoyCard(label,v25,v26,n25,n26,inverse){
-  var hasBoth=n25>0&&n26>0;
-  var pct=hasBoth?(n26-n25)/n25*100:null;
-  var up=pct>=0,better=inverse?!up:up;
-  var badge=pct!==null?'<div style="font-size:13px;font-weight:700;color:'+(better?'#22C55E':'#EF4444')+';margin-top:6px">'+(up?'↑':'↓')+Math.abs(pct).toFixed(1)+'% 同比</div>':'';
-  return '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">'+
-    '<div style="font-size:11px;color:var(--t3);font-weight:600;margin-bottom:10px">'+label+'</div>'+
-    '<div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">'+
-    '<div><div style="font-size:10px;color:var(--t3);margin-bottom:2px">2025年</div><div style="font-size:17px;font-weight:700;color:var(--t3)">'+v25+'</div></div>'+
-    '<div style="font-size:18px;color:var(--t3);align-self:center">→</div>'+
-    '<div><div style="font-size:10px;color:var(--gold);margin-bottom:2px">2026年</div><div style="font-size:22px;font-weight:900;color:var(--t1)">'+v26+'</div></div>'+
-    '</div>'+badge+'</div>';
-}
-
-function renderSumYoY(){
-  var body=document.getElementById('sumYoyBody');
-  if(!body) return;
-
-  // 聚合全平台数据，按年拆分
-  var all={};
-  ['cid','douten','bili'].forEach(function(blk){
-    var arr=_collectBlock(blk);
-    arr.forEach(function(d){
-      var key=d.year*100+d.mon;
-      var o=all[key]||(all[key]={year:d.year,mon:d.mon,cost:0,gmv:0,ord:0});
-      o.cost+=d.cost; o.gmv+=d.gmv; o.ord+=d.ord;
-    });
-  });
-
-  var y25={cost:0,gmv:0,ord:0,months:{}},y26={cost:0,gmv:0,ord:0,months:{}};
-  Object.keys(all).forEach(function(k){
-    var d=all[k];
-    if(d.year===2025){
-      y25.cost+=d.cost;y25.gmv+=d.gmv;y25.ord+=d.ord;
-      y25.months[d.mon]={cost:d.cost,gmv:d.gmv,ord:d.ord};
-    }else if(d.year===2026){
-      y26.cost+=d.cost;y26.gmv+=d.gmv;y26.ord+=d.ord;
-      y26.months[d.mon]={cost:d.cost,gmv:d.gmv,ord:d.ord};
-    }
-  });
-
-  var roi25=y25.cost?y25.gmv/y25.cost:0,roi26=y26.cost?y26.gmv/y26.cost:0;
-
-  // KPI 卡片（含年度订单达成率 = 全年目标12000单）
-  var ANN_TARGET=12000;
-  var ann26Pct=Math.round(y26.ord/ANN_TARGET*100);
-  var ann26Color=ann26Pct>=100?'#22C55E':ann26Pct>=80?'#F59E0B':'#EF4444';
-  var kpi='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px">'+
-    _yoyCard('全年销售额(GMV)',_sumFmt(y25.gmv),_sumFmt(y26.gmv),y25.gmv,y26.gmv,false)+
-    _yoyCard('全年广告消耗',_sumFmt(y25.cost),_sumFmt(y26.cost),y25.cost,y26.cost,true)+
-    _yoyCard('综合ROI',roi25.toFixed(2),roi26.toFixed(2),roi25,roi26,false)+
-    // 订单卡片单独渲染以含进度条
-    '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">'+
-    '<div style="font-size:11px;color:var(--t3);font-weight:600;margin-bottom:10px">全年订单量（目标 12,000 单）</div>'+
-    '<div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px">'+
-    '<div><div style="font-size:10px;color:var(--t3);margin-bottom:2px">2025年</div><div style="font-size:17px;font-weight:700;color:var(--t3)">'+Math.round(y25.ord).toLocaleString()+'单</div></div>'+
-    '<div style="font-size:18px;color:var(--t3);align-self:center">→</div>'+
-    '<div><div style="font-size:10px;color:var(--gold);margin-bottom:2px">2026年</div><div style="font-size:22px;font-weight:900;color:var(--t1)">'+Math.round(y26.ord).toLocaleString()+'单</div></div>'+
-    '</div>'+
-    '<div style="display:flex;align-items:center;gap:8px">'+
-    '<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">'+
-    '<div style="height:100%;width:'+Math.min(ann26Pct,100)+'%;background:'+ann26Color+';border-radius:4px"></div></div>'+
-    '<span style="font-size:12px;font-weight:800;color:'+ann26Color+'">'+ann26Pct+'%</span>'+
-    '</div></div>'+
-    '</div>';
-
-  // 季度目标达成区
-  var Q_TARGET=3000, M_TARGET=1000;
-  var quarters=[
-    {name:'Q1 一季度',label:'1—3月',months:[1,2,3]},
-    {name:'Q2 二季度',label:'4—6月',months:[4,5,6]},
-    {name:'Q3 三季度',label:'7—9月',months:[7,8,9]},
-    {name:'Q4 四季度',label:'10—12月',months:[10,11,12]}
-  ];
-  function qOrd(yObj,mons){return mons.reduce(function(s,m){return s+(yObj.months[m]?Math.round(yObj.months[m].ord):0);},0);}
-  function rateBar(actual,target){
-    var pct=Math.min(Math.round(actual/target*100),100);
-    var c=pct>=100?'#22C55E':pct>=80?'#F59E0B':'#EF4444';
-    return {pct:pct,color:c,bar:'<div style="flex:1;height:7px;background:var(--bg2);border-radius:3px;overflow:hidden">'+
-      '<div style="height:100%;width:'+pct+'%;background:'+c+';border-radius:3px;transition:width .5s"></div></div>'};
-  }
-  var qCards=quarters.map(function(q){
-    var a25=qOrd(y25,q.months),a26=qOrd(y26,q.months);
-    var rb25=rateBar(a25,Q_TARGET),rb26=rateBar(a26,Q_TARGET);
-    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">'+
-      '<div style="font-weight:700;font-size:13px">'+q.name+'</div>'+
-      '<div style="font-size:11px;color:var(--t3);margin-bottom:12px">'+q.label+' · 目标 <b>3,000 单</b></div>'+
-      '<div style="font-size:10px;color:var(--t3);margin-bottom:4px">2025年 · '+a25.toLocaleString()+'单</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+rb25.bar+'<span style="font-size:12px;font-weight:700;color:'+rb25.color+';white-space:nowrap">'+rb25.pct+'%</span></div>'+
-      '<div style="font-size:10px;color:var(--gold);margin-bottom:4px">2026年 · '+(a26?a26.toLocaleString()+'单':'暂无数据')+'</div>'+
-      '<div style="display:flex;align-items:center;gap:8px">'+rb26.bar+'<span style="font-size:12px;font-weight:700;color:'+rb26.color+';white-space:nowrap">'+(a26?rb26.pct+'%':'—')+'</span></div>'+
-      '</div>';
-  }).join('');
-  var quarterSection='<div style="margin-bottom:28px">'+
-    '<div style="font-weight:700;font-size:14px;margin-bottom:14px">🎯 季度订单达成率（目标 3,000 单/季）</div>'+
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px">'+qCards+'</div></div>';
-
-  // 月度数据
-  var months=[1,2,3,4,5,6,7,8,9,10,11,12];
-  var xLabels=months.map(function(m){return m+'月';});
-  var gmv25=months.map(function(m){return y25.months[m]?y25.months[m].gmv:null;});
-  var gmv26=months.map(function(m){return y26.months[m]?y26.months[m].gmv:null;});
-  var cost25=months.map(function(m){return y25.months[m]?y25.months[m].cost:null;});
-  var cost26=months.map(function(m){return y26.months[m]?y26.months[m].cost:null;});
-  var roi25m=months.map(function(m){var o=y25.months[m];return o&&o.cost?+(o.gmv/o.cost).toFixed(2):null;});
-  var roi26m=months.map(function(m){var o=y26.months[m];return o&&o.cost?+(o.gmv/o.cost).toFixed(2):null;});
-  var ord25m=months.map(function(m){return y25.months[m]?Math.round(y25.months[m].ord):null;});
-  var ord26m=months.map(function(m){return y26.months[m]?Math.round(y26.months[m].ord):null;});
-
-  // 趋势图区（新增订单指标）
-  var chartSection='<div class="chart-box" style="margin-bottom:28px">'+
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
-    '<span style="font-weight:700;font-size:14px">📈 月度趋势对比</span>'+
-    '<button class="sub-tab-btn active" id="yoyMetricGmv" onclick="switchYoyMetric(\'gmv\')" style="padding:4px 12px;font-size:12px">销售额</button>'+
-    '<button class="sub-tab-btn" id="yoyMetricCost" onclick="switchYoyMetric(\'cost\')" style="padding:4px 12px;font-size:12px">消耗</button>'+
-    '<button class="sub-tab-btn" id="yoyMetricRoi" onclick="switchYoyMetric(\'roi\')" style="padding:4px 12px;font-size:12px">ROI</button>'+
-    '<button class="sub-tab-btn" id="yoyMetricOrd" onclick="switchYoyMetric(\'ord\')" style="padding:4px 12px;font-size:12px">订单量</button>'+
-    '</div>'+
-    '<div id="sumYoyChart" style="height:320px"></div></div>';
-
-  // 明细对比表（含订单+达成率列）
-  function diffBadge(a,b,inverse){
-    if(!b||!a) return '<span style="color:var(--t4)">—</span>';
-    var p=(a-b)/b*100,up=p>=0,better=inverse?!up:up;
-    return '<span style="color:'+(better?'#22C55E':'#EF4444')+';font-weight:700">'+(up?'↑':'↓')+Math.abs(p).toFixed(1)+'%</span>';
-  }
-  var tableRows=months.map(function(m){
-    var m25=y25.months[m],m26=y26.months[m];
-    if(!m25&&!m26) return '';
-    var g25=m25?m25.gmv:0,g26=m26?m26.gmv:0;
-    var c25=m25?m25.cost:0,c26=m26?m26.cost:0;
-    var r25=c25?+(g25/c25).toFixed(2):0,r26=c26?+(g26/c26).toFixed(2):0;
-    var o25=m25?Math.round(m25.ord):0,o26=m26?Math.round(m26.ord):0;
-    var oPct=o26?Math.round(o26/M_TARGET*100):0;
-    var oColor=oPct>=100?'#22C55E':oPct>=80?'#F59E0B':'#EF4444';
-    // 季度标记
-    var qMark=m===1||m===4||m===7||m===10?'<span style="font-size:9px;color:var(--gold);font-weight:700;margin-left:4px">Q'+(Math.ceil(m/3))+'</span>':'';
-    return '<tr style="border-top:1px solid var(--border)'+(m===1||m===4||m===7||m===10?';border-top:2px solid var(--gold)':'')+'">' +
-      '<td style="padding:8px 12px;font-weight:600">'+m+'月'+qMark+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(c25?_sumFmt(c25):'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(c26?_sumFmt(c26):'<span style="color:var(--t4)">暂无</span>')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right">'+diffBadge(c26,c25,true)+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(g25?_sumFmt(g25):'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(g26?_sumFmt(g26):'<span style="color:var(--t4)">暂无</span>')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right">'+diffBadge(g26,g25,false)+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:'+(r25>=2.3?'#22C55E':'#EF4444')+';font-weight:700">'+(r25?r25.toFixed(2):'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:'+(r26>=2.3?'#22C55E':'#EF4444')+';font-weight:700">'+(r26?r26.toFixed(2):'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(o25?o25.toLocaleString():'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(o26?o26.toLocaleString():'<span style="color:var(--t4)">暂无</span>')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right">1,000</td>'+
-      '<td style="padding:8px 12px;text-align:right;font-weight:700;color:'+oColor+'">'+(o26?oPct+'%':'—')+'</td>'+
-      '</tr>';
-  }).join('');
-  var table='<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">'+
-    '<thead><tr style="background:var(--bg2)">'+
-    '<th style="padding:9px 12px;text-align:left">月份</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25消耗</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26消耗</th>'+
-    '<th style="padding:9px 12px;text-align:right">消耗±</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25 GMV</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26 GMV</th>'+
-    '<th style="padding:9px 12px;text-align:right">GMV±</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25 ROI</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26 ROI</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25订单</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26订单</th>'+
-    '<th style="padding:9px 12px;text-align:right">月目标</th>'+
-    '<th style="padding:9px 12px;text-align:right">26达成率</th>'+
-    '</tr></thead><tbody>'+tableRows+'</tbody></table></div>';
-
-  body.innerHTML=kpi+quarterSection+chartSection+table;
-
-  // 存储图表数据，初始渲染销售额
-  window._yoyData={x:xLabels,gmv25:gmv25,gmv26:gmv26,cost25:cost25,cost26:cost26,roi25m:roi25m,roi26m:roi26m,ord25m:ord25m,ord26m:ord26m,mTarget:M_TARGET};
-  switchYoyMetric('gmv');
-}
-
-function switchYoyMetric(metric){
-  ['Gmv','Cost','Roi','Ord'].forEach(function(m){
-    var btn=document.getElementById('yoyMetric'+m);
-    if(btn) btn.classList.toggle('active',m.toLowerCase()===metric);
-  });
-  var d=window._yoyData;
-  if(!d) return;
-  var y25,y26,ytitle,traces=[];
-  if(metric==='gmv'){y25=d.gmv25;y26=d.gmv26;ytitle='销售额 (¥)';}
-  else if(metric==='cost'){y25=d.cost25;y26=d.cost26;ytitle='消耗 (¥)';}
-  else if(metric==='ord'){y25=d.ord25m;y26=d.ord26m;ytitle='订单量 (单)';}
-  else{y25=d.roi25m;y26=d.roi26m;ytitle='ROI';}
-  traces=[
-    {type:'scatter',mode:'lines+markers',x:d.x,y:y25,name:'2025年',line:{color:'rgba(160,160,160,.9)',width:2,dash:'dot'},marker:{size:6,color:'rgba(160,160,160,.9)'},connectgaps:false},
-    {type:'scatter',mode:'lines+markers',x:d.x,y:y26,name:'2026年',line:{color:'#D4AF37',width:2.5},marker:{size:7,color:'#D4AF37'},connectgaps:false}
-  ];
-  // 订单模式加月目标虚线
-  if(metric==='ord'&&d.mTarget){
-    traces.push({type:'scatter',mode:'lines',x:d.x,y:d.x.map(function(){return d.mTarget;}),name:'月目标(1,000单)',
-      line:{color:'#EF4444',width:1.5,dash:'dashdot'},hoverinfo:'skip'});
-  }
-  var layout=Object.assign({},baseLayout(),{height:320,margin:{t:20,r:30,b:40,l:70},legend:{orientation:'h',y:1.12,x:0}});
-  layout.yaxis=Object.assign({},layout.yaxis||{},{title:ytitle});
-  Plotly.react('sumYoyChart',traces,layout,{responsive:true,displayModeBar:false});
-}
-
-/* ── 平台年度对比（B站 / 抖音）共用核心 ── */
-function _renderYoyPanel(opts){
-  // opts: {bodyId, chartId, mPrefix, blocks:[], platformLabel}
-  var body=document.getElementById(opts.bodyId); if(!body) return;
-  var all={};
-  opts.blocks.forEach(function(blk){
-    _collectBlock(blk).forEach(function(d){
-      var k=d.year*100+d.mon;
-      var o=all[k]||(all[k]={year:d.year,mon:d.mon,cost:0,gmv:0,ord:0});
-      o.cost+=d.cost; o.gmv+=d.gmv; o.ord+=d.ord;
-    });
-  });
-  var y25={cost:0,gmv:0,ord:0,months:{}},y26={cost:0,gmv:0,ord:0,months:{}};
-  Object.keys(all).forEach(function(k){
-    var d=all[k];
-    if(d.year===2025){y25.cost+=d.cost;y25.gmv+=d.gmv;y25.ord+=d.ord;y25.months[d.mon]={cost:d.cost,gmv:d.gmv,ord:d.ord};}
-    else if(d.year===2026){y26.cost+=d.cost;y26.gmv+=d.gmv;y26.ord+=d.ord;y26.months[d.mon]={cost:d.cost,gmv:d.gmv,ord:d.ord};}
-  });
-  var roi25=y25.cost?y25.gmv/y25.cost:0,roi26=y26.cost?y26.gmv/y26.cost:0;
-  var ANN_TARGET=12000,Q_TARGET=3000,M_TARGET=1000;
-  var ann26Pct=Math.round(y26.ord/ANN_TARGET*100);
-  var ann26Color=ann26Pct>=100?'#22C55E':ann26Pct>=80?'#F59E0B':'#EF4444';
-
-  // KPI
-  var kpi='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px">'+
-    _yoyCard('销售额(GMV)',_sumFmt(y25.gmv),_sumFmt(y26.gmv),y25.gmv,y26.gmv,false)+
-    _yoyCard('广告消耗',_sumFmt(y25.cost),_sumFmt(y26.cost),y25.cost,y26.cost,true)+
-    _yoyCard('综合ROI',roi25.toFixed(2),roi26.toFixed(2),roi25,roi26,false)+
-    '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">'+
-    '<div style="font-size:11px;color:var(--t3);font-weight:600;margin-bottom:10px">全年订单量（目标 12,000 单）</div>'+
-    '<div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px">'+
-    '<div><div style="font-size:10px;color:var(--t3);margin-bottom:2px">2025年</div><div style="font-size:17px;font-weight:700;color:var(--t3)">'+Math.round(y25.ord).toLocaleString()+'单</div></div>'+
-    '<div style="font-size:18px;color:var(--t3);align-self:center">→</div>'+
-    '<div><div style="font-size:10px;color:var(--gold);margin-bottom:2px">2026年</div><div style="font-size:22px;font-weight:900;color:var(--t1)">'+Math.round(y26.ord).toLocaleString()+'单</div></div>'+
-    '</div>'+
-    '<div style="display:flex;align-items:center;gap:8px">'+
-    '<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">'+
-    '<div style="height:100%;width:'+Math.min(ann26Pct,100)+'%;background:'+ann26Color+';border-radius:4px"></div></div>'+
-    '<span style="font-size:12px;font-weight:800;color:'+ann26Color+'">'+ann26Pct+'%</span></div></div></div>';
-
-  // 季度卡片
-  function qOrd(yObj,mons){return mons.reduce(function(s,m){return s+(yObj.months[m]?Math.round(yObj.months[m].ord):0);},0);}
-  function rateBar(actual,target){
-    var pct=Math.round(actual/target*100);
-    var barW=Math.min(pct,100);
-    var c=pct>=100?'#22C55E':pct>=80?'#F59E0B':'#EF4444';
-    return {pct:pct,color:c,bar:'<div style="flex:1;height:7px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+c+';border-radius:3px"></div></div>'};
-  }
-  var quarters=[{name:'Q1 一季度',label:'1—3月',months:[1,2,3]},{name:'Q2 二季度',label:'4—6月',months:[4,5,6]},
-    {name:'Q3 三季度',label:'7—9月',months:[7,8,9]},{name:'Q4 四季度',label:'10—12月',months:[10,11,12]}];
-  var qCards=quarters.map(function(q){
-    var a25=qOrd(y25,q.months),a26=qOrd(y26,q.months);
-    var rb25=rateBar(a25,Q_TARGET),rb26=rateBar(a26,Q_TARGET);
-    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">'+
-      '<div style="font-weight:700;font-size:13px">'+q.name+'</div>'+
-      '<div style="font-size:11px;color:var(--t3);margin-bottom:12px">'+q.label+' · 目标 <b>3,000 单</b></div>'+
-      '<div style="font-size:10px;color:var(--t3);margin-bottom:4px">2025年 · '+a25.toLocaleString()+'单</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+rb25.bar+'<span style="font-size:12px;font-weight:700;color:'+rb25.color+';white-space:nowrap">'+rb25.pct+'%</span></div>'+
-      '<div style="font-size:10px;color:var(--gold);margin-bottom:4px">2026年 · '+(a26?a26.toLocaleString()+'单':'暂无数据')+'</div>'+
-      '<div style="display:flex;align-items:center;gap:8px">'+rb26.bar+'<span style="font-size:12px;font-weight:700;color:'+rb26.color+';white-space:nowrap">'+(a26?rb26.pct+'%':'—')+'</span></div></div>';
-  }).join('');
-  var quarterSection='<div style="margin-bottom:28px"><div style="font-weight:700;font-size:14px;margin-bottom:14px">🎯 季度订单达成率（目标 3,000 单/季）</div>'+
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px">'+qCards+'</div></div>';
-
-  // 月度数据
-  var months=[1,2,3,4,5,6,7,8,9,10,11,12];
-  var xL=months.map(function(m){return m+'月';});
-  var mp=opts.mPrefix;
-  var chartSection='<div class="chart-box" style="margin-bottom:28px">'+
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
-    '<span style="font-weight:700;font-size:14px">📈 月度趋势对比</span>'+
-    '<button class="sub-tab-btn active" id="'+mp+'Gmv" onclick="_switchPlatYoyMetric(\''+mp+'\',\''+opts.chartId+'\',\'gmv\')" style="padding:4px 12px;font-size:12px">销售额</button>'+
-    '<button class="sub-tab-btn" id="'+mp+'Cost" onclick="_switchPlatYoyMetric(\''+mp+'\',\''+opts.chartId+'\',\'cost\')" style="padding:4px 12px;font-size:12px">消耗</button>'+
-    '<button class="sub-tab-btn" id="'+mp+'Roi" onclick="_switchPlatYoyMetric(\''+mp+'\',\''+opts.chartId+'\',\'roi\')" style="padding:4px 12px;font-size:12px">ROI</button>'+
-    '<button class="sub-tab-btn" id="'+mp+'Ord" onclick="_switchPlatYoyMetric(\''+mp+'\',\''+opts.chartId+'\',\'ord\')" style="padding:4px 12px;font-size:12px">订单量</button>'+
-    '</div><div id="'+opts.chartId+'" style="height:320px"></div></div>';
-
-  // 明细表
-  function diffBadge(a,b,inverse){
-    if(!b||!a) return '<span style="color:var(--t4)">—</span>';
-    var p=(a-b)/b*100,up=p>=0,better=inverse?!up:up;
-    return '<span style="color:'+(better?'#22C55E':'#EF4444')+';font-weight:700">'+(up?'↑':'↓')+Math.abs(p).toFixed(1)+'%</span>';
-  }
-  var tableRows=months.map(function(m){
-    var m25=y25.months[m],m26=y26.months[m]; if(!m25&&!m26) return '';
-    var g25=m25?m25.gmv:0,g26=m26?m26.gmv:0,c25=m25?m25.cost:0,c26=m26?m26.cost:0;
-    var r25=c25?+(g25/c25).toFixed(2):0,r26=c26?+(g26/c26).toFixed(2):0;
-    var o25=m25?Math.round(m25.ord):0,o26=m26?Math.round(m26.ord):0;
-    var oPct=o26?Math.round(o26/M_TARGET*100):0;
-    var oColor=oPct>=100?'#22C55E':oPct>=80?'#F59E0B':'#EF4444';
-    var qMark=m===1||m===4||m===7||m===10?'<span style="font-size:9px;color:var(--gold);font-weight:700;margin-left:4px">Q'+Math.ceil(m/3)+'</span>':'';
-    return '<tr style="border-top:'+(m===1||m===4||m===7||m===10?'2px solid var(--gold)':'1px solid var(--border)')+'">'+
-      '<td style="padding:8px 12px;font-weight:600">'+m+'月'+qMark+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(c25?_sumFmt(c25):'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(c26?_sumFmt(c26):'<span style="color:var(--t4)">暂无</span>')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right">'+diffBadge(c26,c25,true)+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(g25?_sumFmt(g25):'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(g26?_sumFmt(g26):'<span style="color:var(--t4)">暂无</span>')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right">'+diffBadge(g26,g25,false)+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:'+(r25>=2.3?'#22C55E':'#EF4444')+';font-weight:700">'+(r25?r25.toFixed(2):'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:'+(r26>=2.3?'#22C55E':'#EF4444')+';font-weight:700">'+(r26?r26.toFixed(2):'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--t3)">'+(o25?o25.toLocaleString():'—')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right;color:var(--gold)">'+(o26?o26.toLocaleString():'<span style="color:var(--t4)">暂无</span>')+'</td>'+
-      '<td style="padding:8px 12px;text-align:right">1,000</td>'+
-      '<td style="padding:8px 12px;text-align:right;font-weight:700;color:'+oColor+'">'+(o26?oPct+'%':'—')+'</td></tr>';
-  }).join('');
-  var table='<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:13px">'+
-    '<thead><tr style="background:var(--bg2)">'+
-    '<th style="padding:9px 12px;text-align:left">月份</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25消耗</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26消耗</th>'+
-    '<th style="padding:9px 12px;text-align:right">消耗±</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25 GMV</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26 GMV</th>'+
-    '<th style="padding:9px 12px;text-align:right">GMV±</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25 ROI</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26 ROI</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--t3)">25订单</th>'+
-    '<th style="padding:9px 12px;text-align:right;color:var(--gold)">26订单</th>'+
-    '<th style="padding:9px 12px;text-align:right">月目标</th>'+
-    '<th style="padding:9px 12px;text-align:right">26达成率</th>'+
-    '</tr></thead><tbody>'+tableRows+'</tbody></table></div>';
-
-  body.innerHTML=kpi+quarterSection+chartSection+table;
-
-  var gmv25=months.map(function(m){return y25.months[m]?y25.months[m].gmv:null;});
-  var gmv26=months.map(function(m){return y26.months[m]?y26.months[m].gmv:null;});
-  var cost25=months.map(function(m){return y25.months[m]?y25.months[m].cost:null;});
-  var cost26=months.map(function(m){return y26.months[m]?y26.months[m].cost:null;});
-  var roi25m=months.map(function(m){var o=y25.months[m];return o&&o.cost?+(o.gmv/o.cost).toFixed(2):null;});
-  var roi26m=months.map(function(m){var o=y26.months[m];return o&&o.cost?+(o.gmv/o.cost).toFixed(2):null;});
-  var ord25m=months.map(function(m){return y25.months[m]?Math.round(y25.months[m].ord):null;});
-  var ord26m=months.map(function(m){return y26.months[m]?Math.round(y26.months[m].ord):null;});
-  window['_yoyData_'+opts.chartId]={x:xL,gmv25:gmv25,gmv26:gmv26,cost25:cost25,cost26:cost26,roi25m:roi25m,roi26m:roi26m,ord25m:ord25m,ord26m:ord26m,mTarget:M_TARGET};
-  _switchPlatYoyMetric(mp,opts.chartId,'gmv');
-}
-
-function _switchPlatYoyMetric(mPrefix,chartId,metric){
-  ['Gmv','Cost','Roi','Ord'].forEach(function(m){
-    var btn=document.getElementById(mPrefix+m);
-    if(btn) btn.classList.toggle('active',m.toLowerCase()===metric);
-  });
-  var d=window['_yoyData_'+chartId]; if(!d) return;
-  var y25,y26,ytitle,traces=[];
-  if(metric==='gmv'){y25=d.gmv25;y26=d.gmv26;ytitle='销售额 (¥)';}
-  else if(metric==='cost'){y25=d.cost25;y26=d.cost26;ytitle='消耗 (¥)';}
-  else if(metric==='ord'){y25=d.ord25m;y26=d.ord26m;ytitle='订单量 (单)';}
-  else{y25=d.roi25m;y26=d.roi26m;ytitle='ROI';}
-  traces=[
-    {type:'scatter',mode:'lines+markers',x:d.x,y:y25,name:'2025年',line:{color:'rgba(160,160,160,.9)',width:2,dash:'dot'},marker:{size:6,color:'rgba(160,160,160,.9)'},connectgaps:false},
-    {type:'scatter',mode:'lines+markers',x:d.x,y:y26,name:'2026年',line:{color:'#D4AF37',width:2.5},marker:{size:7,color:'#D4AF37'},connectgaps:false}
-  ];
-  if(metric==='ord'&&d.mTarget){
-    traces.push({type:'scatter',mode:'lines',x:d.x,y:d.x.map(function(){return d.mTarget;}),name:'月目标(1,000单)',
-      line:{color:'#EF4444',width:1.5,dash:'dashdot'},hoverinfo:'skip'});
-  }
-  var layout=Object.assign({},baseLayout(),{height:320,margin:{t:20,r:30,b:40,l:70},legend:{orientation:'h',y:1.12,x:0}});
-  layout.yaxis=Object.assign({},layout.yaxis||{},{title:ytitle});
-  Plotly.react(chartId,traces,layout,{responsive:true,displayModeBar:false});
-}
-
-function renderBiliYoY(){
-  _renderYoyPanel({bodyId:'biliYoyBody',chartId:'biliYoyChart',mPrefix:'biliYoyMetric',blocks:['bili']});
-}
-function renderAdYoY(){
-  _renderYoyPanel({bodyId:'adYoyBody',chartId:'adYoyChart',mPrefix:'adYoyMetric',blocks:['cid','douten']});
 }
 
 /* ── Content sub-tab switching ── */
@@ -6567,17 +5922,13 @@ function switchBiliSubTab(sub){
   localStorage.setItem('xtb_biliSubTab', sub);
   document.getElementById('subTabBtnData').classList.toggle('active', sub==='data');
   document.getElementById('subTabBtnPL').classList.toggle('active', sub==='pl');
-  document.getElementById('subTabBtnYoy').classList.toggle('active', sub==='yoy');
   document.getElementById('biliSubTabData').classList.toggle('active', sub==='data');
   document.getElementById('biliSubTabPL').classList.toggle('active', sub==='pl');
-  document.getElementById('biliSubTabYoy').classList.toggle('active', sub==='yoy');
   if(sub==='pl'){
     buildPLTimeline();
     plCurIdx = plDates.length - 1;
     plRender(plCurIdx);
     plUpdateSlider();
-  } else if(sub==='yoy'){
-    renderBiliYoY();
   }
 }
 
@@ -7800,7 +7151,7 @@ function _showAdPreview(cid,filename){
 function cancelAdImport(){_pendingAdImport=null;document.getElementById('adPreviewModal').classList.remove('show');}
 function confirmAdImport(){
   if(!_pendingAdImport){cancelAdImport();return;}
-  CID_RAW=_pendingAdImport.cid; saveCIDToStorage(); _adInited=false;_summaryInited=false;
+  CID_RAW=_pendingAdImport.cid; saveCIDToStorage(); _adInited=false;
   if(typeof renderAdDashboard==='function')renderAdDashboard();
   if(typeof renderSummary==='function'&&currentTab==='summary')renderSummary();
   var rc=CID_RAW.reduce(function(s,b){return s+b.rows.length;},0);
@@ -7968,12 +7319,9 @@ function switchAdSubTab(sub){
   try{localStorage.setItem('xtb_adSubTab',sub);}catch(e){}
   document.getElementById('adSubBtnData').classList.toggle('active',sub==='data');
   document.getElementById('adSubBtnPL').classList.toggle('active',sub==='pl');
-  document.getElementById('adSubBtnYoy').classList.toggle('active',sub==='yoy');
   document.getElementById('adSubTabData').classList.toggle('active',sub==='data');
   document.getElementById('adSubTabPL').classList.toggle('active',sub==='pl');
-  document.getElementById('adSubTabYoy').classList.toggle('active',sub==='yoy');
   if(sub==='pl') renderAdProfit();
-  else if(sub==='yoy') renderAdYoY();
 }
 function updateAdBreakEven(roi){
   adBreakEvenRoi=roi;
@@ -9725,88 +9073,6 @@ const BILI_EMBEDDED_DATA = [{"month":"01月","rows":[{"date":"2026-01-01","month
 })();
 /* ══════════════════════════════════════
    END LOGIN MODULE — 3D地球渲染
-   ══════════════════════════════════════ */
-
-/* ══════════════════════════════════════
-   巨量千川 · 实时同步模块
-   ══════════════════════════════════════ */
-let _qcTimer=null, _qcSyncing=false, _qcLastData=null;
-const QC_INTERVAL=15*60*1000; // 15分钟
-
-async function syncQianchuan(manual){
-  if(_qcSyncing){toast('⏳ 同步进行中，请稍后','warn');return;}
-  _qcSyncing=true;
-  var btn=document.getElementById('qcSyncBtn'), dot=document.getElementById('qcDot'),
-      st=document.getElementById('qcStatus'), stTxt=document.getElementById('qcStatusText');
-  if(btn){btn.disabled=true;btn.textContent='⏳ 同步中...';}
-  if(st){st.className='qc-status syncing';}
-  if(dot){dot.className='qc-dot syncing';}
-  if(stTxt){stTxt.textContent='同步中...';}
-
-  try{
-    var today=new Date().toISOString().slice(0,10);
-    var yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
-    var resp=await fetch(SUPA_URL+'/functions/v1/qianchuan-proxy',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPA_KEY},
-      body:JSON.stringify({action:'getReport',startDate:yesterday,endDate:today})
-    });
-    if(!resp.ok) throw new Error('HTTP '+resp.status+' '+resp.statusText);
-    var j=await resp.json();
-    if(j.error) throw new Error(j.error);
-
-    _qcLastData=j;
-    renderQianchuanData(j);
-    document.getElementById('qcLastSync').textContent='上次同步：'+new Date().toLocaleTimeString();
-    if(st){st.className='qc-status success';}
-    if(dot){dot.className='qc-dot success';}
-    if(stTxt){stTxt.textContent='已同步';}
-    if(btn){btn.textContent='🔄 立即同步';}
-    if(manual) toast('✅ 千川数据同步成功','ok');
-  }catch(e){
-    console.error('千川同步失败:',e.message);
-    if(st){st.className='qc-status error';}
-    if(dot){dot.className='qc-dot error';}
-    if(stTxt){stTxt.textContent='同步失败';}
-    if(btn){btn.textContent='🔄 重试';}
-    if(manual) toast('⚠️ 千川同步失败：'+e.message,'warn');
-  }finally{
-    _qcSyncing=false;
-    if(btn) btn.disabled=false;
-  }
-}
-
-function renderQianchuanData(data){
-  var fmtCost=function(v){return '¥'+Number(v||0).toLocaleString();};
-  var fmtNum=function(v){return Number(v||0).toLocaleString();};
-  var fmtRoi=function(v){var n=Number(v||0);return n.toFixed(2);};
-  var e1=document.getElementById('qcCost'), e2=document.getElementById('qcShow'),
-      e3=document.getElementById('qcClick'), e4=document.getElementById('qcRoi');
-  if(e1) e1.textContent=fmtCost(data.cost||data.cost_total||0);
-  if(e2) e2.textContent=fmtNum(data.show||data.show_cnt||0);
-  if(e3) e3.textContent=fmtNum(data.click||data.click_cnt||0);
-  if(e4) e4.textContent=fmtRoi(data.roi||data.pay_roi||0);
-}
-
-function startQianchuanAutoSync(){
-  if(_qcTimer) clearInterval(_qcTimer);
-  // 首次延迟3秒再同步（等页面完全加载）
-  setTimeout(function(){ syncQianchuan(); },3000);
-  _qcTimer=setInterval(function(){ syncQianchuan(); },QC_INTERVAL);
-  document.getElementById('qcNextSync').textContent='下次：'+new Date(Date.now()+QC_INTERVAL).toLocaleTimeString();
-  // 每次同步后更新下次时间
-  var orig=window.syncQianchuan;
-  window._qcOrigSync=orig;
-}
-
-// 页面加载后自动启动千川同步
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',startQianchuanAutoSync);
-} else {
-  startQianchuanAutoSync();
-}
-/* ══════════════════════════════════════
-   END 千川同步模块
    ══════════════════════════════════════ */
 </script>
 </body>
