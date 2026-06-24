@@ -1771,7 +1771,15 @@ select option{background:#FFF;color:var(--t1)}
             <button onclick="fetchApiData()" style="padding:6px 18px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600" id="apiFetchBtn">拉取数据</button>
           </div>
           <div id="apiStatus" style="font-size:12px;color:var(--t3);margin-bottom:10px"></div>
+          <div id="apiActionBar" style="display:none;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+            <button onclick="saveApiSnapshot()" style="padding:5px 14px;background:#22C55E;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer">💾 保存快照</button>
+            <button onclick="downloadApiCsv()" style="padding:5px 14px;background:var(--card2);color:var(--t1);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer">📥 下载 CSV</button>
+          </div>
           <div id="apiTableWrap" style="overflow-x:auto"></div>
+          <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px">
+            <div style="font-weight:600;font-size:13px;margin-bottom:10px;color:var(--t2)">📁 历史快照</div>
+            <div id="apiSnapshotList" style="font-size:12px;color:var(--t3)">加载中…</div>
+          </div>
         </div>
       </div>
     </div><!-- end tabAdPanel -->
@@ -8003,6 +8011,12 @@ function switchAdSubTab(sub){
   else if(sub==='api') initApiPanel();
 }
 
+var PERF_IDS=['1849923428895756','1865614489935235'];
+var CAOSHU_ID='1850542911176195';
+var JULIANGADIDS=PERF_IDS.concat([CAOSHU_ID]);
+var PROXY='https://nbfiltgqklzdfaibyeka.supabase.co/functions/v1/qianchuan-proxy';
+var _apiLastData=null; // 存最近一次拉取的数据，供保存/下载使用
+
 function initApiPanel(){
   var s=document.getElementById('apiStartDate');
   var e=document.getElementById('apiEndDate');
@@ -8012,12 +8026,130 @@ function initApiPanel(){
     s.value=d30.toISOString().slice(0,10);
     e.value=now.toISOString().slice(0,10);
   }
+  loadApiSnapshots();
 }
 
-var PERF_IDS=['1849923428895756','1865614489935235']; // 效果投放账户
-var CAOSHU_ID='1850542911176195'; // 种草通账户（A3人群积累，不追转化）
-var JULIANGADIDS=PERF_IDS.concat([CAOSHU_ID]);
-var PROXY='https://nbfiltgqklzdfaibyeka.supabase.co/functions/v1/qianchuan-proxy';
+// ── 保存快照到 Supabase ──
+async function saveApiSnapshot(){
+  if(!_apiLastData){alert('请先拉取数据');return;}
+  var name=prompt('给这份快照起个名字（可留空）：', _apiLastData.startDate+' ~ '+_apiLastData.endDate);
+  if(name===null) return; // 取消
+  try{
+    var resp=await fetch(PROXY+'/snapshot',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPA_KEY},
+      body:JSON.stringify({
+        name:name||null,
+        start_date:_apiLastData.startDate,
+        end_date:_apiLastData.endDate,
+        account_mode:_apiLastData.acct,
+        perf_data:_apiLastData.perfMap,
+        caoshu_data:_apiLastData.caoshuMap
+      })
+    });
+    var r=await resp.json();
+    if(r.ok){
+      alert('✅ 快照已保存！');
+      loadApiSnapshots();
+    } else {
+      alert('❌ 保存失败：'+r.error);
+    }
+  }catch(e){alert('❌ 网络错误：'+e.message);}
+}
+
+// ── 下载 CSV ──
+function downloadApiCsv(){
+  if(!_apiLastData){alert('请先拉取数据');return;}
+  var rows=[['日期','账户类型','消耗(元)','展示量','点击量','CTR(%)','CPM','订单数','订单GMV','ROI','转化成本','A3转化(种草通)']];
+  var pm=_apiLastData.perfMap||{}, cm=_apiLastData.caoshuMap||{};
+  Object.keys(pm).sort().forEach(function(d){
+    var r=pm[d];
+    var ctr=r.show?((r.click/r.show)*100).toFixed(2):'';
+    var cpm=r.cpmDays?(r.cpm/r.cpmDays).toFixed(2):'';
+    var roi=r.roiDays?(r.roi/r.roiDays).toFixed(2):'';
+    var cpa=r.orders?(r.cost/r.orders).toFixed(0):'';
+    rows.push([d,'效果账户',r.cost.toFixed(2),r.show,r.click,ctr,cpm,r.orders,r.gmv.toFixed(0),roi,cpa,'']);
+  });
+  Object.keys(cm).sort().forEach(function(d){
+    var r=cm[d];
+    var ctr=r.show?((r.click/r.show)*100).toFixed(2):'';
+    var cpm=r.cpmDays?(r.cpm/r.cpmDays).toFixed(2):'';
+    var cpa3=r.a3?(r.cost/r.a3).toFixed(0):'';
+    rows.push([d,'种草通(A3)',r.cost.toFixed(2),r.show,r.click,ctr,cpm,'','','',cpa3,r.a3]);
+  });
+  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='巨量API数据_'+_apiLastData.startDate+'_'+_apiLastData.endDate+'.csv';
+  a.click();
+}
+
+// ── 加载历史快照列表 ──
+async function loadApiSnapshots(){
+  var el=document.getElementById('apiSnapshotList');
+  if(!el) return;
+  try{
+    var resp=await fetch(PROXY+'/snapshots',{headers:{'Authorization':'Bearer '+SUPA_KEY}});
+    var r=await resp.json();
+    if(!r.ok||!r.data||!r.data.length){
+      el.innerHTML='<span style="color:var(--t3)">暂无快照，拉取数据后点击"保存快照"</span>';
+      return;
+    }
+    el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<thead><tr style="background:var(--card2)">'
+      +'<th style="padding:6px 8px;text-align:left">名称</th>'
+      +'<th style="padding:6px 8px">日期范围</th>'
+      +'<th style="padding:6px 8px">保存时间</th>'
+      +'<th style="padding:6px 8px">操作</th>'
+      +'</tr></thead><tbody>'
+      +r.data.map(function(s){
+        var savedAt=new Date(s.saved_at).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+        var label=s.name||('快照 '+s.start_date+'~'+s.end_date);
+        return '<tr style="border-bottom:1px solid var(--border)">'
+          +'<td style="padding:6px 8px">'+label+'</td>'
+          +'<td style="padding:6px 8px;text-align:center">'+s.start_date+' ~ '+s.end_date+'</td>'
+          +'<td style="padding:6px 8px;text-align:center;color:var(--t3)">'+savedAt+'</td>'
+          +'<td style="padding:6px 8px;text-align:center">'
+          +'<button onclick="loadApiSnapshot('+s.id+')" style="padding:2px 10px;margin-right:4px;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:4px;cursor:pointer;font-size:11px">📂 加载</button>'
+          +'<button onclick="deleteApiSnapshot('+s.id+')" style="padding:2px 10px;border:1px solid #EF4444;color:#EF4444;background:transparent;border-radius:4px;cursor:pointer;font-size:11px">🗑 删除</button>'
+          +'</td></tr>';
+      }).join('')
+      +'</tbody></table>';
+  }catch(e){
+    el.innerHTML='<span style="color:#EF4444">加载失败：'+e.message+'</span>';
+  }
+}
+
+// ── 加载单条快照数据并展示 ──
+async function loadApiSnapshot(id){
+  var wrap=document.getElementById('apiTableWrap');
+  var status=document.getElementById('apiStatus');
+  try{
+    var resp=await fetch(PROXY+'/snapshot?id='+id,{headers:{'Authorization':'Bearer '+SUPA_KEY}});
+    var r=await resp.json();
+    if(!r.ok){alert('加载失败：'+r.error);return;}
+    var s=r.data;
+    _apiLastData={perfMap:s.perf_data||{},caoshuMap:s.caoshu_data||{},startDate:s.start_date,endDate:s.end_date,acct:s.account_mode};
+    var html=buildPerfTable(s.perf_data||{},'效果账户（快照：'+(s.name||s.start_date+'~'+s.end_date)+'）');
+    html+=buildCaoshuTable(s.caoshu_data||{});
+    html+='<p style="font-size:11px;color:var(--t3);margin-top:10px">📁 历史快照数据 · 保存于 '+new Date(s.saved_at).toLocaleString('zh-CN')+'</p>';
+    wrap.innerHTML=html;
+    document.getElementById('apiActionBar').style.display='flex';
+    status.textContent='✅ 已加载历史快照：'+(s.name||s.start_date+' ~ '+s.end_date);
+  }catch(e){status.textContent='❌ 加载失败：'+e.message;}
+}
+
+// ── 删除快照 ──
+async function deleteApiSnapshot(id){
+  if(!confirm('确认删除这条快照？')) return;
+  try{
+    var resp=await fetch(PROXY+'/snapshot?id='+id,{method:'DELETE',headers:{'Authorization':'Bearer '+SUPA_KEY}});
+    var r=await resp.json();
+    if(r.ok) loadApiSnapshots();
+    else alert('删除失败：'+r.error);
+  }catch(e){alert('删除失败：'+e.message);}
+}
 
 function buildPerfTable(dayMap,label){
   var days=Object.keys(dayMap).sort();
@@ -8160,37 +8292,39 @@ async function fetchApiData(){
     return m;
   }
 
+  var actionBar=document.getElementById('apiActionBar');
   try{
-    var html='';
+    var html=''; var perfMap={}; var caoshuMap={};
     if(acct==='all'){
-      // 拉取所有账户，效果账户聚合，种草通单独展示
       var allResults=await Promise.all(JULIANGADIDS.map(fetchOne));
       var perfResults=allResults.slice(0,PERF_IDS.length);
       var caoshuResult=allResults[PERF_IDS.length];
-      var perfMap=buildDayMap(PERF_IDS,perfResults);
-      var caoshuMap=buildDayMap([CAOSHU_ID],[caoshuResult]);
+      perfMap=buildDayMap(PERF_IDS,perfResults);
+      caoshuMap=buildDayMap([CAOSHU_ID],[caoshuResult]);
       html=buildPerfTable(perfMap,'效果账户汇总（5756 + 5235）');
       html+=buildCaoshuTable(caoshuMap);
       var perfDays=Object.keys(perfMap).length;
       status.textContent='✅ 获取成功，效果账户 '+perfDays+' 天 · 种草通 '+Object.keys(caoshuMap).length+' 天';
     } else if(acct===CAOSHU_ID){
-      // 单独看种草通
       var res=await fetchOne(acct);
-      var m=buildDayMap([acct],[res]);
-      html=buildCaoshuTable(m);
-      if(!Object.keys(m).length) html='<p style="color:var(--t3);padding:12px 0">该时间段暂无数据</p>';
-      status.textContent='✅ 种草通账户，共 '+Object.keys(m).length+' 天';
+      caoshuMap=buildDayMap([acct],[res]);
+      html=buildCaoshuTable(caoshuMap);
+      if(!Object.keys(caoshuMap).length) html='<p style="color:var(--t3);padding:12px 0">该时间段暂无数据</p>';
+      status.textContent='✅ 种草通账户，共 '+Object.keys(caoshuMap).length+' 天';
     } else {
-      // 单独看某个效果账户
       var res=await fetchOne(acct);
-      var m=buildDayMap([acct],[res]);
-      html=buildPerfTable(m,'账户 '+acct.slice(-4));
-      status.textContent='✅ 获取成功，共 '+Object.keys(m).length+' 天';
+      perfMap=buildDayMap([acct],[res]);
+      html=buildPerfTable(perfMap,'账户 '+acct.slice(-4));
+      status.textContent='✅ 获取成功，共 '+Object.keys(perfMap).length+' 天';
     }
-    html+='<p style="font-size:11px;color:var(--t3);margin-top:10px">消耗：巨量API原始值 ÷ 100000 = 元 · 转化数：convert_cnt · API仅支持近3个月</p>';
+    html+='<p style="font-size:11px;color:var(--t3);margin-top:10px">消耗：巨量API原始值 ÷ 100000 = 元 · API仅支持近3个月</p>';
     wrap.innerHTML=html;
+    // 存全局供保存/下载使用
+    _apiLastData={perfMap:perfMap,caoshuMap:caoshuMap,startDate:startDate,endDate:endDate,acct:acct};
+    if(actionBar) actionBar.style.display='flex';
   }catch(err){
     status.textContent='❌ 请求失败：'+err.message;
+    if(actionBar) actionBar.style.display='none';
   }
   btn.disabled=false; btn.textContent='拉取数据';
 }

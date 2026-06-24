@@ -13,7 +13,7 @@ const QIANCHUAN_API = "https://ad.oceanengine.com/open_api";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type",
 };
 
@@ -231,6 +231,91 @@ serve(async (req: Request) => {
 
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS });
+  }
+
+  // ── GET /snapshots ── 获取历史快照列表 ──
+  if (req.method === "GET" && path === "/snapshots") {
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("ad_snapshots")
+        .select("id, name, start_date, end_date, account_mode, saved_at")
+        .order("saved_at", { ascending: false })
+        .limit(50);
+      if (error) throw new Error(error.message);
+      return new Response(JSON.stringify({ ok: true, data }), {
+        headers: { ...CORS, "content-type": "application/json" },
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+        status: 500, headers: { ...CORS, "content-type": "application/json" },
+      });
+    }
+  }
+
+  // ── GET /snapshot?id=xxx ── 获取单条快照完整数据 ──
+  if (req.method === "GET" && path === "/snapshot") {
+    const id = url.searchParams.get("id");
+    if (!id) return new Response(JSON.stringify({ ok: false, error: "缺少 id" }), {
+      status: 400, headers: { ...CORS, "content-type": "application/json" },
+    });
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("ad_snapshots").select("*").eq("id", id).single();
+      if (error) throw new Error(error.message);
+      return new Response(JSON.stringify({ ok: true, data }), {
+        headers: { ...CORS, "content-type": "application/json" },
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+        status: 500, headers: { ...CORS, "content-type": "application/json" },
+      });
+    }
+  }
+
+  // ── POST /snapshot ── 保存快照 ──
+  if (req.method === "POST" && path === "/snapshot") {
+    try {
+      const body = await req.json();
+      const supabase = getSupabase();
+      const { data, error } = await supabase.from("ad_snapshots").insert({
+        name: body.name || null,
+        start_date: body.start_date,
+        end_date: body.end_date,
+        account_mode: body.account_mode || "all",
+        perf_data: body.perf_data || null,
+        caoshu_data: body.caoshu_data || null,
+      }).select("id, saved_at").single();
+      if (error) throw new Error(error.message);
+      return new Response(JSON.stringify({ ok: true, data }), {
+        headers: { ...CORS, "content-type": "application/json" },
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+        status: 500, headers: { ...CORS, "content-type": "application/json" },
+      });
+    }
+  }
+
+  // ── DELETE /snapshot?id=xxx ── 删除快照 ──
+  if (req.method === "DELETE" && path === "/snapshot") {
+    const id = url.searchParams.get("id");
+    if (!id) return new Response(JSON.stringify({ ok: false, error: "缺少 id" }), {
+      status: 400, headers: { ...CORS, "content-type": "application/json" },
+    });
+    try {
+      const supabase = getSupabase();
+      const { error } = await supabase.from("ad_snapshots").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...CORS, "content-type": "application/json" },
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+        status: 500, headers: { ...CORS, "content-type": "application/json" },
+      });
+    }
   }
 
   // ── GET /metrics ── 查询 BASIC_DATA 可用指标和维度 ──
