@@ -362,9 +362,10 @@ serve(async (req: Request) => {
         data_topic: body.data_topic || "BASIC_DATA",
         dimensions: body.dimensions || ["stat_time_day"],
         metrics: body.metrics || [
-          "cost", "show_cnt", "click_cnt", "ctr",
+          "cost", "show_cnt", "click_cnt", "ctr", "cpm_platform",
           "convert_cnt", "conversion_cost", "conversion_rate",
-          "deep_convert_cnt", "deep_convert_cost",
+          "in_app_order_count", "in_app_order_gmv", "in_app_order_roi",
+          "in_app_order_net_count_1h", "in_app_order_net_gmv_1h", "in_app_order_net_roi_1h",
         ],
         start_time: startDate + " 00:00:00",
         end_time: endDate + " 23:59:59",

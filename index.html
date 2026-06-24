@@ -8022,46 +8022,78 @@ var PROXY='https://nbfiltgqklzdfaibyeka.supabase.co/functions/v1/qianchuan-proxy
 function buildPerfTable(dayMap,label){
   var days=Object.keys(dayMap).sort();
   if(!days.length) return '<p style="color:var(--t3);padding:12px 0">该时间段暂无数据</p>';
-  var totalCost=0,totalShow=0,totalClick=0,totalConvert=0;
+  var th=function(txt,tip){return '<th style="padding:8px 8px;text-align:right;white-space:nowrap"'+(tip?' title="'+tip+'"':'')+'>'+(tip?'<u>'+txt+'</u>':txt)+'</th>';};
+  var td=function(v,color){return '<td style="padding:6px 8px;text-align:right'+(color?';color:'+color:'')+'">'+v+'</td>';};
+  var tTotalCost=0,tTotalShow=0,tTotalClick=0,tOrders=0,tNetOrders=0,tGmv=0,tNetGmv=0;
   var rows=days.map(function(d){
     var r=dayMap[d];
-    totalCost+=r.cost; totalShow+=r.show; totalClick+=r.click; totalConvert+=r.convert;
+    tTotalCost+=r.cost; tTotalShow+=r.show; tTotalClick+=r.click;
+    tOrders+=r.orders; tNetOrders+=r.netOrders; tGmv+=r.gmv; tNetGmv+=r.netGmv;
     var ctr=r.show?((r.click/r.show)*100).toFixed(2)+'%':'—';
-    var cpa=r.convert?(r.cost/r.convert).toFixed(0)+'元':'—';
+    var cpm=r.cpmDays?(r.cpm/r.cpmDays).toFixed(2):'—';
+    var refundOrd=r.orders-r.netOrders;
+    var refundRate=r.orders?((refundOrd/r.orders)*100).toFixed(1)+'%':'—';
+    var roi=r.convDays?(r.roi/r.convDays).toFixed(2):'—';
+    var netRoi=r.convDays?(r.netRoi/r.convDays).toFixed(2):'—';
+    var convCost=r.netOrders?(r.cost/r.netOrders).toFixed(0):'—';
     return '<tr>'
-      +'<td style="padding:6px 10px">'+d+'</td>'
-      +'<td style="padding:6px 10px;text-align:right">'+r.cost.toFixed(2)+'</td>'
-      +'<td style="padding:6px 10px;text-align:right">'+r.show.toLocaleString()+'</td>'
-      +'<td style="padding:6px 10px;text-align:right">'+r.click.toLocaleString()+'</td>'
-      +'<td style="padding:6px 10px;text-align:right">'+ctr+'</td>'
-      +'<td style="padding:6px 10px;text-align:right;color:var(--green)">'+r.convert+'</td>'
-      +'<td style="padding:6px 10px;text-align:right">'+cpa+'</td>'
+      +'<td style="padding:6px 8px;white-space:nowrap">'+d+'</td>'
+      +td(r.cost.toFixed(2))
+      +td(r.show.toLocaleString())
+      +td(r.click.toLocaleString())
+      +td(ctr)
+      +td(cpm)
+      +td(r.orders,'var(--t1)')
+      +td(refundOrd>0?refundOrd:'—',refundOrd>0?'#EF4444':'var(--t3)')
+      +td(r.netOrders,'#22C55E')
+      +td(refundRate,refundOrd>0?'#F59E0B':'var(--t3)')
+      +td(r.gmv>0?'¥'+r.gmv.toFixed(0):'—')
+      +td(r.netGmv>0?'¥'+r.netGmv.toFixed(0):'—','#22C55E')
+      +td(roi,'var(--gold)')
+      +td(netRoi,'var(--gold)')
+      +td(convCost?convCost+'元':'—')
       +'</tr>';
   }).join('');
-  var totalCtr=totalShow?((totalClick/totalShow)*100).toFixed(2)+'%':'—';
-  var totalCpa=totalConvert?(totalCost/totalConvert).toFixed(0)+'元':'—';
+  var tCtr=tTotalShow?((tTotalClick/tTotalShow)*100).toFixed(2)+'%':'—';
+  var tRefundOrd=tOrders-tNetOrders;
+  var tRefundRate=tOrders?((tRefundOrd/tOrders)*100).toFixed(1)+'%':'—';
+  var tRoi=tNetGmv&&tTotalCost?(tNetGmv/tTotalCost).toFixed(2):'—';
+  var tGrossRoi=tGmv&&tTotalCost?(tGmv/tTotalCost).toFixed(2):'—';
+  var tConvCost=tNetOrders?(tTotalCost/tNetOrders).toFixed(0)+'元':'—';
   return '<div style="font-weight:600;font-size:13px;margin-bottom:6px;color:var(--accent)">'+label+'</div>'
-    +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    +'<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;min-width:900px">'
     +'<thead><tr style="background:var(--card2);text-align:left">'
-    +'<th style="padding:8px 10px">日期</th>'
-    +'<th style="padding:8px 10px;text-align:right">消耗(元)</th>'
-    +'<th style="padding:8px 10px;text-align:right">展示量</th>'
-    +'<th style="padding:8px 10px;text-align:right">点击量</th>'
-    +'<th style="padding:8px 10px;text-align:right">CTR</th>'
-    +'<th style="padding:8px 10px;text-align:right">转化数</th>'
-    +'<th style="padding:8px 10px;text-align:right">转化成本</th>'
+    +'<th style="padding:8px 8px;white-space:nowrap">日期</th>'
+    +th('消耗(元)')+th('展示量')+th('点击量')+th('CTR')+th('CPM')
+    +th('订单数','引流电商总订单 in_app_order_count')
+    +th('退款订单','总订单 - 净订单')
+    +th('净订单','1h净化退款后 in_app_order_net_count_1h')
+    +th('退款率','退款订单 / 总订单')
+    +th('订单GMV','in_app_order_gmv')
+    +th('净GMV','扣退款后 in_app_order_net_gmv_1h')
+    +th('ROI','订单ROI')
+    +th('净ROI','净GMV ROI')
+    +th('净转化成本','消耗/净订单数')
     +'</tr></thead>'
     +'<tbody>'+rows+'</tbody>'
     +'<tfoot><tr style="background:var(--card2);font-weight:600">'
-    +'<td style="padding:8px 10px">合计 ('+days.length+'天)</td>'
-    +'<td style="padding:8px 10px;text-align:right">'+totalCost.toFixed(2)+'</td>'
-    +'<td style="padding:8px 10px;text-align:right">'+totalShow.toLocaleString()+'</td>'
-    +'<td style="padding:8px 10px;text-align:right">'+totalClick.toLocaleString()+'</td>'
-    +'<td style="padding:8px 10px;text-align:right">'+totalCtr+'</td>'
-    +'<td style="padding:8px 10px;text-align:right;color:var(--green)">'+totalConvert+'</td>'
-    +'<td style="padding:8px 10px;text-align:right">'+totalCpa+'</td>'
+    +'<td style="padding:8px 8px">合计 ('+days.length+'天)</td>'
+    +td(tTotalCost.toFixed(2))
+    +td(tTotalShow.toLocaleString())
+    +td(tTotalClick.toLocaleString())
+    +td(tCtr)
+    +td('—')
+    +td(tOrders)
+    +td(tRefundOrd>0?tRefundOrd:'—',tRefundOrd>0?'#EF4444':'')
+    +td(tNetOrders,'#22C55E')
+    +td(tRefundRate,tRefundOrd>0?'#F59E0B':'')
+    +td(tGmv>0?'¥'+Math.round(tGmv).toLocaleString():'—')
+    +td(tNetGmv>0?'¥'+Math.round(tNetGmv).toLocaleString():'—','#22C55E')
+    +td(tGrossRoi,'var(--gold)')
+    +td(tRoi,'var(--gold)')
+    +td(tConvCost)
     +'</tr></tfoot>'
-    +'</table>';
+    +'</table></div>';
 }
 
 function buildCaoshuTable(dayMap){
@@ -8124,12 +8156,22 @@ async function fetchApiData(){
       var rows=(res.data&&res.data.data&&res.data.data.rows)||[];
       rows.forEach(function(row){
         var day=row.dimensions.stat_time_day;
-        if(!m[day]) m[day]={cost:0,show:0,click:0,convert:0};
+        if(!m[day]) m[day]={cost:0,show:0,click:0,cpm:0,cpmDays:0,
+          orders:0,netOrders:0,gmv:0,netGmv:0,roi:0,netRoi:0,convCost:0,convDays:0};
         var met=row.metrics;
-        m[day].cost+=Math.round(Number(met.cost||0)/100000*100)/100;
+        var costYuan=Math.round(Number(met.cost||0)/100000*100)/100;
+        m[day].cost+=costYuan;
         m[day].show+=Number(met.show_cnt||0);
         m[day].click+=Number(met.click_cnt||0);
-        m[day].convert+=Number(met.convert_cnt||0);
+        m[day].orders+=Number(met.in_app_order_count||0);
+        m[day].netOrders+=Number(met.in_app_order_net_count_1h||0);
+        m[day].gmv+=Math.round(Number(met.in_app_order_gmv||0)*100)/100;
+        m[day].netGmv+=Math.round(Number(met.in_app_order_net_gmv_1h||0)*100)/100;
+        // CPM 和 ROI 是均值型，按有效天数加权
+        if(Number(met.cpm_platform||0)>0){m[day].cpm+=Number(met.cpm_platform||0);m[day].cpmDays++;}
+        if(Number(met.in_app_order_roi||0)>0){m[day].roi+=Number(met.in_app_order_roi||0);m[day].convDays++;}
+        if(Number(met.in_app_order_net_roi_1h||0)>0) m[day].netRoi+=Number(met.in_app_order_net_roi_1h||0);
+        if(Number(met.conversion_cost||0)>0){m[day].convCost+=Number(met.conversion_cost||0);}
       });
     });
     return m;
