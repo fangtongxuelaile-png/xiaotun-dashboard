@@ -8078,21 +8078,25 @@ function buildPerfTable(dayMap,label){
 function buildCaoshuTable(dayMap){
   var days=Object.keys(dayMap).sort();
   if(!days.length) return '';
-  var totalCost=0,totalShow=0,totalClick=0;
+  var totalCost=0,totalShow=0,totalClick=0,totalA3=0;
   var rows=days.map(function(d){
     var r=dayMap[d];
-    totalCost+=r.cost; totalShow+=r.show; totalClick+=r.click;
+    totalCost+=r.cost; totalShow+=r.show; totalClick+=r.click; totalA3+=r.a3;
     var ctr=r.show?((r.click/r.show)*100).toFixed(2)+'%':'—';
+    var cpa3=r.a3?(r.cost/r.a3).toFixed(0)+'元':'—';
     return '<tr>'
       +'<td style="padding:6px 10px">'+d+'</td>'
       +'<td style="padding:6px 10px;text-align:right">'+r.cost.toFixed(2)+'</td>'
       +'<td style="padding:6px 10px;text-align:right">'+r.show.toLocaleString()+'</td>'
       +'<td style="padding:6px 10px;text-align:right">'+r.click.toLocaleString()+'</td>'
       +'<td style="padding:6px 10px;text-align:right">'+ctr+'</td>'
+      +'<td style="padding:6px 10px;text-align:right;color:#a78bfa">'+(r.a3||'—')+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+cpa3+'</td>'
       +'</tr>';
   }).join('');
   var totalCtr=totalShow?((totalClick/totalShow)*100).toFixed(2)+'%':'—';
-  return '<div style="font-weight:600;font-size:13px;margin:20px 0 6px;color:#a78bfa">🌱 种草通账户 1850…6195（A3人群积累·不追转化）</div>'
+  var totalCpa3=totalA3?(totalCost/totalA3).toFixed(0)+'元':'—';
+  return '<div style="font-weight:600;font-size:13px;margin:20px 0 6px;color:#a78bfa">🌱 种草通账户 1850…6195（A3人群积累）</div>'
     +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
     +'<thead><tr style="background:var(--card2);text-align:left">'
     +'<th style="padding:8px 10px">日期</th>'
@@ -8100,6 +8104,8 @@ function buildCaoshuTable(dayMap){
     +'<th style="padding:8px 10px;text-align:right">展示量</th>'
     +'<th style="padding:8px 10px;text-align:right">点击量</th>'
     +'<th style="padding:8px 10px;text-align:right">CTR</th>'
+    +'<th style="padding:8px 10px;text-align:right;color:#a78bfa">转化(A3人群)</th>'
+    +'<th style="padding:8px 10px;text-align:right">A3单次成本</th>'
     +'</tr></thead>'
     +'<tbody>'+rows+'</tbody>'
     +'<tfoot><tr style="background:var(--card2);font-weight:600">'
@@ -8108,6 +8114,8 @@ function buildCaoshuTable(dayMap){
     +'<td style="padding:8px 10px;text-align:right">'+totalShow.toLocaleString()+'</td>'
     +'<td style="padding:8px 10px;text-align:right">'+totalClick.toLocaleString()+'</td>'
     +'<td style="padding:8px 10px;text-align:right">'+totalCtr+'</td>'
+    +'<td style="padding:8px 10px;text-align:right;color:#a78bfa">'+totalA3+'</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalCpa3+'</td>'
     +'</tr></tfoot>'
     +'</table>';
 }
@@ -8136,7 +8144,7 @@ async function fetchApiData(){
       rows.forEach(function(row){
         var day=row.dimensions.stat_time_day;
         if(!m[day]) m[day]={cost:0,show:0,click:0,cpm:0,cpmDays:0,
-          orders:0,gmv:0,roi:0,roiDays:0};
+          orders:0,gmv:0,roi:0,roiDays:0,a3:0};
         var met=row.metrics;
         var costYuan=Math.round(Number(met.cost||0)/100000*100)/100;
         m[day].cost+=costYuan;
@@ -8144,6 +8152,7 @@ async function fetchApiData(){
         m[day].click+=Number(met.click_cnt||0);
         m[day].orders+=Number(met.in_app_order_count||0);
         m[day].gmv+=Math.round(Number(met.in_app_order_gmv||0)*100)/100;
+        m[day].a3+=Number(met.convert_cnt||0);
         if(Number(met.cpm_platform||0)>0){m[day].cpm+=Number(met.cpm_platform||0);m[day].cpmDays++;}
         if(Number(met.in_app_order_roi||0)>0){m[day].roi+=Number(met.in_app_order_roi||0);m[day].roiDays++;}
       });
