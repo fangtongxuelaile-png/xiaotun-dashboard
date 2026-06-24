@@ -1763,10 +1763,10 @@ select option{background:#FFF;color:var(--t1)}
               <input type="date" id="apiEndDate" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--t1);font-size:13px">
             </div>
             <select id="apiAccountSel" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--t1);font-size:13px">
-              <option value="all">全部账户汇总</option>
-              <option value="1849923428895756">账户 1849…5756</option>
-              <option value="1865614489935235">账户 1865…5235</option>
-              <option value="1850542911176195">账户 1850…6195</option>
+              <option value="all">效果账户汇总（不含种草通）</option>
+              <option value="1849923428895756">账户 1849…5756（效果）</option>
+              <option value="1865614489935235">账户 1865…5235（效果）</option>
+              <option value="1850542911176195">账户 1850…6195（种草通）</option>
             </select>
             <button onclick="fetchApiData()" style="padding:6px 18px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600" id="apiFetchBtn">拉取数据</button>
           </div>
@@ -8014,8 +8014,92 @@ function initApiPanel(){
   }
 }
 
-var JULIANGADIDS=['1849923428895756','1865614489935235','1850542911176195'];
+var PERF_IDS=['1849923428895756','1865614489935235']; // 效果投放账户
+var CAOSHU_ID='1850542911176195'; // 种草通账户（A3人群积累，不追转化）
+var JULIANGADIDS=PERF_IDS.concat([CAOSHU_ID]);
 var PROXY='https://nbfiltgqklzdfaibyeka.supabase.co/functions/v1/qianchuan-proxy';
+
+function buildPerfTable(dayMap,label){
+  var days=Object.keys(dayMap).sort();
+  if(!days.length) return '<p style="color:var(--t3);padding:12px 0">该时间段暂无数据</p>';
+  var totalCost=0,totalShow=0,totalClick=0,totalConvert=0;
+  var rows=days.map(function(d){
+    var r=dayMap[d];
+    totalCost+=r.cost; totalShow+=r.show; totalClick+=r.click; totalConvert+=r.convert;
+    var ctr=r.show?((r.click/r.show)*100).toFixed(2)+'%':'—';
+    var cpa=r.convert?(r.cost/r.convert).toFixed(0)+'元':'—';
+    return '<tr>'
+      +'<td style="padding:6px 10px">'+d+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+r.cost.toFixed(2)+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+r.show.toLocaleString()+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+r.click.toLocaleString()+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+ctr+'</td>'
+      +'<td style="padding:6px 10px;text-align:right;color:var(--green)">'+r.convert+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+cpa+'</td>'
+      +'</tr>';
+  }).join('');
+  var totalCtr=totalShow?((totalClick/totalShow)*100).toFixed(2)+'%':'—';
+  var totalCpa=totalConvert?(totalCost/totalConvert).toFixed(0)+'元':'—';
+  return '<div style="font-weight:600;font-size:13px;margin-bottom:6px;color:var(--accent)">'+label+'</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    +'<thead><tr style="background:var(--card2);text-align:left">'
+    +'<th style="padding:8px 10px">日期</th>'
+    +'<th style="padding:8px 10px;text-align:right">消耗(元)</th>'
+    +'<th style="padding:8px 10px;text-align:right">展示量</th>'
+    +'<th style="padding:8px 10px;text-align:right">点击量</th>'
+    +'<th style="padding:8px 10px;text-align:right">CTR</th>'
+    +'<th style="padding:8px 10px;text-align:right">转化数</th>'
+    +'<th style="padding:8px 10px;text-align:right">转化成本</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'<tfoot><tr style="background:var(--card2);font-weight:600">'
+    +'<td style="padding:8px 10px">合计 ('+days.length+'天)</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalCost.toFixed(2)+'</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalShow.toLocaleString()+'</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalClick.toLocaleString()+'</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalCtr+'</td>'
+    +'<td style="padding:8px 10px;text-align:right;color:var(--green)">'+totalConvert+'</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalCpa+'</td>'
+    +'</tr></tfoot>'
+    +'</table>';
+}
+
+function buildCaoshuTable(dayMap){
+  var days=Object.keys(dayMap).sort();
+  if(!days.length) return '';
+  var totalCost=0,totalShow=0,totalClick=0;
+  var rows=days.map(function(d){
+    var r=dayMap[d];
+    totalCost+=r.cost; totalShow+=r.show; totalClick+=r.click;
+    var ctr=r.show?((r.click/r.show)*100).toFixed(2)+'%':'—';
+    return '<tr>'
+      +'<td style="padding:6px 10px">'+d+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+r.cost.toFixed(2)+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+r.show.toLocaleString()+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+r.click.toLocaleString()+'</td>'
+      +'<td style="padding:6px 10px;text-align:right">'+ctr+'</td>'
+      +'</tr>';
+  }).join('');
+  var totalCtr=totalShow?((totalClick/totalShow)*100).toFixed(2)+'%':'—';
+  return '<div style="font-weight:600;font-size:13px;margin:20px 0 6px;color:#a78bfa">🌱 种草通账户 1850…6195（A3人群积累·不追转化）</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    +'<thead><tr style="background:var(--card2);text-align:left">'
+    +'<th style="padding:8px 10px">日期</th>'
+    +'<th style="padding:8px 10px;text-align:right">消耗(元)</th>'
+    +'<th style="padding:8px 10px;text-align:right">展示量</th>'
+    +'<th style="padding:8px 10px;text-align:right">点击量</th>'
+    +'<th style="padding:8px 10px;text-align:right">CTR</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'<tfoot><tr style="background:var(--card2);font-weight:600">'
+    +'<td style="padding:8px 10px">合计 ('+days.length+'天)</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalCost.toFixed(2)+'</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalShow.toLocaleString()+'</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalClick.toLocaleString()+'</td>'
+    +'<td style="padding:8px 10px;text-align:right">'+totalCtr+'</td>'
+    +'</tr></tfoot>'
+    +'</table>';
+}
 
 async function fetchApiData(){
   var btn=document.getElementById('apiFetchBtn');
@@ -8027,73 +8111,59 @@ async function fetchApiData(){
   if(!startDate||!endDate){status.textContent='请选择日期范围';return;}
   btn.disabled=true; btn.textContent='拉取中...';
   status.textContent='正在请求巨量引擎 API…'; wrap.innerHTML='';
-  try{
-    var ids=acct==='all'?JULIANGADIDS:[acct];
-    var results=await Promise.all(ids.map(function(id){
-      return fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'getReport',advertiser_id:Number(id),start_date:startDate,end_date:endDate})
-      }).then(function(r){return r.json();});
-    }));
-    // 按日期合并
-    var dayMap={};
-    results.forEach(function(res,i){
+
+  function fetchOne(id){
+    return fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'getReport',advertiser_id:Number(id),start_date:startDate,end_date:endDate})
+    }).then(function(r){return r.json();});
+  }
+
+  function buildDayMap(ids,results){
+    var m={};
+    results.forEach(function(res){
       var rows=(res.data&&res.data.data&&res.data.data.rows)||[];
       rows.forEach(function(row){
         var day=row.dimensions.stat_time_day;
-        if(!dayMap[day]) dayMap[day]={date:day,cost:0,show:0,click:0,convert:0,accounts:{}};
-        var m=row.metrics;
-        var costYuan=Math.round(Number(m.cost||0)/100000*100)/100;
-        dayMap[day].cost+=costYuan;
-        dayMap[day].show+=Number(m.show_cnt||0);
-        dayMap[day].click+=Number(m.click_cnt||0);
-        dayMap[day].convert+=Number(m.convert_cnt||0);
-        dayMap[day].accounts[ids[i]]=(dayMap[day].accounts[ids[i]]||0)+costYuan;
+        if(!m[day]) m[day]={cost:0,show:0,click:0,convert:0};
+        var met=row.metrics;
+        m[day].cost+=Math.round(Number(met.cost||0)/100000*100)/100;
+        m[day].show+=Number(met.show_cnt||0);
+        m[day].click+=Number(met.click_cnt||0);
+        m[day].convert+=Number(met.convert_cnt||0);
       });
     });
-    var days=Object.keys(dayMap).sort();
-    if(!days.length){wrap.innerHTML='<p style="color:var(--t3);padding:20px">该时间段暂无数据（API可能只支持近期数据）</p>';
-      status.textContent='完成，无数据';btn.disabled=false;btn.textContent='拉取数据';return;}
-    var totalCost=0,totalShow=0,totalClick=0,totalConvert=0;
-    var rows=days.map(function(d){
-      var r=dayMap[d];
-      totalCost+=r.cost; totalShow+=r.show; totalClick+=r.click; totalConvert+=r.convert;
-      var ctr=r.show?((r.click/r.show)*100).toFixed(2)+'%':'—';
-      var cpa=r.convert?(r.cost/r.convert).toFixed(0)+'元':'—';
-      return '<tr>'
-        +'<td>'+d+'</td>'
-        +'<td style="text-align:right">'+r.cost.toFixed(2)+'</td>'
-        +'<td style="text-align:right">'+r.show.toLocaleString()+'</td>'
-        +'<td style="text-align:right">'+r.click.toLocaleString()+'</td>'
-        +'<td style="text-align:right">'+ctr+'</td>'
-        +'<td style="text-align:right;color:var(--green)">'+r.convert+'</td>'
-        +'<td style="text-align:right">'+cpa+'</td>'
-        +'</tr>';
-    }).join('');
-    var totalCtr=totalShow?((totalClick/totalShow)*100).toFixed(2)+'%':'—';
-    var totalCpa=totalConvert?(totalCost/totalConvert).toFixed(0)+'元':'—';
-    wrap.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:13px">'
-      +'<thead><tr style="background:var(--card2);text-align:left">'
-      +'<th style="padding:8px 10px">日期</th>'
-      +'<th style="padding:8px 10px;text-align:right">消耗(元)</th>'
-      +'<th style="padding:8px 10px;text-align:right">展示量</th>'
-      +'<th style="padding:8px 10px;text-align:right">点击量</th>'
-      +'<th style="padding:8px 10px;text-align:right">CTR</th>'
-      +'<th style="padding:8px 10px;text-align:right">转化数</th>'
-      +'<th style="padding:8px 10px;text-align:right">转化成本</th>'
-      +'</tr></thead>'
-      +'<tbody>'+rows+'</tbody>'
-      +'<tfoot><tr style="background:var(--card2);font-weight:600">'
-      +'<td style="padding:8px 10px">合计 ('+days.length+'天)</td>'
-      +'<td style="padding:8px 10px;text-align:right">'+totalCost.toFixed(2)+'</td>'
-      +'<td style="padding:8px 10px;text-align:right">'+totalShow.toLocaleString()+'</td>'
-      +'<td style="padding:8px 10px;text-align:right">'+totalClick.toLocaleString()+'</td>'
-      +'<td style="padding:8px 10px;text-align:right">'+totalCtr+'</td>'
-      +'<td style="padding:8px 10px;text-align:right;color:var(--green)">'+totalConvert+'</td>'
-      +'<td style="padding:8px 10px;text-align:right">'+totalCpa+'</td>'
-      +'</tr></tfoot>'
-      +'</table>'
-      +'<p style="font-size:11px;color:var(--t3);margin-top:8px">⚠️ 消耗单位：巨量API原始值 ÷ 100000 = 元 · 转化数字段：convert_cnt</p>';
-    status.textContent='✅ 获取成功，共 '+days.length+' 天数据（'+ids.length+' 个账户）';
+    return m;
+  }
+
+  try{
+    var html='';
+    if(acct==='all'){
+      // 拉取所有账户，效果账户聚合，种草通单独展示
+      var allResults=await Promise.all(JULIANGADIDS.map(fetchOne));
+      var perfResults=allResults.slice(0,PERF_IDS.length);
+      var caoshuResult=allResults[PERF_IDS.length];
+      var perfMap=buildDayMap(PERF_IDS,perfResults);
+      var caoshuMap=buildDayMap([CAOSHU_ID],[caoshuResult]);
+      html=buildPerfTable(perfMap,'效果账户汇总（5756 + 5235）');
+      html+=buildCaoshuTable(caoshuMap);
+      var perfDays=Object.keys(perfMap).length;
+      status.textContent='✅ 获取成功，效果账户 '+perfDays+' 天 · 种草通 '+Object.keys(caoshuMap).length+' 天';
+    } else if(acct===CAOSHU_ID){
+      // 单独看种草通
+      var res=await fetchOne(acct);
+      var m=buildDayMap([acct],[res]);
+      html=buildCaoshuTable(m);
+      if(!Object.keys(m).length) html='<p style="color:var(--t3);padding:12px 0">该时间段暂无数据</p>';
+      status.textContent='✅ 种草通账户，共 '+Object.keys(m).length+' 天';
+    } else {
+      // 单独看某个效果账户
+      var res=await fetchOne(acct);
+      var m=buildDayMap([acct],[res]);
+      html=buildPerfTable(m,'账户 '+acct.slice(-4));
+      status.textContent='✅ 获取成功，共 '+Object.keys(m).length+' 天';
+    }
+    html+='<p style="font-size:11px;color:var(--t3);margin-top:10px">消耗：巨量API原始值 ÷ 100000 = 元 · 转化数：convert_cnt · API仅支持近3个月</p>';
+    wrap.innerHTML=html;
   }catch(err){
     status.textContent='❌ 请求失败：'+err.message;
   }
