@@ -1582,6 +1582,7 @@ select option{background:#FFF;color:var(--t1)}
         <button class="sub-tab-btn active" id="adSubBtnData" onclick="switchAdSubTab('data')">📊 投放数据</button>
         <button class="sub-tab-btn" id="adSubBtnPL" onclick="switchAdSubTab('pl')">💰 老板盈亏</button>
         <button class="sub-tab-btn" id="adSubBtnYoy" onclick="switchAdSubTab('yoy')">📊 年度对比</button>
+        <button class="sub-tab-btn" id="adSubBtnApi" onclick="switchAdSubTab('api')">📡 巨量API核对</button>
       </div>
       <div class="sub-tab-panel active" id="adSubTabData">
       <!-- ═══ 千川实时同步 ═══ -->
@@ -1748,6 +1749,31 @@ select option{background:#FFF;color:var(--t1)}
         </div>
       </div>
       <div class="sub-tab-panel" id="adSubTabYoy"><div id="adYoyBody"></div></div>
+
+      <!-- 巨量API核对面板 -->
+      <div class="sub-tab-panel" id="adSubTabApi">
+        <div style="padding:16px 0">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:6px">
+              <label style="font-size:13px;color:var(--t2)">开始日期</label>
+              <input type="date" id="apiStartDate" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--t1);font-size:13px">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <label style="font-size:13px;color:var(--t2)">结束日期</label>
+              <input type="date" id="apiEndDate" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--t1);font-size:13px">
+            </div>
+            <select id="apiAccountSel" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--t1);font-size:13px">
+              <option value="all">全部账户汇总</option>
+              <option value="1849923428895756">账户 1849…5756</option>
+              <option value="1865614489935235">账户 1865…5235</option>
+              <option value="1850542911176195">账户 1850…6195</option>
+            </select>
+            <button onclick="fetchApiData()" style="padding:6px 18px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600" id="apiFetchBtn">拉取数据</button>
+          </div>
+          <div id="apiStatus" style="font-size:12px;color:var(--t3);margin-bottom:10px"></div>
+          <div id="apiTableWrap" style="overflow-x:auto"></div>
+        </div>
+      </div>
     </div><!-- end tabAdPanel -->
 
     <!-- ═══ Tab: 内容管理 ═══ -->
@@ -7966,14 +7992,112 @@ function renderAdDashboard(){
 var adBreakEvenRoi=4.0;
 function switchAdSubTab(sub){
   try{localStorage.setItem('xtb_adSubTab',sub);}catch(e){}
-  document.getElementById('adSubBtnData').classList.toggle('active',sub==='data');
-  document.getElementById('adSubBtnPL').classList.toggle('active',sub==='pl');
-  document.getElementById('adSubBtnYoy').classList.toggle('active',sub==='yoy');
-  document.getElementById('adSubTabData').classList.toggle('active',sub==='data');
-  document.getElementById('adSubTabPL').classList.toggle('active',sub==='pl');
-  document.getElementById('adSubTabYoy').classList.toggle('active',sub==='yoy');
+  ['data','pl','yoy','api'].forEach(function(s){
+    var btn=document.getElementById('adSubBtn'+s.charAt(0).toUpperCase()+s.slice(1));
+    var panel=document.getElementById('adSubTab'+s.charAt(0).toUpperCase()+s.slice(1));
+    if(btn) btn.classList.toggle('active',s===sub);
+    if(panel) panel.classList.toggle('active',s===sub);
+  });
   if(sub==='pl') renderAdProfit();
   else if(sub==='yoy') renderAdYoY();
+  else if(sub==='api') initApiPanel();
+}
+
+function initApiPanel(){
+  var s=document.getElementById('apiStartDate');
+  var e=document.getElementById('apiEndDate');
+  if(!s.value){
+    var now=new Date();
+    var d30=new Date(now-30*86400000);
+    s.value=d30.toISOString().slice(0,10);
+    e.value=now.toISOString().slice(0,10);
+  }
+}
+
+var JULIANGADIDS=['1849923428895756','1865614489935235','1850542911176195'];
+var PROXY='https://nbfiltgqklzdfaibyeka.supabase.co/functions/v1/qianchuan-proxy';
+
+async function fetchApiData(){
+  var btn=document.getElementById('apiFetchBtn');
+  var status=document.getElementById('apiStatus');
+  var wrap=document.getElementById('apiTableWrap');
+  var startDate=document.getElementById('apiStartDate').value;
+  var endDate=document.getElementById('apiEndDate').value;
+  var acct=document.getElementById('apiAccountSel').value;
+  if(!startDate||!endDate){status.textContent='请选择日期范围';return;}
+  btn.disabled=true; btn.textContent='拉取中...';
+  status.textContent='正在请求巨量引擎 API…'; wrap.innerHTML='';
+  try{
+    var ids=acct==='all'?JULIANGADIDS:[acct];
+    var results=await Promise.all(ids.map(function(id){
+      return fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'getReport',advertiser_id:Number(id),start_date:startDate,end_date:endDate})
+      }).then(function(r){return r.json();});
+    }));
+    // 按日期合并
+    var dayMap={};
+    results.forEach(function(res,i){
+      var rows=(res.data&&res.data.data&&res.data.data.rows)||[];
+      rows.forEach(function(row){
+        var day=row.dimensions.stat_time_day;
+        if(!dayMap[day]) dayMap[day]={date:day,cost:0,show:0,click:0,convert:0,accounts:{}};
+        var m=row.metrics;
+        var costYuan=Math.round(Number(m.cost||0)/100000*100)/100;
+        dayMap[day].cost+=costYuan;
+        dayMap[day].show+=Number(m.show_cnt||0);
+        dayMap[day].click+=Number(m.click_cnt||0);
+        dayMap[day].convert+=Number(m.convert_cnt||0);
+        dayMap[day].accounts[ids[i]]=(dayMap[day].accounts[ids[i]]||0)+costYuan;
+      });
+    });
+    var days=Object.keys(dayMap).sort();
+    if(!days.length){wrap.innerHTML='<p style="color:var(--t3);padding:20px">该时间段暂无数据（API可能只支持近期数据）</p>';
+      status.textContent='完成，无数据';btn.disabled=false;btn.textContent='拉取数据';return;}
+    var totalCost=0,totalShow=0,totalClick=0,totalConvert=0;
+    var rows=days.map(function(d){
+      var r=dayMap[d];
+      totalCost+=r.cost; totalShow+=r.show; totalClick+=r.click; totalConvert+=r.convert;
+      var ctr=r.show?((r.click/r.show)*100).toFixed(2)+'%':'—';
+      var cpa=r.convert?(r.cost/r.convert).toFixed(0)+'元':'—';
+      return '<tr>'
+        +'<td>'+d+'</td>'
+        +'<td style="text-align:right">'+r.cost.toFixed(2)+'</td>'
+        +'<td style="text-align:right">'+r.show.toLocaleString()+'</td>'
+        +'<td style="text-align:right">'+r.click.toLocaleString()+'</td>'
+        +'<td style="text-align:right">'+ctr+'</td>'
+        +'<td style="text-align:right;color:var(--green)">'+r.convert+'</td>'
+        +'<td style="text-align:right">'+cpa+'</td>'
+        +'</tr>';
+    }).join('');
+    var totalCtr=totalShow?((totalClick/totalShow)*100).toFixed(2)+'%':'—';
+    var totalCpa=totalConvert?(totalCost/totalConvert).toFixed(0)+'元':'—';
+    wrap.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:13px">'
+      +'<thead><tr style="background:var(--card2);text-align:left">'
+      +'<th style="padding:8px 10px">日期</th>'
+      +'<th style="padding:8px 10px;text-align:right">消耗(元)</th>'
+      +'<th style="padding:8px 10px;text-align:right">展示量</th>'
+      +'<th style="padding:8px 10px;text-align:right">点击量</th>'
+      +'<th style="padding:8px 10px;text-align:right">CTR</th>'
+      +'<th style="padding:8px 10px;text-align:right">转化数</th>'
+      +'<th style="padding:8px 10px;text-align:right">转化成本</th>'
+      +'</tr></thead>'
+      +'<tbody>'+rows+'</tbody>'
+      +'<tfoot><tr style="background:var(--card2);font-weight:600">'
+      +'<td style="padding:8px 10px">合计 ('+days.length+'天)</td>'
+      +'<td style="padding:8px 10px;text-align:right">'+totalCost.toFixed(2)+'</td>'
+      +'<td style="padding:8px 10px;text-align:right">'+totalShow.toLocaleString()+'</td>'
+      +'<td style="padding:8px 10px;text-align:right">'+totalClick.toLocaleString()+'</td>'
+      +'<td style="padding:8px 10px;text-align:right">'+totalCtr+'</td>'
+      +'<td style="padding:8px 10px;text-align:right;color:var(--green)">'+totalConvert+'</td>'
+      +'<td style="padding:8px 10px;text-align:right">'+totalCpa+'</td>'
+      +'</tr></tfoot>'
+      +'</table>'
+      +'<p style="font-size:11px;color:var(--t3);margin-top:8px">⚠️ 消耗单位：巨量API原始值 ÷ 100000 = 元 · 转化数字段：convert_cnt</p>';
+    status.textContent='✅ 获取成功，共 '+days.length+' 天数据（'+ids.length+' 个账户）';
+  }catch(err){
+    status.textContent='❌ 请求失败：'+err.message;
+  }
+  btn.disabled=false; btn.textContent='拉取数据';
 }
 function updateAdBreakEven(roi){
   adBreakEvenRoi=roi;
