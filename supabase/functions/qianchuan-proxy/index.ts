@@ -365,7 +365,6 @@ serve(async (req: Request) => {
           "cost", "show_cnt", "click_cnt", "ctr", "cpm_platform",
           "convert_cnt", "conversion_cost", "conversion_rate",
           "in_app_order_count", "in_app_order_gmv", "in_app_order_roi",
-          "in_app_order_net_count_1h", "in_app_order_net_gmv_1h", "in_app_order_net_roi_1h",
         ],
         start_time: startDate + " 00:00:00",
         end_time: endDate + " 23:59:59",
