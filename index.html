@@ -8124,7 +8124,7 @@ async function fetchApiData(){
   status.textContent='正在请求巨量引擎 API…'; wrap.innerHTML='';
 
   function fetchOne(id){
-    return fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},
+    return fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPA_KEY},
       body:JSON.stringify({action:'getReport',advertiser_id:Number(id),start_date:startDate,end_date:endDate})
     }).then(function(r){return r.json();});
   }
