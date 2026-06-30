@@ -3810,7 +3810,10 @@ function renderSummary(){
   var cid=_collectBlock('cid'),dd=_collectBlock('douten'),bili=_collectBlock('bili');
   // 全平台总览
   var allCost=0,allGmv=0,allOrd=0,monthsSet={};
-  [cid,dd,bili].forEach(function(arr){arr.forEach(function(d){allCost+=d.cost;allGmv+=d.gmv;allOrd+=d.ord;monthsSet[d.n]=1;});});
+  [cid,dd,bili].forEach(function(arr){arr.forEach(function(d){
+    allCost+=d.cost;allGmv+=d.gmv;allOrd+=d.ord;
+    if(d.cost>0||d.gmv>0||d.imp>0) monthsSet[d.n]=1; // 只统计在筛选范围内有实际数据的月份
+  });});
   var kpiEl=document.getElementById('sumYearKpi');
   if(kpiEl){
     var cards=[['全年实际销售额',_sumFmt(allGmv)],['全年广告消耗',_sumFmt(allCost)],['全年实际转化销量',Math.round(allOrd).toLocaleString()],['全年综合ROI',(allCost?allGmv/allCost:0).toFixed(2)],['覆盖月份',Object.keys(monthsSet).length+'个月']];
