@@ -3893,9 +3893,16 @@ function renderSumPieSection(cid, dd, bili){
   var biDarenViews=biFiltered.reduce(function(s,x){return s+(x.views||0);},0);
   var kocPlays=KOC_DATA.reduce(function(s,x){return s+(x.plays||0);},0);
 
-  // ── 种草通投放曝光（来自巨量广告 API 拉取的 caoshuMap.show）──
+  // ── 种草通投放曝光：优先从嵌入的 ZC_RAW 累计 imp 字段 ──
   var zcImp=0;
-  if(typeof _apiLastData!=='undefined'&&_apiLastData&&_apiLastData.caoshuMap){
+  (typeof ZC_RAW!=='undefined'?ZC_RAW:[]).forEach(function(r){
+    var d=r.d||r.date;
+    if(_df&&d&&d<_df) return;
+    if(_dt&&d&&d>_dt) return;
+    zcImp+=(r.imp||0);
+  });
+  // 若 ZC_RAW 为空则回退到 API 数据（caoshuMap.show）
+  if(!zcImp&&typeof _apiLastData!=='undefined'&&_apiLastData&&_apiLastData.caoshuMap){
     Object.keys(_apiLastData.caoshuMap).forEach(function(d){
       if(_df&&d<_df) return;
       if(_dt&&d>_dt) return;
@@ -4008,8 +4015,28 @@ function renderSumPieSection(cid, dd, bili){
   // ── 总数徽标 ──
   var totalBadge='style="font-size:20px;font-weight:700;color:var(--accent,#FFD60A);margin-left:auto;white-space:nowrap"';
 
+  // ── 固定曝光测算（2026全年人工修正，不随日期筛选变化）──
+  var fixedExp=[
+    {l:'B站广告',    v:42678000, c:'rgba(94,92,230,.85)'},
+    {l:'种草通投放',  v:28621000, c:'rgba(0,199,190,.85)'},
+    {l:'CID广告',   v:30000000, c:'rgba(0,114,255,.85)'},
+    {l:'抖音达人',   v:7388000,  c:'rgba(255,69,58,.85)'},
+    {l:'千川广告',   v:10000000, c:'rgba(255,159,10,.8)'},
+    {l:'KOC',      v:3640000,  c:'rgba(175,82,222,.8)'},
+    {l:'B站达人',   v:3610000,  c:'rgba(48,209,88,.85)'}
+  ];
+  var fixedTotal=fixedExp.reduce(function(s,x){return s+x.v;},0);
+  var fixedTbl='<table style="'+tblStyle+'"><thead><tr>'
+    +'<th style="'+thStyle+'">来源</th><th style="'+thStyle+';text-align:right">曝光量</th><th style="'+thStyle+';text-align:right">占比</th>'
+    +'</tr></thead><tbody>'
+    +fixedExp.slice().sort(function(a,b){return b.v-a.v;}).map(function(r){
+      return '<tr><td style="'+tdStyle+'">'+makeDot(r.c)+r.l+'</td>'
+        +'<td style="'+tdRStyle+'">'+fmtN(r.v)+'</td>'
+        +'<td style="'+tdRStyle+'">'+pct(r.v,fixedTotal)+'</td></tr>';
+    }).join('')+'</tbody></table>';
+
   el.innerHTML=
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">'
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:16px">'
       +'<div><div class="sec-header" style="display:flex;align-items:center"><h3>💰 销售额平台占比</h3><span '+totalBadge+'>'+fmtY(totalGmv)+'</span></div>'
         +'<div class="chart-box"><div id="spGmv" style="height:260px"></div>'
         +'<div style="padding:4px 12px 10px">'+gmvTbl+'</div></div></div>'
@@ -4021,6 +4048,12 @@ function renderSumPieSection(cid, dd, bili){
       +'<div><div class="sec-header" style="display:flex;align-items:center"><h3>👁 全渠道曝光占比</h3><span '+totalBadge+'>'+fmtN(totalExp)+'</span></div>'
         +'<div class="chart-box"><div id="spExp" style="height:260px"></div>'
         +'<div style="padding:4px 12px 10px">'+expTbl+'</div></div></div>'
+
+      +'<div><div class="sec-header" style="display:flex;align-items:center"><h3>📌 2026全年曝光测算</h3>'
+        +'<span style="font-size:11px;color:var(--t3);margin-left:8px;font-weight:400">人工修正·固定</span>'
+        +'<span '+totalBadge+'>'+fmtN(fixedTotal)+'</span></div>'
+        +'<div class="chart-box"><div id="spExpFixed" style="height:260px"></div>'
+        +'<div style="padding:4px 12px 10px">'+fixedTbl+'</div></div></div>'
     +'</div>'
     +'<div><div class="sec-header"><h3>📊 渠道 ROI 对比（高→低排序）</h3></div>'
       +'<div class="chart-box"><div id="spRoi" style="height:160px"></div>'
@@ -4045,6 +4078,15 @@ function renderSumPieSection(cid, dd, bili){
     labels:expSrc.map(function(x){return x.l;}),
     values:expSrc.map(function(x){return Math.round(x.v);}),
     marker:{colors:expSrc.map(function(x){return x.c;})},
+    textinfo:'label+percent',textfont:{size:10,color:'#ccc'},
+    hovertemplate:'%{label}<br>%{value:,.0f}<br>%{percent}<extra></extra>'}],
+    Object.assign({},pBase,{height:260,margin:{t:30,r:10,b:80,l:10}}),pCfg);
+
+  // Pie 4 — Fixed 2026 Exposure (hardcoded, no date filter)
+  Plotly.newPlot('spExpFixed',[{type:'pie',hole:.45,
+    labels:fixedExp.map(function(x){return x.l;}),
+    values:fixedExp.map(function(x){return x.v;}),
+    marker:{colors:fixedExp.map(function(x){return x.c;})},
     textinfo:'label+percent',textfont:{size:10,color:'#ccc'},
     hovertemplate:'%{label}<br>%{value:,.0f}<br>%{percent}<extra></extra>'}],
     Object.assign({},pBase,{height:260,margin:{t:30,r:10,b:80,l:10}}),pCfg);
