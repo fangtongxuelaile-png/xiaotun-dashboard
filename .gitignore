@@ -1,0 +1,12 @@
+# Sensitive files - NEVER commit
+*.bak
+*.xlsx
+*.csv
+.DS_Store
+.claude/
+supabase/.temp/
+备份/
+投放数据中台数据核对/
+
+# Knowledge base docs (private)
+巨量*.md

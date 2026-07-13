@@ -1,0 +1,23 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    - cron: '0 6 */5 * *'  # 每5天执行一次
+  workflow_dispatch:        # 允许手动触发
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://nbfiltgqklzdfaibyeka.supabase.co/rest/v1/login_history?limit=1" \
+            -H "apikey: sb_publishable_JUAxogJ3PvkcaoTwvXksbw_Arme6Vx2" \
+            -H "Authorization: Bearer sb_publishable_JUAxogJ3PvkcaoTwvXksbw_Arme6Vx2")
+          echo "Supabase response: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Supabase is alive"
+          else
+            echo "⚠️ Unexpected status: $STATUS"
+          fi
